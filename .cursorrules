@@ -1,0 +1,140 @@
+# === Node/React/Vite/TypeScript ===
+node_modules/
+dist/
+.vite/
+.eslintcache
+.storybook-static/
+coverage/
+*.tsbuildinfo
+
+# === Java/Spring Boot ===
+target/
+.classpath
+.project
+.settings/
+*.iml
+.idea/
+
+# === Python (if any tooling/scripts) ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+*.egg-info/
+build/
+
+# === General/OS/Temp ===
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+.env
+.env.*
+
+# === Docker/Deployment ===
+docker-data/
+*.pid
+
+# === Testing/CI ===
+coverage/
+.nyc_output/
+.jest/
+.cypress/
+test-results/
+reports/
+*.lcov
+
+# === Database (local/dev) ===
+*.sqlite3
+
+# === Include documentation and configuration ===
+!relmgmt/docs/
+!docker/
+!relmgmt/docker/
+!*.md
+!*.yml
+!*.yaml
+!.eslintrc.js
+!.prettierrc
+!tailwind.config.js
+!tsconfig.json
+!vite.config.ts
+!.storybook/
+!cypress/
+!tests/
+!__tests__/
+!__mocks__/
+!docker-compose.yml
+!Dockerfile*
+!.github/
+!.gitlab/
+
+# Project Context and Architecture
+SYSTEM_CONTEXT: |
+  You are a senior developer working on a React + Spring Boot fullstack project.
+  Required file reads on startup:
+  - docs/PRD-Release_Management_System.md: Product requirement document for the system being built
+  - docs/system-architecture.md: System architecture and component relationships
+  - docs/backend-technical-specification.md: Technical specifications for the backend components
+  - docs/frontend-technical-specification.md: Technical specifications for the frontend components
+  - tasks/tasks.md: Current development tasks and requirements
+  - docs/status.md: Project progress and state
+
+  Before making any changes:
+  1. Parse and understand product requirements from docs/PRD-Release_Management_System.md
+  2. Parse and understand system architecture from docs/system-architecture.md
+  3. Parse and understand backend technical specifications from docs/backend-technical-specification.md
+  4. Parse and understand frontend technical specifications from docs/frontend-technical-specification.md 
+  5. Check current task context from tasks/tasks.md
+  6. Update progress in docs/status.md
+
+# File Management Rules
+ON_FILE_CHANGE: |
+  Required actions after any code changes:
+  1. READ docs/system-architecture.md, docs/backend-technical-specification.md, docs/frontend-technical-specification.md to verify architectural & technical specifications' compliance
+  2. READ docs/PRD-Release_Management_System.md to verify product requirements and functional compliance
+  3. UPDATE docs/status.md with:
+     - Current progress
+     - Any new issues encountered
+     - Completed items
+  4. VALIDATE changes against docs/backend-technical-specification.md and docs/frontend-technical-specification.md specifications
+  5. VERIFY task progress against tasks/tasks.md
+
+# Code Style and Patterns
+TYPESCRIPT_GUIDELINES: |
+  - Use strict typing, avoid 'any'
+  - Follow SOLID principles
+  - Write unit tests for all public methods
+  - Document with JSDoc
+
+# Task Management
+TASK_WORKFLOW: |
+  Required files:
+  - tasks/tasks.md: Source of task definitions
+  - docs/status.md: Progress tracking
+  - docs/backend-technical-specification.md, docs/frontend-technical-specification.md: Implementation guidelines
+  
+  Workflow steps:
+  1. READ tasks/tasks.md:
+     - Parse current task requirements
+     - Extract acceptance criteria
+     - Identify dependencies
+  
+  2. VALIDATE against docs/PRD-Release_Management_System.md, docs/system-architecture.md, docs/backend-technical-specification.md, docs/frontend-technical-specification.md:
+     - Confirm product requirements and functional specifications
+     - Confirm architectural alignment
+     - Check component specifications and interactions
+  
+  3. UPDATE docs/status.md:
+     - Mark task as in-progress
+     - Track completion of sub-tasks
+     - Document any blockers
+  
+  4. IMPLEMENT following TDD:
+     - Create test files first
+     - Implement to pass tests
+     - Update status on test completion

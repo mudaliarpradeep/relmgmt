@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Management System - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .card {
+            @apply rounded-lg shadow-md p-6 border;
+        }
+        .card-blue {
+            @apply bg-blue-50 border-blue-200;
+        }
+        .card-green {
+            @apply bg-green-50 border-green-200;
+        }
+        .card-purple {
+            @apply bg-purple-50 border-purple-200;
+        }
+        .card-orange {
+            @apply bg-orange-50 border-orange-200;
+        }
+        .card-red {
+            @apply bg-red-50 border-red-200;
+        }
+        .card-yellow {
+            @apply bg-yellow-50 border-yellow-200;
+        }
+        .card-indigo {
+            @apply bg-indigo-50 border-indigo-200;
+        }
+        .card-title {
+            @apply text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200;
+        }
+        .progress-bar {
+            @apply h-2 rounded-full bg-gray-200 overflow-hidden;
+        }
+        .progress-value {
+            @apply h-full rounded-full;
+        }
+        .btn {
+            @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150;
+        }
+        .btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700;
+        }
+        .btn-secondary {
+            @apply bg-gray-100 text-gray-800 hover:bg-gray-200;
+        }
+        .stat-card {
+            @apply bg-white rounded-lg shadow-sm p-4 border border-gray-200;
+        }
+        .link {
+            @apply text-blue-600 hover:text-blue-800 text-sm font-medium;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <h1 class="text-xl font-bold text-gray-900">Release Management System</h1>
+                <nav class="ml-10 hidden md:flex space-x-4">
+                    <a href="#" class="text-blue-600 font-medium px-3 py-2 rounded-md">Dashboard</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Resources</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Releases</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Projects</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Scope</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Allocation</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Reports</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md">Audit</a>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="relative p-1 rounded-full text-gray-500 hover:text-gray-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                </button>
+                <div class="relative">
+                    <button class="flex items-center space-x-2">
+                        <span class="text-sm font-medium text-gray-700">Admin</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="stat-card bg-blue-50 border-blue-200">
+                <div class="text-sm font-medium text-blue-700">Active Releases</div>
+                <div class="mt-1 flex items-baseline">
+                    <div class="text-3xl font-semibold text-blue-900">4</div>
+                </div>
+            </div>
+            <div class="stat-card bg-green-50 border-green-200">
+                <div class="text-sm font-medium text-green-700">Total Resources</div>
+                <div class="mt-1 flex items-baseline">
+                    <div class="text-3xl font-semibold text-green-900">125</div>
+                </div>
+            </div>
+            <div class="stat-card bg-red-50 border-red-200">
+                <div class="text-sm font-medium text-red-700">Allocation Conflicts</div>
+                <div class="mt-1 flex items-baseline">
+                    <div class="text-3xl font-semibold text-red-900">3</div>
+                </div>
+            </div>
+            <div class="stat-card bg-purple-50 border-purple-200">
+                <div class="text-sm font-medium text-purple-700">Upcoming Go-Lives</div>
+                <div class="mt-1 flex items-baseline">
+                    <div class="text-3xl font-semibold text-purple-900">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Active Releases -->
+            <div class="card bg-blue-50 border-blue-200">
+                <h2 class="card-title text-blue-800">Active Releases</h2>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium text-gray-900">Release 2024.1</span>
+                            <span class="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded">In Progress</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-gray-600">Technical Design</span>
+                                    <span class="text-gray-900">100%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value bg-green-500" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-gray-600">Build</span>
+                                    <span class="text-gray-900">45%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value bg-blue-500" style="width: 45%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-gray-600">SIT</span>
+                                    <span class="text-gray-900">Not Started</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value bg-gray-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium text-gray-900">Release 2024.2</span>
+                            <span class="text-sm text-blue-600 bg-blue-100 px-2 py-0.5 rounded">In Progress</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-gray-600">Functional Design</span>
+                                    <span class="text-gray-900">80%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value bg-blue-500" style="width: 80%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-gray-600">Technical Design</span>
+                                    <span class="text-gray-900">20%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value bg-blue-500" style="width: 20%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium text-gray-900">Release 2024.3</span>
+                            <span class="text-sm text-purple-600 bg-purple-100 px-2 py-0.5 rounded">Planning</span>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-gray-600">Functional Design</span>
+                                    <span class="text-gray-900">30%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value bg-blue-500" style="width: 30%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="link flex items-center justify-end">
+                        View All Releases
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Resource Utilization -->
+            <div class="card bg-green-50 border-green-200">
+                <h2 class="card-title text-green-800">Resource Utilization</h2>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Functional Design</span>
+                            <span class="text-gray-900">85%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-green-500" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Technical Design</span>
+                            <span class="text-gray-900">92%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-yellow-500" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Build</span>
+                            <span class="text-gray-900">78%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-green-500" style="width: 78%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Test</span>
+                            <span class="text-gray-900">65%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-green-500" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-gray-600">Platform</span>
+                            <span class="text-gray-900">70%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-value bg-green-500" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <a href="#" class="link flex items-center justify-end">
+                            View Resource Details
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Timeline -->
+        <div class="mb-6">
+            <div class="card bg-purple-50 border-purple-200">
+                <h2 class="card-title text-purple-800">Release Timeline Overview</h2>
+                <div class="overflow-x-auto">
+                    <div class="min-w-full py-2" style="min-width: 600px;">
+                        <!-- Timeline header -->
+                        <div class="flex mb-4">
+                            <div class="w-1/6 text-gray-500 text-sm font-medium"></div>
+                            <div class="w-1/4 text-gray-500 text-sm font-medium">Q1 2024</div>
+                            <div class="w-1/4 text-gray-500 text-sm font-medium">Q2 2024</div>
+                            <div class="w-1/4 text-gray-500 text-sm font-medium">Q3 2024</div>
+                            <div class="w-1/4 text-gray-500 text-sm font-medium">Q4 2024</div>
+                        </div>
+                        
+                        <!-- Timeline rows -->
+                        <div class="space-y-6">
+                            <div class="flex items-center">
+                                <div class="w-1/6 text-gray-900 font-medium">R2024.1</div>
+                                <div class="w-3/4 flex">
+                                    <div class="h-8 bg-blue-500 rounded-lg w-1/3 relative flex items-center justify-center text-white text-xs">
+                                        Release 2024.1
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-1/6 text-gray-900 font-medium">R2024.2</div>
+                                <div class="w-3/4 flex">
+                                    <div class="w-1/6"></div>
+                                    <div class="h-8 bg-blue-500 rounded-lg w-1/3 relative flex items-center justify-center text-white text-xs">
+                                        Release 2024.2
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-1/6 text-gray-900 font-medium">R2024.3</div>
+                                <div class="w-3/4 flex">
+                                    <div class="w-1/3"></div>
+                                    <div class="h-8 bg-purple-500 rounded-lg w-1/3 relative flex items-center justify-center text-white text-xs">
+                                        Release 2024.3
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-1/6 text-gray-900 font-medium">R2024.4</div>
+                                <div class="w-3/4 flex">
+                                    <div class="w-1/2"></div>
+                                    <div class="h-8 bg-purple-500 rounded-lg w-1/3 relative flex items-center justify-center text-white text-xs">
+                                        Release 2024.4
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="#" class="link flex items-center justify-end">
+                        View Full Gantt Chart
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Quick Actions -->
+            <div class="card bg-gray-100 border-gray-300">
+                <h2 class="card-title text-gray-800">Quick Actions</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 gap-3">
+                        <button class="group relative bg-white hover:bg-orange-50 border border-orange-200 hover:border-orange-300 text-gray-700 hover:text-orange-700 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-102">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="bg-orange-100 p-2 rounded-lg mr-3 group-hover:bg-orange-200 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-sm">Create New Release</div>
+                                        <div class="text-gray-500 text-xs">Start a new release cycle</div>
+                                    </div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        <button class="group relative bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-300 text-gray-700 hover:text-blue-700 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-102">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="bg-blue-100 p-2 rounded-lg mr-3 group-hover:bg-blue-200 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-sm">Import Resources</div>
+                                        <div class="text-gray-500 text-xs">Upload resource roster</div>
+                                    </div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        <button class="group relative bg-white hover:bg-red-50 border border-red-200 hover:border-red-300 text-gray-700 hover:text-red-700 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-102">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="bg-red-100 p-2 rounded-lg mr-3 group-hover:bg-red-200 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-sm">View Conflicts</div>
+                                        <div class="text-gray-500 text-xs">Check allocation issues</div>
+                                    </div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        <button class="group relative bg-white hover:bg-green-50 border border-green-200 hover:border-green-300 text-gray-700 hover:text-green-700 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-102">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="bg-green-100 p-2 rounded-lg mr-3 group-hover:bg-green-200 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-sm">Generate Reports</div>
+                                        <div class="text-gray-500 text-xs">Export data & analytics</div>
+                                    </div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Notifications -->
+            <div class="card bg-indigo-50 border-indigo-200">
+                <h2 class="card-title text-indigo-800">Recent Notifications</h2>
+                <div class="space-y-4">
+                    <div class="flex space-x-3">
+                        <div class="flex-shrink-0">
+                            <span class="flex h-8 w-8 rounded-full bg-red-100 items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">Resource allocation conflict detected in Release 2024.1</p>
+                            <p class="text-sm text-gray-500">3 resources overallocated - 10 minutes ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <div class="flex-shrink-0">
+                            <span class="flex h-8 w-8 rounded-full bg-yellow-100 items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">Phase deadline approaching: SIT for Release 2024.2</p>
+                            <p class="text-sm text-gray-500">Due in 5 days - 2 hours ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <div class="flex-shrink-0">
+                            <span class="flex h-8 w-8 rounded-full bg-green-100 items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">New resource added: John Smith (Technical Design)</p>
+                            <p class="text-sm text-gray-500">1 day ago</p>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="link flex items-center justify-end">
+                        View All Notifications
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Allocation Conflicts -->
+            <div class="card bg-red-50 border-red-200">
+                <h2 class="card-title text-red-800">Allocation Conflicts</h2>
+                <div class="space-y-4">
+                    <div class="p-3 bg-red-100 rounded-lg border border-red-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-red-900">Jane Doe (Technical Design)</p>
+                                <p class="text-sm text-red-700">Overallocated by 2.5 person-days</p>
+                                <p class="text-xs text-red-600">Week of May 15</p>
+                            </div>
+                            <span class="bg-red-200 text-red-900 text-xs font-medium px-2 py-0.5 rounded">High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-yellow-100 rounded-lg border border-yellow-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-yellow-900">Mike Johnson (Build)</p>
+                                <p class="text-sm text-yellow-700">Overallocated by 1.5 person-days</p>
+                                <p class="text-xs text-yellow-600">Week of May 22</p>
+                            </div>
+                            <span class="bg-yellow-200 text-yellow-900 text-xs font-medium px-2 py-0.5 rounded">Medium</span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-red-100 rounded-lg border border-red-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm font-medium text-red-900">Sarah Williams (Test)</p>
+                                <p class="text-sm text-red-700">Overallocated by 3 person-days</p>
+                                <p class="text-xs text-red-600">Week of June 5</p>
+                            </div>
+                            <span class="bg-red-200 text-red-900 text-xs font-medium px-2 py-0.5 rounded">High</span>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="link flex items-center justify-end">
+                        Resolve Conflicts
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 

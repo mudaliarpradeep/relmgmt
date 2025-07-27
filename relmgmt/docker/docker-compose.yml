@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # Database
+  relmgmtpostgres:
+    image: postgres:17
+    container_name: relmgmtpostgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: bBzp16eHfA29wZUvr
+      POSTGRES_DB: relmgmt
+    ports:
+      - '5432:5432'
+    networks:
+      - relmgmtnet
+    volumes:
+      - relmgmt_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database Admin Tool
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: john.doe@polycoder.com
+      PGADMIN_DEFAULT_PASSWORD: devpgadmin
+    ports:
+      - '5050:80'
+    networks:
+      - relmgmtnet
+    depends_on:
+      - relmgmtpostgres
+
+  # Backend API
+  relmgmt-backend:
+    image: eclipse-temurin:21-jdk
+    container_name: relmgmt-backend
+    working_dir: /app
+    volumes:
+      - ../backend:/app
+    command: ["./mvnw", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]
+    ports:
+      - '8080:8080'
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://relmgmtpostgres:5432/relmgmt
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=bBzp16eHfA29wZUvr
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    networks:
+      - relmgmtnet
+    depends_on:
+      relmgmtpostgres:
+        condition: service_healthy
+
+  # Frontend
+  relmgmt-frontend:
+    image: node:20-alpine
+    container_name: relmgmt-frontend
+    working_dir: /app
+    volumes:
+      - ../frontend:/app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - '3000:3000'
+    environment:
+      - VITE_API_URL=http://localhost:8080/api
+    networks:
+      - relmgmtnet
+    depends_on:
+      - relmgmt-backend
+
+networks:
+  relmgmtnet:
+    driver: bridge
+
+volumes:
+  relmgmt_postgres_data: 
