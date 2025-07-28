@@ -4,7 +4,7 @@
 
 | Phase ID      | Description                                 | Status     | Notes |
 |-------------- |---------------------------------------------|------------|-------|
-| FE-Phase-1    | Project Setup and Testing Infrastructure    | Completed   | Frontend scaffolded, linting, formatting, and test infra ready |
+| FE-Phase-1    | Project Setup and Testing Infrastructure    | Completed   | All dependencies added, Tailwind CSS configured, Storybook setup, CI/CD pipeline created, UI components implemented |
 | FE-Phase-2    | Core Components and Layout                  | Pending    |       |
 | FE-Phase-3    | Authentication and Routing                  | Pending    |       |
 | FE-Phase-4    | Resource Management                         | Pending    |       |
@@ -14,7 +14,7 @@
 | FE-Phase-8    | Reports and Data Export                     | Pending    |       |
 | FE-Phase-9    | Notification System                         | Pending    |       |
 | FE-Phase-10   | Audit Log and Final Integration             | Pending    |       |
-| BE-Phase-1    | Project Setup and Core Infrastructure       | Completed   | Backend scaffolded, DB/test infra/entity/repo/tests done; CI/CD pipeline pending |
+| BE-Phase-1    | Project Setup and Core Infrastructure       | Completed   | All dependencies added, proper package structure, CI/CD pipeline, configuration files, and basic infrastructure implemented |
 | BE-Phase-2    | Authentication and User Management          | Pending    |       |
 | BE-Phase-3    | Resource Management                         | Pending    |       |
 | BE-Phase-4    | Release Management                          | Pending    |       |
@@ -28,3 +28,7 @@
 
 ## Known Issues
 - None currently
+
+## Recent Updates
+- **FE-Phase-1 Completed**: Added all missing dependencies (ShadCB UI, Tailwind CSS, React Router, React Query, etc.), configured Storybook, created CI/CD pipeline, implemented basic UI components (Button, Input, Card), and set up proper project structure with types and constants.
+- **BE-Phase-1 Completed**: Added all missing dependencies (Spring Security, SpringDoc OpenAPI, Apache POI, JWT, etc.), updated package structure to `com.polycoder.relmgmt`, created proper configuration files (application.yml, profiles), implemented basic infrastructure (BaseEntity, exceptions, health controller), and created CI/CD pipeline with PostgreSQL testing.

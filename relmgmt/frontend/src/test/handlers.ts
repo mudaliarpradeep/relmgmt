@@ -1,8 +1,7 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw'
 
 export const handlers = [
-  // Example:
-  // rest.get('/api/example', (req, res, ctx) => {
-  //   return res(ctx.json({ message: 'Hello world' }));
-  // }),
-]; 
+  http.get('/api/test', () => {
+    return HttpResponse.json({ message: 'Test response' })
+  }),
+] 

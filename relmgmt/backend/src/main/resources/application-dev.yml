@@ -1,0 +1,25 @@
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:postgresql://localhost:5432/relmgmt
+    username: postgres
+    password: bBzp16eHfA29wZUvr
+
+# Development-specific logging
+logging:
+  level:
+    com.polycoder.relmgmt: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Enable H2 console for development (if needed)
+# spring:
+#   h2:
+#     console:
+#       enabled: true
+#       path: /h2-console 
