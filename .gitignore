@@ -1,0 +1,76 @@
+# === Node/React/Vite/TypeScript ===
+node_modules/
+dist/
+.vite/
+.eslintcache
+.storybook-static/
+coverage/
+*.tsbuildinfo
+
+# === Java/Spring Boot ===
+target/
+.classpath
+.project
+.settings/
+*.iml
+.idea/
+.gradle/
+build/
+
+# === Python (if any tooling/scripts) ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+*.egg-info/
+build/
+
+# === General/OS/Temp ===
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+.env
+.env.*
+
+# === Docker/Deployment ===
+docker-data/
+*.pid
+
+# === Testing/CI ===
+coverage/
+.nyc_output/
+.jest/
+.cypress/
+test-results/
+reports/
+*.lcov
+
+# === Database (local/dev) ===
+*.sqlite3
+
+# === Include documentation and configuration ===
+!relmgmt/docs/
+!docker/
+!relmgmt/docker/
+!*.md
+!*.yml
+!*.yaml
+!.eslintrc.js
+!.prettierrc
+!tailwind.config.js
+!tsconfig.json
+!vite.config.ts
+!.storybook/
+!cypress/
+!tests/
+!__tests__/
+!__mocks__/
+!docker-compose.yml
+!Dockerfile*
+!.github/
+!.gitlab/ 

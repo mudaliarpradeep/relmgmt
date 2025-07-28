@@ -4,7 +4,7 @@
 
 | Phase ID      | Description                                 | Status     | Notes |
 |-------------- |---------------------------------------------|------------|-------|
-| FE-Phase-1    | Project Setup and Testing Infrastructure    | Pending    |       |
+| FE-Phase-1    | Project Setup and Testing Infrastructure    | Completed   | Frontend scaffolded, linting, formatting, and test infra ready |
 | FE-Phase-2    | Core Components and Layout                  | Pending    |       |
 | FE-Phase-3    | Authentication and Routing                  | Pending    |       |
 | FE-Phase-4    | Resource Management                         | Pending    |       |
@@ -14,7 +14,7 @@
 | FE-Phase-8    | Reports and Data Export                     | Pending    |       |
 | FE-Phase-9    | Notification System                         | Pending    |       |
 | FE-Phase-10   | Audit Log and Final Integration             | Pending    |       |
-| BE-Phase-1    | Project Setup and Core Infrastructure       | Pending    |       |
+| BE-Phase-1    | Project Setup and Core Infrastructure       | Completed   | Backend scaffolded, DB/test infra/entity/repo/tests done; CI/CD pipeline pending |
 | BE-Phase-2    | Authentication and User Management          | Pending    |       |
 | BE-Phase-3    | Resource Management                         | Pending    |       |
 | BE-Phase-4    | Release Management                          | Pending    |       |
