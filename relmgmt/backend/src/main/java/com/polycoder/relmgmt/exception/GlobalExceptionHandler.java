@@ -52,6 +52,12 @@ public class GlobalExceptionHandler {
         body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false));
         
+        // Check if this is a resource deletion conflict
+        if (ex.getMessage().contains("Cannot delete resource") && 
+            ex.getMessage().contains("allocated to active releases")) {
+            return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+        }
+        
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 

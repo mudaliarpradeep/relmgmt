@@ -1,13 +1,9 @@
 import React from 'react';
-import DashboardPage from './pages/dashboard/DashboardPage';
+import { AppRouter } from './components/routing/AppRouter';
 import './App.css';
 
 function App() {
-  return (
-    <div className="App">
-      <DashboardPage />
-    </div>
-  );
+  return <AppRouter />;
 }
 
 export default App;
