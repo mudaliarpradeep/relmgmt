@@ -43,10 +43,10 @@ Create a `.env` file in the backend directory or set environment variables:
 
 ```env
 DB_USERNAME=postgres
-DB_PASSWORD=bBzp16eHfA29wZUvr
+DB_PASSWORD=your_secure_database_password
 JWT_SECRET=your-secret-key-here-make-it-long-and-secure-in-production
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin123
+ADMIN_PASSWORD=your_secure_admin_password
 ```
 
 ### Running the Application

@@ -165,7 +165,7 @@ If you're using Docker Compose as described above, the application should alread
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:8080/api/v1`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-- pgAdmin: `http://localhost:5050` (login with email: `admin@example.com`, password: `devpgadmin`)
+   - pgAdmin: `http://localhost:5050` (login with email: `admin@example.com`, password: `devpgadmin`)
 
 ### Running Locally
 
