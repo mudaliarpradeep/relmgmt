@@ -81,8 +81,8 @@ frontend/
 
 - **AppLayout**: Main application layout with sidebar, header, and content area
 - **AuthLayout**: Layout for authentication pages
-- **Sidebar**: Navigation sidebar
-- **Header**: Application header with user info and notification bell
+- **Sidebar**: Navigation sidebar with responsive hamburger menu for mobile devices
+- **Header**: Application header with hamburger menu button, user info, and notification bell
 - **NotificationCenter**: Dropdown for displaying notifications
 - **Footer**: Application footer
 
@@ -412,9 +412,12 @@ const routes = [
 
 ### 8.2 Responsive Design
 
-- Mobile-first approach
-- Breakpoints for different screen sizes
-- Responsive layout components
+- Mobile-first approach with hamburger menu navigation
+- Breakpoints for different screen sizes (sm, md, lg, xl)
+- Responsive layout components with smooth transitions
+- Sidebar slides in/out on mobile devices with overlay
+- Desktop sidebar remains static and always visible
+- Responsive grid layouts and typography scaling
 
 ### 8.3 Accessibility
 

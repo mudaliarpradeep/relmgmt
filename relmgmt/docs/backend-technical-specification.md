@@ -8,8 +8,8 @@ This document provides the technical specification for the backend implementatio
 
 - **Language**: Java 21
 - **Framework**: Spring Boot 3.5.4
-- **Database**: PostgreSQL 17
-- **Build Tool**: Maven
+- **Database**: PostgreSQL 17.5
+- **Build Tool**: Gradle
 - **API Documentation**: SpringDoc OpenAPI (Swagger)
 - **Testing**: JUnit 5, Mockito
 - **Security**: Spring Security with JWT
@@ -45,7 +45,7 @@ backend/
 │           ├── controller/        # Controller tests
 │           ├── repository/        # Repository tests
 │           └── service/           # Service tests
-└── pom.xml                        # Maven configuration
+└── build.gradle                   # Gradle configuration
 ```
 
 ## 4. Database Schema
@@ -2871,7 +2871,7 @@ public class ResourceControllerIntegrationTest {
 public class ResourceRepositoryTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17.5")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test");
@@ -2951,7 +2951,7 @@ public class ResourceRepositoryTest {
 
 ### 11.1 Packaging
 
-- Build executable JAR file with Maven
+- Build executable JAR file with Gradle
 - Include all dependencies
 
 ### 11.2 Environment Configuration
@@ -2969,14 +2969,15 @@ The backend application will be containerized using Docker to ensure consistent 
 
 ```dockerfile
 # Build stage
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
-COPY pom.xml .
 # Download dependencies separately to leverage Docker cache
-RUN mvn dependency:go-offline -B
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle ./gradle
+RUN ./gradlew dependencies
 COPY src ./src
 # Run tests and build the application
-RUN mvn clean package -DskipTests
+RUN ./gradlew build -x test
 
 # Runtime stage
 FROM eclipse-temurin:21-jre
@@ -3002,12 +3003,13 @@ ENTRYPOINT ["/wait-for-it.sh", "relmgmtpostgres:5432", "--", "java", "-jar", "ap
 2. **Test-Specific Dockerfile**: A separate Dockerfile for running tests in the CI/CD pipeline.
 
 ```dockerfile
-FROM maven:3.9-eclipse-temurin-21
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
-COPY pom.xml .
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle ./gradle
 COPY src ./src
 # Run tests with coverage reporting
-CMD ["mvn", "clean", "verify", "jacoco:report"]
+CMD ["./gradlew", "clean", "test", "jacocoTestReport"]
 ```
 
 #### 11.3.2 Docker Compose Configuration
@@ -3020,7 +3022,7 @@ version: '3.8'
 services:
   # Database
   relmgmtpostgres:
-    image: postgres:17
+    image: postgres:17.5
     container_name: relmgmtpostgres
     environment:
       POSTGRES_USER: postgres
@@ -3134,7 +3136,7 @@ The Docker build process will be integrated into the CI/CD pipeline:
      stage: test
      services:
        - docker:20.10.16-dind
-       - postgres:17
+       - postgres:17.5
      variables:
        POSTGRES_DB: relmgmt_test
        POSTGRES_USER: postgres

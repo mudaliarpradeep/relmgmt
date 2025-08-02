@@ -25,12 +25,12 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'backend/**'
+      - 'relmgmt/backend/**'
       - '.github/workflows/backend-ci-cd.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'backend/**'
+      - 'relmgmt/backend/**'
       - '.github/workflows/backend-ci-cd.yml'
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17.5
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -53,42 +53,45 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up JDK 21
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
-        cache: maven
+        cache: gradle
     
-    - name: Build with Maven
-      run: |
-        cd backend
-        mvn -B clean package -DskipTests
+    - name: Grant execute permission for gradlew
+      run: chmod +x relmgmt/backend/gradlew
     
     - name: Run Tests
       run: |
-        cd backend
-        mvn -B test
+        cd relmgmt/backend
+        ./gradlew test
+    
+    - name: Build with Gradle
+      run: |
+        cd relmgmt/backend
+        ./gradlew build -x test
     
     - name: Generate Test Coverage Report
       run: |
-        cd backend
-        mvn -B jacoco:report
+        cd relmgmt/backend
+        ./gradlew jacocoTestReport
     
     - name: Upload Test Coverage Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-coverage-report
-        path: backend/target/site/jacoco/
+        path: relmgmt/backend/build/reports/jacoco/test/html/
     
     - name: Build and Push Docker Image
       if: github.event_name != 'pull_request'
       env:
         RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       run: |
-        cd backend
+        cd relmgmt/backend
         docker build -t relmgmt-backend:latest .
         # The following would be used if you're using a container registry
         # docker tag relmgmt-backend:latest your-registry/relmgmt-backend:latest
@@ -110,12 +113,12 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'frontend/**'
+      - 'relmgmt/frontend/**'
       - '.github/workflows/frontend-ci-cd.yml'
   pull_request:
     branches: [ main ]
     paths:
-      - 'frontend/**'
+      - 'relmgmt/frontend/**'
       - '.github/workflows/frontend-ci-cd.yml'
 
 jobs:
@@ -123,44 +126,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
+        cache-dependency-path: relmgmt/frontend/package-lock.json
     
     - name: Install Dependencies
       run: |
-        cd frontend
+        cd relmgmt/frontend
         npm ci
     
     - name: Lint
       run: |
-        cd frontend
+        cd relmgmt/frontend
         npm run lint
-    
-    - name: Type Check
-      run: |
-        cd frontend
-        npm run type-check
     
     - name: Run Tests
       run: |
-        cd frontend
-        npm test -- --coverage
+        cd relmgmt/frontend
+        npm run test
     
     - name: Upload Test Coverage Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: frontend-test-coverage
-        path: frontend/coverage/
+        path: relmgmt/frontend/coverage/
     
     - name: Build
       run: |
-        cd frontend
+        cd relmgmt/frontend
         npm run build
     
     - name: Deploy to Render
@@ -186,8 +184,8 @@ Name: relmgmt-backend
 Environment: Docker
 Region: (Choose the region closest to your users)
 Branch: main
-Dockerfile Path: backend/Dockerfile
-Health Check Path: /api/v1/actuator/health
+Dockerfile Path: relmgmt/backend/Dockerfile
+Health Check Path: /actuator/health
 ```
 
 4. Add the following environment variables:
@@ -210,14 +208,14 @@ APP_JWT_EXPIRATION=86400000
 ```
 Name: relmgmt-frontend
 Branch: main
-Build Command: cd frontend && npm ci && npm run build
-Publish Directory: frontend/dist
+Build Command: cd relmgmt/frontend && npm ci && npm run build
+Publish Directory: relmgmt/frontend/dist
 ```
 
 4. Add the following environment variables:
 
 ```
-VITE_API_URL=https://your-backend-service-url.onrender.com/api/v1
+VITE_API_URL=https://your-backend-service-url.onrender.com/api
 ```
 
 ### Database Configuration
@@ -227,7 +225,7 @@ VITE_API_URL=https://your-backend-service-url.onrender.com/api/v1
 
 ```
 Name: relmgmt-db
-PostgreSQL Version: 17
+PostgreSQL Version: 17.5
 Region: (Same region as your backend service)
 ```
 
@@ -252,7 +250,7 @@ Region: (Same region as your backend service)
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| VITE_API_URL | Backend API URL | https://relmgmt-backend.onrender.com/api/v1 |
+| VITE_API_URL | Backend API URL | https://relmgmt-backend.onrender.com/api |
 
 ### GitHub Secrets
 
@@ -294,9 +292,9 @@ Monitor your services through the Render dashboard:
 ### Application Monitoring
 
 1. Access Spring Boot Actuator endpoints for backend monitoring:
-   - Health: `/api/v1/actuator/health`
-   - Info: `/api/v1/actuator/info`
-   - Metrics: `/api/v1/actuator/metrics`
+   - Health: `/actuator/health`
+   - Info: `/actuator/info`
+   - Metrics: `/actuator/metrics`
 
 2. Set up custom monitoring using Prometheus and Grafana (optional):
    - Add Prometheus dependencies to the backend

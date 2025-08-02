@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Database
   relmgmtpostgres:
-    image: postgres:17
+    image: postgres:17.5
     container_name: relmgmtpostgres
     environment:
       POSTGRES_USER: postgres
@@ -42,7 +42,7 @@ services:
     working_dir: /app
     volumes:
       - ../backend:/app
-    command: ["./mvnw", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]
+    command: ["./gradlew", "bootRun", "--args=--spring.profiles.active=dev"]
     ports:
       - '8080:8080'
     environment:
