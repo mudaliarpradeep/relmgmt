@@ -20,8 +20,8 @@ Before starting, ensure you have the following installed on your machine:
 - **Git** (2.30.0 or later)
 - **Docker** (20.10.0 or later) and **Docker Compose** (2.0.0 or later)
 - **Java Development Kit (JDK)** (21 or later)
-- **Maven** (3.8.0 or later)
-- **Node.js** (18.0.0 or later) and **npm** (9.0.0 or later)
+- **Gradle** (7.0 or later, or use included wrapper)
+- **Node.js** (20.0.0 or later) and **npm** (9.0.0 or later)
 - **IDE** of your choice (IntelliJ IDEA, VS Code, Eclipse, etc.)
 
 You can verify the installations with the following commands:
@@ -31,7 +31,7 @@ git --version
 docker --version
 docker-compose --version
 java --version
-mvn --version
+./gradlew --version
 node --version
 npm --version
 ```
@@ -59,29 +59,30 @@ chmod +x .git/hooks/pre-commit
 1. Navigate to the backend directory:
 
 ```bash
-cd backend
+cd relmgmt/backend
 ```
 
-2. Install Maven dependencies:
+2. Install Gradle dependencies:
 
 ```bash
-mvn clean install -DskipTests
+./gradlew build -x test
 ```
 
 3. Set up the local PostgreSQL database:
-   - Install PostgreSQL 17
+   - Install PostgreSQL 17.5
    - Create a database named `relmgmt`
    - Create a user with username `postgres` and password `bBzp16eHfA29wZUvr`
    - Grant all privileges on the `relmgmt` database to the user
 
 4. Configure the application:
-   - Copy `src/main/resources/application-dev.yml.example` to `src/main/resources/application-dev.yml`
-   - Update the database connection properties if needed
+   - The application uses existing configuration files in `src/main/resources/`
+   - Environment-specific settings are in `application-dev.yml`, `application-test.yml`
+   - Update database connection properties if using different credentials
 
 5. Run the application:
 
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
 ### Option 2: Docker Setup (Recommended)
@@ -95,7 +96,7 @@ The backend can be run in a Docker container, which is covered in the [Docker En
 1. Navigate to the frontend directory:
 
 ```bash
-cd frontend
+cd relmgmt/frontend
 ```
 
 2. Install npm dependencies:
@@ -105,8 +106,8 @@ npm install
 ```
 
 3. Configure the application:
-   - Copy `.env.example` to `.env.local`
-   - Update the API URL if needed (default: `http://localhost:8080/api/v1`)
+   - Create a `.env.local` file with environment variables
+   - Set `VITE_API_URL=http://localhost:8080/api/v1`
 
 4. Run the development server:
 
@@ -115,6 +116,14 @@ npm run dev
 ```
 
 The frontend will be available at `http://localhost:3000`.
+
+5. (Optional) Start Storybook for component development:
+
+```bash
+npm run storybook
+```
+
+Storybook will be available at `http://localhost:6006`.
 
 ### Option 2: Docker Setup (Recommended)
 
@@ -127,13 +136,18 @@ The recommended way to run the application is using Docker Compose, which sets u
 1. Navigate to the docker directory:
 
 ```bash
-cd docker
+cd relmgmt/docker
 ```
 
 2. Create a `.env` file for environment variables:
 
 ```bash
-cp .env.example .env
+# Create .env file with required variables
+cat > .env << EOF
+POSTGRES_PASSWORD=bBzp16eHfA29wZUvr
+PGADMIN_DEFAULT_EMAIL=admin@example.com
+PGADMIN_DEFAULT_PASSWORD=devpgadmin
+EOF
 ```
 
 3. Update the environment variables in the `.env` file if needed.
@@ -141,7 +155,7 @@ cp .env.example .env
 4. Start the Docker containers:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 This will start the following services:
@@ -153,7 +167,7 @@ This will start the following services:
 5. Check if the containers are running:
 
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 ## Running the Application
@@ -174,14 +188,14 @@ If you're running the application locally:
 1. Start the backend:
 
 ```bash
-cd backend
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+cd relmgmt/backend
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
 2. Start the frontend (in a new terminal):
 
 ```bash
-cd frontend
+cd relmgmt/frontend
 npm run dev
 ```
 
@@ -217,13 +231,13 @@ git checkout -b feature/your-feature-name
 4. Run tests:
 
 ```bash
-mvn test
+./gradlew test
 ```
 
 5. Run the application to manually test:
 
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
 ### Frontend Development
@@ -256,7 +270,7 @@ npm run lint
 
 ### Database Changes
 
-1. Create a new Flyway migration script in `backend/src/main/resources/db/migration`:
+1. Create a new Flyway migration script in `relmgmt/backend/src/main/resources/db/migration`:
    - Name format: `V{version}__{description}.sql`
    - Example: `V2__add_notifications_table.sql`
 
@@ -269,25 +283,25 @@ npm run lint
 ### Docker Issues
 
 1. **Container fails to start**:
-   - Check container logs: `docker-compose logs [service-name]`
+   - Check container logs: `docker compose logs [service-name]`
    - Ensure ports are not already in use
    - Verify environment variables in `.env` file
 
 2. **Database connection issues**:
-   - Ensure the PostgreSQL container is running: `docker-compose ps`
-   - Check database logs: `docker-compose logs relmgmtpostgres`
+   - Ensure the PostgreSQL container is running: `docker compose ps`
+   - Check database logs: `docker compose logs relmgmtpostgres`
    - Verify connection settings in application configuration
 
 3. **Reset the environment**:
-   - Stop and remove containers: `docker-compose down`
-   - Remove volumes (caution: this will delete all data): `docker-compose down -v`
-   - Rebuild and start: `docker-compose up -d --build`
+   - Stop and remove containers: `docker compose down`
+   - Remove volumes (caution: this will delete all data): `docker compose down -v`
+   - Rebuild and start: `docker compose up -d --build`
 
 ### Backend Issues
 
 1. **Compilation errors**:
    - Ensure JDK 21 is installed and configured
-   - Update Maven dependencies: `mvn clean install -U`
+   - Update Gradle dependencies: `./gradlew build --refresh-dependencies`
 
 2. **Runtime errors**:
    - Check application logs
@@ -295,7 +309,7 @@ npm run lint
    - Ensure all required environment variables are set
 
 3. **Test failures**:
-   - Run specific tests: `mvn test -Dtest=TestClassName`
+   - Run specific tests: `./gradlew test --tests TestClassName`
    - Check test logs for details
 
 ### Frontend Issues
@@ -305,7 +319,7 @@ npm run lint
    - Delete node_modules and reinstall: `rm -rf node_modules && npm install`
 
 2. **Build errors**:
-   - Check for TypeScript errors: `npm run type-check`
+   - Check for TypeScript errors: `npm run build`
    - Verify environment variables in `.env.local`
 
 3. **Runtime errors**:
@@ -316,18 +330,19 @@ npm run lint
 ### Common Fixes
 
 1. **Reset database**:
-   - If using Docker: `docker-compose down -v && docker-compose up -d`
+   - If using Docker: `docker compose down -v && docker compose up -d`
    - If local: Drop and recreate the database
 
 2. **Clear frontend cache**:
-   - Delete `.next` directory: `rm -rf .next`
+   - Delete `dist` directory: `rm -rf dist`
+   - Clear node_modules: `rm -rf node_modules && npm install`
    - Restart development server: `npm run dev`
 
 3. **Update dependencies**:
-   - Backend: `mvn clean install -U`
+   - Backend: `./gradlew build --refresh-dependencies`
    - Frontend: `npm update`
 
 4. **Restart services**:
-   - Docker: `docker-compose restart`
+   - Docker: `docker compose restart`
    - Local backend: Stop and restart Spring Boot application
    - Local frontend: Stop and restart development server 
