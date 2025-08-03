@@ -98,4 +98,10 @@ public interface ResourceService {
      * @return true if the resource can be deleted, false otherwise
      */
     boolean canDeleteResource(Long resourceId);
+
+    /**
+     * Automatically update status of resources with past project end dates to inactive
+     * @return number of resources that were updated
+     */
+    int updateExpiredResourcesStatus();
 }

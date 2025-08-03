@@ -101,4 +101,13 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
      * @return List of resources matching the criteria
      */
     List<Resource> findBySkillFunctionAndStatus(SkillFunctionEnum skillFunction, StatusEnum status);
+
+    /**
+     * Find active resources with project end dates in the past
+     * @param status the status to filter by (should be ACTIVE)
+     * @param currentDate the current date to compare against
+     * @return List of active resources with past end dates
+     */
+    @Query("SELECT r FROM Resource r WHERE r.status = :status AND r.projectEndDate IS NOT NULL AND r.projectEndDate < :currentDate")
+    List<Resource> findActiveResourcesWithPastEndDates(@Param("status") StatusEnum status, @Param("currentDate") LocalDate currentDate);
 }

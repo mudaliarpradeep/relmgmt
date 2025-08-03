@@ -278,4 +278,52 @@ class ResourceRepositoryTest {
         assertTrue(allocatedResources.isEmpty()); // No allocations exist yet
     }
     */
+
+    @Test
+    void testFindActiveResourcesWithPastEndDates() {
+        // Create a resource with past end date
+        Resource expiredResource = new Resource();
+        expiredResource.setName("Expired Resource");
+        expiredResource.setEmployeeNumber("11111111");
+        expiredResource.setEmail("expired@example.com");
+        expiredResource.setStatus(StatusEnum.ACTIVE);
+        expiredResource.setProjectStartDate(LocalDate.of(2024, 1, 1));
+        expiredResource.setProjectEndDate(LocalDate.now().minusDays(1)); // Past date
+        expiredResource.setEmployeeGrade(EmployeeGradeEnum.LEVEL_8);
+        expiredResource.setSkillFunction(SkillFunctionEnum.BUILD);
+        
+        // Create a resource with future end date
+        Resource activeResource = new Resource();
+        activeResource.setName("Active Resource");
+        activeResource.setEmployeeNumber("22222222");
+        activeResource.setEmail("active@example.com");
+        activeResource.setStatus(StatusEnum.ACTIVE);
+        activeResource.setProjectStartDate(LocalDate.of(2024, 1, 1));
+        activeResource.setProjectEndDate(LocalDate.now().plusDays(30)); // Future date
+        activeResource.setEmployeeGrade(EmployeeGradeEnum.LEVEL_8);
+        activeResource.setSkillFunction(SkillFunctionEnum.BUILD);
+        
+        // Create a resource with no end date
+        Resource noEndDateResource = new Resource();
+        noEndDateResource.setName("No End Date Resource");
+        noEndDateResource.setEmployeeNumber("33333333");
+        noEndDateResource.setEmail("noenddate@example.com");
+        noEndDateResource.setStatus(StatusEnum.ACTIVE);
+        noEndDateResource.setProjectStartDate(LocalDate.of(2024, 1, 1));
+        noEndDateResource.setProjectEndDate(null); // No end date
+        noEndDateResource.setEmployeeGrade(EmployeeGradeEnum.LEVEL_8);
+        noEndDateResource.setSkillFunction(SkillFunctionEnum.BUILD);
+        
+        resourceRepository.save(expiredResource);
+        resourceRepository.save(activeResource);
+        resourceRepository.save(noEndDateResource);
+        
+        // Test finding expired resources
+        List<Resource> expiredResources = resourceRepository.findActiveResourcesWithPastEndDates(
+            StatusEnum.ACTIVE, LocalDate.now());
+        
+        assertEquals(1, expiredResources.size());
+        assertEquals("Expired Resource", expiredResources.get(0).getName());
+        assertTrue(expiredResources.get(0).getProjectEndDate().isBefore(LocalDate.now()));
+    }
 }

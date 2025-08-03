@@ -46,7 +46,8 @@ export const SkillFunction = {
   TECHNICAL_DESIGN: 'Technical Design',
   BUILD: 'Build',
   TEST: 'Test',
-  PLATFORM: 'Platform'
+  PLATFORM: 'Platform',
+  GOVERNANCE: 'Governance'
 } as const;
 
 export type SkillFunctionEnum = typeof SkillFunction[keyof typeof SkillFunction];
@@ -63,6 +64,59 @@ export const SkillSubFunction = {
 } as const;
 
 export type SkillSubFunctionEnum = typeof SkillSubFunction[keyof typeof SkillSubFunction];
+
+// Utility function to get applicable sub-functions based on skill function
+export const getApplicableSubFunctions = (skillFunction: SkillFunctionEnum): SkillSubFunctionEnum[] => {
+  switch (skillFunction) {
+    case SkillFunction.TEST:
+      return [SkillSubFunction.AUTOMATED, SkillSubFunction.MANUAL];
+    case SkillFunction.TECHNICAL_DESIGN:
+    case SkillFunction.BUILD:
+      return [
+        SkillSubFunction.TALEND,
+        SkillSubFunction.FORGEROCK_IDM,
+        SkillSubFunction.FORGEROCK_IG,
+        SkillSubFunction.SAILPOINT,
+        SkillSubFunction.FORGEROCK_UI
+      ];
+    case SkillFunction.FUNCTIONAL_DESIGN:
+    case SkillFunction.PLATFORM:
+    case SkillFunction.GOVERNANCE:
+    default:
+      return [];
+  }
+};
+
+// Utility functions to convert between display names and enum names for API calls
+export const getStatusEnumName = (displayName: string): string => {
+  switch (displayName) {
+    case Status.ACTIVE:
+      return 'ACTIVE';
+    case Status.INACTIVE:
+      return 'INACTIVE';
+    default:
+      return displayName;
+  }
+};
+
+export const getSkillFunctionEnumName = (displayName: string): string => {
+  switch (displayName) {
+    case SkillFunction.FUNCTIONAL_DESIGN:
+      return 'FUNCTIONAL_DESIGN';
+    case SkillFunction.TECHNICAL_DESIGN:
+      return 'TECHNICAL_DESIGN';
+    case SkillFunction.BUILD:
+      return 'BUILD';
+    case SkillFunction.TEST:
+      return 'TEST';
+    case SkillFunction.PLATFORM:
+      return 'PLATFORM';
+    case SkillFunction.GOVERNANCE:
+      return 'GOVERNANCE';
+    default:
+      return displayName;
+  }
+};
 
 // Resource types
 export interface Resource {

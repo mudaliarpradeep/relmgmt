@@ -490,4 +490,19 @@ public class ResourceServiceImpl implements ResourceService {
             subFunctionCell.setCellValue("");
         }
     }
+
+    @Override
+    public int updateExpiredResourcesStatus() {
+        LocalDate currentDate = LocalDate.now();
+        List<Resource> expiredResources = resourceRepository.findActiveResourcesWithPastEndDates(StatusEnum.ACTIVE, currentDate);
+        
+        int updatedCount = 0;
+        for (Resource resource : expiredResources) {
+            resource.setStatus(StatusEnum.INACTIVE);
+            resourceRepository.save(resource);
+            updatedCount++;
+        }
+        
+        return updatedCount;
+    }
 }

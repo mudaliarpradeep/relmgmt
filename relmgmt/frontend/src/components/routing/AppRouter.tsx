@@ -3,6 +3,9 @@ import { AuthProvider } from '../../hooks/useAuth';
 import { ProtectedRoute } from '../auth/ProtectedRoute';
 import { LoginPage } from '../../pages/auth/LoginPage';
 import DashboardPage from '../../pages/dashboard/DashboardPage';
+import ResourceListPage from '../../pages/resources/ResourceListPage';
+import ResourceForm from '../../pages/resources/ResourceForm';
+import ResourceDetailPage from '../../pages/resources/ResourceDetailPage';
 import AppLayout from '../layout/AppLayout';
 
 /**
@@ -29,20 +32,52 @@ export function AppRouter() {
             }
           />
           
-          {/* Protected Routes - Future phases */}
+          {/* Resource Management Routes */}
           <Route
             path="/resources"
             element={
               <ProtectedRoute>
                 <AppLayout>
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold text-gray-900">Resource Management</h1>
-                    <p className="text-gray-600 mt-2">Coming in Phase 4</p>
-                  </div>
+                  <ResourceListPage />
                 </AppLayout>
               </ProtectedRoute>
             }
           />
+          
+          <Route
+            path="/resources/new"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ResourceForm />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/resources/:id"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ResourceDetailPage />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/resources/:id/edit"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <ResourceForm />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Protected Routes - Future phases */}
           
           <Route
             path="/releases"
@@ -65,6 +100,20 @@ export function AppRouter() {
                 <AppLayout>
                   <div className="p-6">
                     <h1 className="text-2xl font-bold text-gray-900">Project Management</h1>
+                    <p className="text-gray-600 mt-2">Coming in Phase 6</p>
+                  </div>
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/scope"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <div className="p-6">
+                    <h1 className="text-2xl font-bold text-gray-900">Scope Management</h1>
                     <p className="text-gray-600 mt-2">Coming in Phase 6</p>
                   </div>
                 </AppLayout>

@@ -1,17 +1,22 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { renderWithRouter } from '../../test/test-utils';
 import DashboardPage from './DashboardPage';
 
-// Mock the components to isolate DashboardPage testing
-vi.mock('../../components/layout/AppLayout', () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="app-layout">{children}</div>
-  ),
-}));
+// Mock useNavigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
+// Mock the components to isolate DashboardPage testing
 vi.mock('../../components/ui/StatCard', () => ({
-  default: ({ title, value, color }: { title: string; value: number; color: string }) => (
-    <div data-testid={`stat-card-${color}`}>
+  default: ({ title, value, color, onClick }: { title: string; value: number | string; color: string; onClick?: () => void }) => (
+    <div data-testid={`stat-card-${color}`} onClick={onClick}>
       <span data-testid="stat-title">{title}</span>
       <span data-testid="stat-value">{value}</span>
     </div>
@@ -34,20 +39,41 @@ vi.mock('../../components/dashboard/QuickActions', () => ({
   default: () => <div data-testid="quick-actions">Quick Actions</div>,
 }));
 
-
-
 vi.mock('../../components/dashboard/AllocationConflicts', () => ({
   default: () => <div data-testid="allocation-conflicts">Allocation Conflicts</div>,
 }));
 
+// Mock ResourceService
+vi.mock('../../services/api/v1/resourceService', () => ({
+  default: {
+    getResources: vi.fn().mockResolvedValue({
+      totalElements: 125,
+      content: [],
+      pageable: { pageNumber: 0, pageSize: 1 },
+      totalPages: 1,
+      last: true,
+      size: 1,
+      number: 0,
+      sort: { sorted: true, unsorted: false, empty: false },
+      numberOfElements: 1,
+      first: true,
+      empty: false
+    })
+  }
+}));
+
 describe('DashboardPage', () => {
-  it('renders the dashboard with AppLayout', () => {
-    render(<DashboardPage />);
-    expect(screen.getByTestId('app-layout')).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('renders all stat cards with correct data', () => {
-    render(<DashboardPage />);
+  it('renders the dashboard', () => {
+    renderWithRouter(<DashboardPage />);
+    expect(screen.getByTestId('stat-card-blue')).toBeInTheDocument();
+  });
+
+  it('renders all stat cards with correct data', async () => {
+    renderWithRouter(<DashboardPage />);
     
     // Check that all stat cards are rendered
     expect(screen.getByTestId('stat-card-blue')).toBeInTheDocument();
@@ -59,7 +85,7 @@ describe('DashboardPage', () => {
     const statTitles = screen.getAllByTestId('stat-title');
     expect(statTitles).toHaveLength(4);
     expect(statTitles[0]).toHaveTextContent('Active Releases');
-    expect(statTitles[1]).toHaveTextContent('Total Resources');
+    expect(statTitles[1]).toHaveTextContent('Active Resources');
     expect(statTitles[2]).toHaveTextContent('Allocation Conflicts');
     expect(statTitles[3]).toHaveTextContent('Upcoming Go-Lives');
     
@@ -67,13 +93,14 @@ describe('DashboardPage', () => {
     const statValues = screen.getAllByTestId('stat-value');
     expect(statValues).toHaveLength(4);
     expect(statValues[0]).toHaveTextContent('4');
+    // The resource count will show "..." initially while loading, then "125"
     expect(statValues[1]).toHaveTextContent('125');
     expect(statValues[2]).toHaveTextContent('3');
     expect(statValues[3]).toHaveTextContent('2');
   });
 
   it('renders all dashboard sections', () => {
-    render(<DashboardPage />);
+    renderWithRouter(<DashboardPage />);
     
     // Check that all dashboard sections are rendered
     expect(screen.getByTestId('active-releases')).toBeInTheDocument();
@@ -84,30 +111,31 @@ describe('DashboardPage', () => {
   });
 
   it('renders dashboard sections in correct order', () => {
-    render(<DashboardPage />);
-    
-    const container = screen.getByTestId('app-layout');
+    renderWithRouter(<DashboardPage />);
     
     // Check that sections appear in the expected order
-    const sections = container.children[0].children;
+    const container = screen.getByTestId('stat-card-blue').parentElement;
     
     // First row: Stats
-    expect(sections[0]).toHaveClass('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-4');
+    expect(container).toHaveClass('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-4');
     
     // Second row: Active Releases and Resource Utilization
-    expect(sections[1]).toHaveClass('grid', 'grid-cols-1', 'lg:grid-cols-2');
+    const secondRow = screen.getByTestId('active-releases').parentElement;
+    expect(secondRow).toHaveClass('grid', 'grid-cols-1', 'lg:grid-cols-2');
     
     // Third row: Release Timeline
-    expect(sections[2]).toHaveClass('mb-4', 'sm:mb-6');
+    const thirdRow = screen.getByTestId('release-timeline').parentElement;
+    expect(thirdRow).toHaveClass('mb-4', 'sm:mb-6');
     
     // Fourth row: Quick Actions, Allocation Conflicts
-    expect(sections[3]).toHaveClass('grid', 'grid-cols-1', 'lg:grid-cols-2');
+    const fourthRow = screen.getByTestId('quick-actions').parentElement;
+    expect(fourthRow).toHaveClass('grid', 'grid-cols-1', 'lg:grid-cols-2');
   });
 
   it('has proper container styling', () => {
-    render(<DashboardPage />);
+    renderWithRouter(<DashboardPage />);
     
-    const container = screen.getByTestId('app-layout').children[0];
+    const container = screen.getByTestId('stat-card-blue').parentElement?.parentElement;
     expect(container).toHaveClass('w-full', 'max-w-7xl', 'mx-auto', 'px-2', 'sm:px-4', 'lg:px-6', 'xl:px-8', 'py-4', 'sm:py-6', 'lg:py-8');
   });
 }); 

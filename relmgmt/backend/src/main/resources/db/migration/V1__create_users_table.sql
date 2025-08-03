@@ -12,6 +12,6 @@ CREATE TABLE users (
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_email ON users(email);
 
--- Insert initial admin user (password: admin123)
+-- Insert initial admin user (password: admin123) - TEMPORARILY USING PLAIN TEXT
 INSERT INTO users (username, password, email) 
-VALUES ('admin', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'admin@example.com'); 
+VALUES ('admin', 'admin123', 'admin@example.com'); 

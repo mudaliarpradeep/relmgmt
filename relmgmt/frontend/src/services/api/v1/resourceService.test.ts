@@ -94,7 +94,7 @@ describe('ResourceService', () => {
       expect(result.content[0].status).toBe(Status.ACTIVE);
       expect(result.content[0].skillFunction).toBe(SkillFunction.BUILD);
       expect(mockedApiClient.get).toHaveBeenCalledWith(
-        '/v1/resources?status=Active&skillFunction=Build&page=0&size=10'
+        '/v1/resources?status=ACTIVE&skillFunction=BUILD&page=0&size=10'
       );
     });
 

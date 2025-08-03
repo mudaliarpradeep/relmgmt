@@ -46,7 +46,7 @@ These variables are required across all environments:
 
 | Variable | Description | Required | Default | Example |
 |----------|-------------|----------|---------|---------|
-| `VITE_API_URL` | URL for the backend API | Yes | - | `http://localhost:8080/api/v1` |
+| `VITE_API_URL` | URL for the backend API | Yes | `http://localhost:8080/api` | `http://localhost:8080/api` |
 | `VITE_APP_TITLE` | Application title | No | `Release Management System` | `Release Management System - Dev` |
 | `VITE_LOG_LEVEL` | Client-side logging level | No | `info` | `debug`, `info`, `warn`, `error` |
 
@@ -69,7 +69,7 @@ These variables are required across all environments:
 
 | Variable | Value | Description |
 |----------|-------|-------------|
-| `VITE_API_URL` | `http://localhost:8080/api/v1` | Local backend API |
+| `VITE_API_URL` | `http://localhost:8080/api` | Local backend API (CORS configured) |
 | `VITE_LOG_LEVEL` | `debug` | Verbose logging for development |
 | `VITE_MOCK_API` | `false` | Use real API instead of mocks |
 
@@ -89,7 +89,7 @@ These variables are required across all environments:
 
 | Variable | Value | Description |
 |----------|-------|-------------|
-| `VITE_API_URL` | `http://localhost:8080/api/v1` | Test backend API |
+| `VITE_API_URL` | `http://localhost:8080/api` | Test backend API (CORS configured) |
 | `VITE_MOCK_API` | `true` | Use mock API for component tests |
 
 #### Staging Environment
@@ -246,6 +246,34 @@ spring:
     enabled: true
     locations: classpath:db/migration
     clean-disabled: true
+```
+
+## CORS Configuration
+
+The backend is configured with CORS (Cross-Origin Resource Sharing) to allow the frontend application to communicate with the backend API. The CORS configuration is defined in `SecurityConfig.java` and includes:
+
+### CORS Settings
+
+- **Allowed Origins**: `http://localhost:3000`, `http://127.0.0.1:3000`
+- **Allowed Methods**: GET, POST, PUT, DELETE, OPTIONS
+- **Allowed Headers**: All headers (including Authorization for JWT tokens)
+- **Allow Credentials**: Enabled for authentication
+- **Exposed Headers**: Authorization, Content-Type
+- **Max Age**: 3600 seconds (1 hour) for preflight request caching
+
+### Environment-Specific CORS Configuration
+
+For different environments, you may need to update the allowed origins in `SecurityConfig.java`:
+
+```java
+// Development
+configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
+
+// Staging
+configuration.setAllowedOriginPatterns(Arrays.asList("https://staging.yourapp.com"));
+
+// Production
+configuration.setAllowedOriginPatterns(Arrays.asList("https://yourapp.com", "https://www.yourapp.com"));
 ```
 
 ## Sample Configuration Files

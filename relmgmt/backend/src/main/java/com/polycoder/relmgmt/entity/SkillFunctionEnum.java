@@ -5,7 +5,8 @@ public enum SkillFunctionEnum {
     TECHNICAL_DESIGN("Technical Design"),
     BUILD("Build"),
     TEST("Test"),
-    PLATFORM("Platform");
+    PLATFORM("Platform"),
+    GOVERNANCE("Governance");
     
     private final String displayName;
     

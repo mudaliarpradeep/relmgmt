@@ -430,7 +430,8 @@ public enum SkillFunctionEnum {
     TECHNICAL_DESIGN("Technical Design"),
     BUILD("Build"),
     TEST("Test"),
-    PLATFORM("Platform");
+    PLATFORM("Platform"),
+    GOVERNANCE("Governance");
     
     private final String displayName;
     
@@ -478,6 +479,12 @@ public enum SkillSubFunctionEnum {
     }
 }
 ```
+
+**Skill Sub-Function Logic:**
+- **Functional Design & Platform**: No sub-functions applicable
+- **Technical Design & Build**: Applicable sub-functions: Talend, ForgeRock IDM, ForgeRock IG, SailPoint, ForgeRock UI
+- **Test**: Applicable sub-functions: Automated, Manual
+- **Governance**: No sub-functions applicable
 
 #### 4.3.5 PhaseTypeEnum
 ```java
@@ -3342,19 +3349,50 @@ public class SecurityConfig {
     private JwtAuthenticationEntryPoint unauthorizedHandler;
     
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-            .cors().and().csrf().disable()
-            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-            .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**").permitAll()
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/logout").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated();
-        
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .requestMatchers("/actuator/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Allow frontend origin
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
+        
+        // Allow all HTTP methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Allow all headers
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Allow credentials (cookies, authorization headers)
+        configuration.setAllowCredentials(true);
+        
+        // Expose headers
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        
+        // Max age for preflight requests
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        
+        return source;
     }
     
     @Bean
@@ -4096,5 +4134,152 @@ The allocation algorithm detects conflicts when resources are over-allocated:
 3. **Conflict Notification**:
    - Generate notification for each conflict
    - Include resource details, week, and allocation amount
+
+### 6.4 Automatic Resource Status Management
+
+The system includes an automatic resource status management feature that ensures resources with past project end dates are automatically marked as inactive.
+
+#### 6.4.1 Resource Status Scheduler
+
+**Class**: `ResourceStatusScheduler`
+**Package**: `com.polycoder.relmgmt.service`
+
+The scheduler automatically updates resource statuses based on business rules:
+
+```java
+@Service
+public class ResourceStatusScheduler {
+    
+    @Autowired
+    private ResourceService resourceService;
+    
+    /**
+     * Scheduled job to automatically mark resources with past project end dates as inactive
+     * Runs daily at 2:00 AM
+     */
+    @Scheduled(cron = "0 0 2 * * ?") // Daily at 2:00 AM
+    public void updateExpiredResourcesStatus() {
+        try {
+            logger.info("Starting scheduled task: Update expired resources status");
+            
+            int updatedCount = resourceService.updateExpiredResourcesStatus();
+            
+            if (updatedCount > 0) {
+                logger.info("Successfully updated {} resources from ACTIVE to INACTIVE due to past project end dates", updatedCount);
+            } else {
+                logger.info("No resources found with past project end dates that need status update");
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error occurred while updating expired resources status: {}", e.getMessage(), e);
+        }
+    }
+}
+```
+
+#### 6.4.2 Repository Method
+
+**Class**: `ResourceRepository`
+**Method**: `findActiveResourcesWithPastEndDates()`
+
+```java
+/**
+ * Find active resources with project end dates in the past
+ * @param status the status to filter by (should be ACTIVE)
+ * @param currentDate the current date to compare against
+ * @return List of active resources with past end dates
+ */
+@Query("SELECT r FROM Resource r WHERE r.status = :status AND r.projectEndDate IS NOT NULL AND r.projectEndDate < :currentDate")
+List<Resource> findActiveResourcesWithPastEndDates(@Param("status") StatusEnum status, @Param("currentDate") LocalDate currentDate);
+```
+
+#### 6.4.3 Service Method
+
+**Class**: `ResourceService`
+**Method**: `updateExpiredResourcesStatus()`
+
+```java
+/**
+ * Automatically update status of resources with past project end dates to inactive
+ * @return number of resources that were updated
+ */
+int updateExpiredResourcesStatus();
+```
+
+**Implementation**:
+```java
+@Override
+public int updateExpiredResourcesStatus() {
+    LocalDate currentDate = LocalDate.now();
+    List<Resource> expiredResources = resourceRepository.findActiveResourcesWithPastEndDates(StatusEnum.ACTIVE, currentDate);
+    
+    int updatedCount = 0;
+    for (Resource resource : expiredResources) {
+        resource.setStatus(StatusEnum.INACTIVE);
+        resourceRepository.save(resource);
+        updatedCount++;
+    }
+    
+    return updatedCount;
+}
+```
+
+#### 6.4.4 Manual Trigger Endpoint
+
+**Endpoint**: `POST /api/v1/resources/update-expired-status`
+**Controller**: `ResourceController`
+
+```java
+@PostMapping("/update-expired-status")
+@Operation(summary = "Manually trigger expired resources status update", 
+           description = "Manually trigger the process to mark resources with past project end dates as inactive")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Status update completed successfully"),
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+})
+public ResponseEntity<Map<String, Object>> manuallyUpdateExpiredResourcesStatus() {
+    int updatedCount = resourceService.updateExpiredResourcesStatus();
+    
+    Map<String, Object> response = new HashMap<>();
+    response.put("message", "Expired resources status update completed");
+    response.put("updatedCount", updatedCount);
+    response.put("timestamp", LocalDateTime.now());
+    
+    return ResponseEntity.ok(response);
+}
+```
+
+#### 6.4.5 Scheduling Configuration
+
+**Main Application Class**: `RelmgmtApplication`
+
+```java
+@SpringBootApplication
+@EnableScheduling
+public class RelmgmtApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(RelmgmtApplication.class, args);
+    }
+}
+```
+
+#### 6.4.6 Business Rules
+
+1. **Automatic Status Update**: Resources with `projectEndDate` in the past are automatically marked as `INACTIVE`
+2. **Scheduled Execution**: The process runs daily at 2:00 AM using Spring's `@Scheduled` annotation
+3. **Manual Trigger**: Administrators can manually trigger the process using the REST endpoint
+4. **Logging**: All operations are logged with appropriate information and error messages
+5. **Error Handling**: Exceptions are caught and logged without affecting the scheduled job execution
+
+#### 6.4.7 Response Format
+
+**Manual Trigger Response**:
+```json
+{
+  "message": "Expired resources status update completed",
+  "updatedCount": 1,
+  "timestamp": "2025-01-03T11:31:21.872642758"
+}
+```
 
 // ... existing content ...

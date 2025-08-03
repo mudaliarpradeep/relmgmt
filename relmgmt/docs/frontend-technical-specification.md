@@ -253,10 +253,21 @@ frontend/
 - Request/response interceptors
 - Authentication token handling
 - Error handling
+- CORS support for cross-origin requests
 - API versioning support
   - Base URL includes API version: `/api/v1/`
   - Version header support for future implementations
   - Ability to switch between API versions if needed
+
+#### 6.1.1 CORS Configuration
+
+The frontend is configured to work with the backend CORS settings:
+
+- **Base URL**: Configurable via `VITE_API_URL` environment variable (defaults to `http://localhost:8080/api`)
+- **CORS Headers**: Backend automatically handles CORS headers for frontend origin (`http://localhost:3000`)
+- **Authentication**: JWT tokens are automatically included in Authorization header
+- **Preflight Requests**: Handled automatically by browser and backend
+- **Error Handling**: 401 responses trigger automatic logout and redirect to login page
 
 ### 6.2 API Services
 
@@ -548,7 +559,8 @@ export enum SkillFunctionEnum {
   TECHNICAL_DESIGN = "Technical Design",
   BUILD = "Build",
   TEST = "Test",
-  PLATFORM = "Platform"
+  PLATFORM = "Platform",
+  GOVERNANCE = "Governance"
 }
 
 // Skill Sub-function enum
@@ -561,6 +573,28 @@ export enum SkillSubFunctionEnum {
   AUTOMATED = "Automated",
   MANUAL = "Manual"
 }
+
+// Utility function to get applicable sub-functions based on skill function
+export const getApplicableSubFunctions = (skillFunction: SkillFunctionEnum): SkillSubFunctionEnum[] => {
+  switch (skillFunction) {
+    case SkillFunctionEnum.TEST:
+      return [SkillSubFunctionEnum.AUTOMATED, SkillSubFunctionEnum.MANUAL];
+    case SkillFunctionEnum.TECHNICAL_DESIGN:
+    case SkillFunctionEnum.BUILD:
+      return [
+        SkillSubFunctionEnum.TALEND,
+        SkillSubFunctionEnum.FORGEROCK_IDM,
+        SkillSubFunctionEnum.FORGEROCK_IG,
+        SkillSubFunctionEnum.SAILPOINT,
+        SkillSubFunctionEnum.FORGEROCK_UI
+      ];
+    case SkillFunctionEnum.FUNCTIONAL_DESIGN:
+    case SkillFunctionEnum.PLATFORM:
+    case SkillFunctionEnum.GOVERNANCE:
+    default:
+      return [];
+  }
+};
 
 // Phase Type enum
 export enum PhaseTypeEnum {
@@ -646,7 +680,8 @@ const resourceSchema = z.object({
         ].includes(subFunction);
       }
       
-      return !subFunction; // Should be undefined for other skill functions
+      // Functional Design, Platform, and Governance should not have sub-functions
+      return !subFunction;
     },
     { message: "Invalid skill sub-function for the selected skill function" }
   )

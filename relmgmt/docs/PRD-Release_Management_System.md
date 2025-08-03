@@ -85,6 +85,10 @@ Each resource in the roster shall have the following attributes:
   - Skill sub-functions Talend, ForgeRock IDM, ForgeRock IG, SailPoint, ForgeRock UI are applicable to Technical Design and Build
   - Skill sub-functions Automated and Manual are applicable only to Test function
 
+#### 4.1.4 Automatic Resource Status Management
+- The system shall automatically mark any resource as Inactive when their project end date is in the past.
+- This rule ensures that resources are automatically considered unavailable for allocation once their project assignment has ended.
+
 ### 4.2 Release Management
 
 #### 4.2.1 Release Creation
@@ -363,6 +367,7 @@ The system shall allocate resources to releases based on the following rules:
 - REST API between frontend and backend
 - Database connectivity for persistent storage
 - Transaction logging system
+- Scheduled job system for automatic resource status management
 
 ## 9. Constraints and Assumptions
 
@@ -412,6 +417,7 @@ The development process will follow Agile methodologies:
 - **Person-day**: A unit representing one day of work by one person
 - **Transaction Log**: A record of data modifications for auditing purposes
 - **Audit Trail**: A chronological record of system activities for security and compliance
+- **Automatic Status Management**: A system process that automatically updates resource status from Active to Inactive when their project end date has passed
 
 ### 11.2 References
 - Resource Allocation Best Practices

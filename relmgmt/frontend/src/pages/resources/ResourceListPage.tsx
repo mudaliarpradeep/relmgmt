@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ResourceService from '../../services/api/v1/resourceService';
 import type { Resource, ResourceFilters, PaginatedResponse } from '../../types';
@@ -9,10 +9,147 @@ interface DeleteModalState {
   resource: Resource | null;
 }
 
+// Memoized table content component to prevent unnecessary re-renders
+const TableContent = React.memo(({ 
+  resources, 
+  onRowClick, 
+  onEdit, 
+  onDelete 
+}: { 
+  resources: Resource[];
+  onRowClick: (resource: Resource) => void;
+  onEdit: (resource: Resource, event: React.MouseEvent) => void;
+  onDelete: (resource: Resource, event: React.MouseEvent) => void;
+}) => {
+  return (
+    <>
+      {resources.map((resource) => (
+        <tr
+          key={resource.id}
+          onClick={() => onRowClick(resource)}
+          className="hover:bg-gray-50 cursor-pointer"
+        >
+          <td className="px-6 py-4 text-sm font-medium text-gray-900 min-w-[150px]">
+            <div className="truncate" title={resource.name}>
+              {resource.name}
+            </div>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-500 min-w-[120px]">
+            <div className="truncate" title={resource.employeeNumber}>
+              {resource.employeeNumber}
+            </div>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-500 min-w-[200px]">
+            <div className="truncate" title={resource.email}>
+              {resource.email}
+            </div>
+          </td>
+          <td className="px-6 py-4 min-w-[100px]">
+            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              resource.status === Status.ACTIVE 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {resource.status}
+            </span>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-500 min-w-[120px]">
+            <div className="truncate" title={resource.skillFunction}>
+              {resource.skillFunction}
+            </div>
+          </td>
+          <td className="px-6 py-4 text-sm font-medium min-w-[120px]">
+            <div className="flex space-x-2">
+              <button
+                onClick={(e) => onEdit(resource, e)}
+                className="text-blue-600 hover:text-blue-900 transition-colors"
+              >
+                Edit
+              </button>
+              <button
+                onClick={(e) => onDelete(resource, e)}
+                className="text-red-600 hover:text-red-900 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+});
+
+// Memoized mobile card content component
+const MobileCardContent = React.memo(({ 
+  resources, 
+  onRowClick, 
+  onEdit, 
+  onDelete 
+}: { 
+  resources: Resource[];
+  onRowClick: (resource: Resource) => void;
+  onEdit: (resource: Resource, event: React.MouseEvent) => void;
+  onDelete: (resource: Resource, event: React.MouseEvent) => void;
+}) => {
+  return (
+    <>
+      {resources.map((resource) => (
+        <div
+          key={resource.id}
+          className="p-4 hover:bg-gray-50 cursor-pointer"
+          onClick={() => onRowClick(resource)}
+        >
+          <div className="flex justify-between items-start mb-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium text-gray-900 truncate">
+                {resource.name}
+              </h3>
+              <p className="text-sm text-gray-500 truncate">
+                {resource.email}
+              </p>
+            </div>
+            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 flex-shrink-0 ${
+              resource.status === Status.ACTIVE 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {resource.status}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-500">
+              <span className="font-medium">ID:</span> {resource.employeeNumber}
+            </div>
+            <div className="text-sm text-gray-500">
+              <span className="font-medium">Function:</span> {resource.skillFunction}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-100">
+            <button
+              onClick={(e) => onEdit(resource, e)}
+              className="text-blue-600 hover:text-blue-900 text-sm font-medium transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              onClick={(e) => onDelete(resource, e)}
+              className="text-red-600 hover:text-red-900 text-sm font-medium transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+});
+
 const ResourceListPage = () => {
   const navigate = useNavigate();
   const [resources, setResources] = useState<PaginatedResponse<Resource> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [filters, setFilters] = useState<ResourceFilters>({
@@ -26,9 +163,13 @@ const ResourceListPage = () => {
   const [importModalOpen, setImportModalOpen] = useState(false);
 
   // Load resources
-  const loadResources = async (newFilters?: ResourceFilters) => {
+  const loadResources = async (newFilters?: ResourceFilters, isTableUpdate: boolean = false) => {
     try {
-      setLoading(true);
+      if (isTableUpdate) {
+        setTableLoading(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
       const filtersToUse = newFilters || filters;
       const response = await ResourceService.getResources(filtersToUse);
@@ -36,7 +177,11 @@ const ResourceListPage = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load resources');
     } finally {
-      setLoading(false);
+      if (isTableUpdate) {
+        setTableLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
@@ -53,7 +198,8 @@ const ResourceListPage = () => {
     };
     setFilters(newFilters);
     setCurrentPage(0);
-    loadResources(newFilters);
+    // Only update the table data, not the entire page
+    loadResources(newFilters, true);
   };
 
   // Reset filters
@@ -61,7 +207,8 @@ const ResourceListPage = () => {
     const resetFilters: ResourceFilters = { page: 0, size: 20 };
     setFilters(resetFilters);
     setCurrentPage(0);
-    loadResources(resetFilters);
+    // Only update the table data, not the entire page
+    loadResources(resetFilters, true);
   };
 
   // Handle pagination
@@ -69,7 +216,8 @@ const ResourceListPage = () => {
     const newFilters = { ...filters, page: newPage };
     setFilters(newFilters);
     setCurrentPage(newPage);
-    loadResources(newFilters);
+    // Only update the table data, not the entire page
+    loadResources(newFilters, true);
   };
 
   // Handle navigation
@@ -151,159 +299,187 @@ const ResourceListPage = () => {
   }
 
   return (
-    <div className="p-6">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Resource Management</h1>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+              <h1 className="text-2xl font-bold text-white">Resource Management</h1>
+              <p className="text-blue-100 mt-1">Manage your team resources and allocations</p>
+            </div>
         
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 mb-4">
-          <button
-            onClick={handleAddNew}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Add New Resource
-          </button>
-          <button
-            onClick={handleImport}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            Import from Excel
-          </button>
-          <button
-            onClick={handleExport}
-            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            Export to Excel
-          </button>
-        </div>
+            {/* Action Buttons */}
+            <div className="px-6 py-4 bg-gray-50">
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={handleAddNew}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium shadow-sm"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add New Resource
+                </button>
+                <button
+                  onClick={handleImport}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all font-medium shadow-sm"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Import from Excel
+                </button>
+                <button
+                  onClick={handleExport}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all font-medium shadow-sm"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export to Excel
+                </button>
+              </div>
+            </div>
+          </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <div>
-            <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              id="status-filter"
-              value={filters.status || ''}
-              onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              {Object.values(Status).map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
           </div>
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <select
+                  id="status-filter"
+                  value={filters.status || ''}
+                  onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors hover:border-gray-400"
+                >
+                  <option value="">All Statuses</option>
+                  {Object.values(Status).map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              </div>
 
-          <div>
-            <label htmlFor="skill-function-filter" className="block text-sm font-medium text-gray-700 mb-1">
-              Skill Function
-            </label>
-            <select
-              id="skill-function-filter"
-              value={filters.skillFunction || ''}
-              onChange={(e) => handleFilterChange('skillFunction', e.target.value || undefined)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All</option>
-              {Object.values(SkillFunction).map(func => (
-                <option key={func} value={func}>{func}</option>
-              ))}
-            </select>
-          </div>
+              <div>
+                <label htmlFor="skill-function-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                  Skill Function
+                </label>
+                <select
+                  id="skill-function-filter"
+                  value={filters.skillFunction || ''}
+                  onChange={(e) => handleFilterChange('skillFunction', e.target.value || undefined)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors hover:border-gray-400"
+                >
+                  <option value="">All Functions</option>
+                  {Object.values(SkillFunction).map(func => (
+                    <option key={func} value={func}>{func}</option>
+                  ))}
+                </select>
+              </div>
 
-          <div className="flex items-end">
-            <button
-              onClick={resetFilters}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Reset Filters
-            </button>
+              <div className="flex items-end">
+                <button
+                  onClick={resetFilters}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all font-medium shadow-sm"
+                >
+                  <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Reset Filters
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Error Display */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <div className="text-red-800">{error}</div>
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center text-red-800">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {error}
+          </div>
         </div>
       )}
 
       {/* Resources Table */}
       {resources && resources.content.length > 0 ? (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="w-full table-auto">
-            <thead className="bg-gray-50">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          {/* Table Loading Overlay */}
+          {tableLoading && (
+            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span className="text-gray-600">Loading...</span>
+              </div>
+            </div>
+          )}
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto relative">
+            <table className="w-full table-auto min-w-full">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Employee Number
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Skill Function
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {resources.content.map((resource) => (
-                <tr
-                  key={resource.id}
-                  onClick={() => handleRowClick(resource)}
-                  className="hover:bg-gray-50 cursor-pointer"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {resource.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {resource.employeeNumber}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {resource.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      resource.status === Status.ACTIVE 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {resource.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {resource.skillFunction}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={(e) => handleEdit(resource, e)}
-                      className="text-blue-600 hover:text-blue-900 mr-4"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={(e) => handleDeleteClick(resource, e)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              <TableContent
+                resources={resources.content}
+                onRowClick={handleRowClick}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+              />
             </tbody>
           </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden relative">
+            {/* Mobile Loading Overlay */}
+            {tableLoading && (
+              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <span className="text-gray-600">Loading...</span>
+                </div>
+              </div>
+            )}
+            <div className="divide-y divide-gray-200">
+              <MobileCardContent
+                resources={resources.content}
+                onRowClick={handleRowClick}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+              />
+            </div>
+          </div>
 
           {/* Pagination */}
           {resources.totalPages > 1 && (
@@ -450,6 +626,7 @@ const ResourceListPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

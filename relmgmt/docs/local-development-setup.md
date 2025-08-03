@@ -164,6 +164,8 @@ This will start the following services:
 - Backend API (`relmgmt-backend`) on port 8080
 - Frontend (`relmgmt-frontend`) on port 3000
 
+**Note**: The backend is configured with CORS to allow cross-origin requests from the frontend. No additional configuration is required for local development.
+
 5. Check if the containers are running:
 
 ```bash
@@ -203,6 +205,8 @@ npm run dev
    - Frontend: `http://localhost:3000`
    - Backend API: `http://localhost:8080/api/v1`
    - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+
+**Note**: When running locally, ensure both frontend and backend are running on their respective ports. The backend CORS configuration allows requests from `http://localhost:3000`.
 
 ## Development Workflow
 
@@ -325,7 +329,7 @@ npm run lint
 3. **Runtime errors**:
    - Check browser console for errors
    - Verify API connectivity
-   - Check for CORS issues
+   - Check for CORS issues (see CORS troubleshooting section below)
 
 ### Common Fixes
 
@@ -345,4 +349,38 @@ npm run lint
 4. **Restart services**:
    - Docker: `docker compose restart`
    - Local backend: Stop and restart Spring Boot application
-   - Local frontend: Stop and restart development server 
+   - Local frontend: Stop and restart development server
+
+### CORS Issues
+
+The application is configured to handle CORS automatically, but if you encounter CORS-related issues:
+
+1. **Verify CORS Configuration**:
+   - Backend CORS is configured in `SecurityConfig.java`
+   - Allowed origins: `http://localhost:3000`, `http://127.0.0.1:3000`
+   - Allowed methods: GET, POST, PUT, DELETE, OPTIONS
+   - Credentials: Enabled for JWT authentication
+
+2. **Common CORS Problems**:
+   - **Wrong port**: Ensure frontend runs on port 3000 and backend on port 8080
+   - **Wrong protocol**: Use `http://` not `https://` for local development
+   - **Missing headers**: Backend automatically includes required CORS headers
+
+3. **Testing CORS**:
+   ```bash
+   # Test preflight request
+   curl -X OPTIONS -H "Origin: http://localhost:3000" \
+        -H "Access-Control-Request-Method: POST" \
+        -H "Access-Control-Request-Headers: Content-Type,Authorization" \
+        -v http://localhost:8080/api/v1/auth/login
+   
+   # Test simple request
+   curl -H "Origin: http://localhost:3000" \
+        -v http://localhost:8080/actuator/health
+   ```
+
+4. **Debugging Steps**:
+   - Check browser Network tab for CORS errors
+   - Verify backend is running and accessible
+   - Check backend logs for CORS-related messages
+   - Ensure no proxy or firewall is blocking requests 

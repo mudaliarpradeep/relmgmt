@@ -4,6 +4,7 @@ interface StatCardProps {
   title: string;
   value: number | string;
   color: 'blue' | 'green' | 'red' | 'purple';
+  onClick?: () => void;
 }
 
 const colorClasses: Record<StatCardProps['color'], string> = {
@@ -13,9 +14,22 @@ const colorClasses: Record<StatCardProps['color'], string> = {
   purple: 'bg-purple-50 border-purple-200 text-purple-700',
 };
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, color }) => (
-  <div className={`rounded-lg shadow-sm p-4 border ${colorClasses[color]} text-center`}
-       data-testid="stat-card">
+const StatCard: React.FC<StatCardProps> = ({ title, value, color, onClick }) => (
+  <div 
+    className={`rounded-lg shadow-sm p-4 border ${colorClasses[color]} text-center ${
+      onClick ? 'cursor-pointer hover:shadow-md transition-shadow duration-200' : ''
+    }`}
+    data-testid="stat-card"
+    onClick={onClick}
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    } : undefined}
+  >
     <div className={`text-sm font-medium ${colorClasses[color]}`}>{title}</div>
     <div className="mt-1 flex items-baseline justify-center">
       <div className={`text-3xl font-semibold ${color === 'blue' ? 'text-blue-900' : color === 'green' ? 'text-green-900' : color === 'red' ? 'text-red-900' : 'text-purple-900'}`}>{value}</div>

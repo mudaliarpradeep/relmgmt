@@ -315,4 +315,57 @@ class ResourceServiceTest {
         
         assertTrue(result); // Currently returns true as allocation check is not implemented
     }
+
+    @Test
+    void testUpdateExpiredResourcesStatus() {
+        // Create test resources with past end dates
+        Resource expiredResource1 = new Resource();
+        expiredResource1.setId(2L);
+        expiredResource1.setName("Expired Resource 1");
+        expiredResource1.setEmployeeNumber("11111111");
+        expiredResource1.setEmail("expired1@example.com");
+        expiredResource1.setStatus(StatusEnum.ACTIVE);
+        expiredResource1.setProjectStartDate(LocalDate.of(2024, 1, 1));
+        expiredResource1.setProjectEndDate(LocalDate.now().minusDays(1));
+        expiredResource1.setEmployeeGrade(EmployeeGradeEnum.LEVEL_8);
+        expiredResource1.setSkillFunction(SkillFunctionEnum.BUILD);
+
+        Resource expiredResource2 = new Resource();
+        expiredResource2.setId(3L);
+        expiredResource2.setName("Expired Resource 2");
+        expiredResource2.setEmployeeNumber("22222222");
+        expiredResource2.setEmail("expired2@example.com");
+        expiredResource2.setStatus(StatusEnum.ACTIVE);
+        expiredResource2.setProjectStartDate(LocalDate.of(2024, 1, 1));
+        expiredResource2.setProjectEndDate(LocalDate.now().minusDays(5));
+        expiredResource2.setEmployeeGrade(EmployeeGradeEnum.LEVEL_8);
+        expiredResource2.setSkillFunction(SkillFunctionEnum.BUILD);
+
+        when(resourceRepository.findActiveResourcesWithPastEndDates(StatusEnum.ACTIVE, LocalDate.now()))
+            .thenReturn(Arrays.asList(expiredResource1, expiredResource2));
+        when(resourceRepository.save(any(Resource.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        int updatedCount = resourceService.updateExpiredResourcesStatus();
+
+        assertEquals(2, updatedCount);
+        verify(resourceRepository).findActiveResourcesWithPastEndDates(StatusEnum.ACTIVE, LocalDate.now());
+        verify(resourceRepository, times(2)).save(any(Resource.class));
+        
+        // Verify that the resources were updated to inactive
+        assertEquals(StatusEnum.INACTIVE, expiredResource1.getStatus());
+        assertEquals(StatusEnum.INACTIVE, expiredResource2.getStatus());
+    }
+
+    @Test
+    void testUpdateExpiredResourcesStatus_NoExpiredResources() {
+        when(resourceRepository.findActiveResourcesWithPastEndDates(StatusEnum.ACTIVE, LocalDate.now()))
+            .thenReturn(Arrays.asList());
+
+        int updatedCount = resourceService.updateExpiredResourcesStatus();
+
+        assertEquals(0, updatedCount);
+        verify(resourceRepository).findActiveResourcesWithPastEndDates(StatusEnum.ACTIVE, LocalDate.now());
+        verify(resourceRepository, never()).save(any(Resource.class));
+    }
 }

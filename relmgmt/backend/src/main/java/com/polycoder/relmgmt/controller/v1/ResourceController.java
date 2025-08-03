@@ -26,6 +26,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/resources")
@@ -167,5 +170,23 @@ public class ResourceController {
             @Parameter(description = "Status", required = true) @RequestParam StatusEnum status) {
         List<ResourceResponse> resources = resourceService.getResourcesBySkillFunctionAndStatus(skillFunction, status);
         return ResponseEntity.ok(resources);
+    }
+
+    @PostMapping("/update-expired-status")
+    @Operation(summary = "Manually trigger expired resources status update", 
+               description = "Manually trigger the process to mark resources with past project end dates as inactive")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Status update completed successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<Map<String, Object>> manuallyUpdateExpiredResourcesStatus() {
+        int updatedCount = resourceService.updateExpiredResourcesStatus();
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Expired resources status update completed");
+        response.put("updatedCount", updatedCount);
+        response.put("timestamp", LocalDateTime.now());
+        
+        return ResponseEntity.ok(response);
     }
 }

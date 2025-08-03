@@ -292,4 +292,38 @@ class ResourceControllerTest {
         mockMvc.perform(get("/api/v1/resources"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithMockUser
+    void testManuallyUpdateExpiredResourcesStatus() throws Exception {
+        // Arrange
+        when(resourceService.updateExpiredResourcesStatus()).thenReturn(3);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/resources/update-expired-status")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Expired resources status update completed"))
+                .andExpect(jsonPath("$.updatedCount").value(3))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        verify(resourceService).updateExpiredResourcesStatus();
+    }
+
+    @Test
+    @WithMockUser
+    void testManuallyUpdateExpiredResourcesStatus_NoUpdates() throws Exception {
+        // Arrange
+        when(resourceService.updateExpiredResourcesStatus()).thenReturn(0);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/resources/update-expired-status")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Expired resources status update completed"))
+                .andExpect(jsonPath("$.updatedCount").value(0))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        verify(resourceService).updateExpiredResourcesStatus();
+    }
 }
