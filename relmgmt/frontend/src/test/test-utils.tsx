@@ -1,12 +1,15 @@
 import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from '../hooks/useAuth';
 
 // Custom render function that includes Router context
 const AllTheProviders = ({ children, initialEntries = ['/'] }: { children: React.ReactNode; initialEntries?: string[] }) => {
   return (
     <MemoryRouter initialEntries={initialEntries}>
-      {children}
+      <Routes>
+        <Route path="*" element={children} />
+      </Routes>
     </MemoryRouter>
   );
 };
@@ -23,17 +26,39 @@ export const renderWithRouter = (
   return render(ui, { wrapper: Wrapper, ...renderOptions });
 };
 
+// Custom render function for components that need AuthProvider context
+export const renderWithAuth = (
+  ui: React.ReactElement,
+  { initialEntries = ['/'], ...renderOptions }: RenderOptions & { initialEntries?: string[] } = {}
+) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <MemoryRouter initialEntries={initialEntries}>
+      <AuthProvider>
+        <Routes>
+          <Route path="*" element={children} />
+        </Routes>
+      </AuthProvider>
+    </MemoryRouter>
+  );
+
+  return render(ui, { wrapper: Wrapper, ...renderOptions });
+};
+
 // Custom render function for components that need BrowserRouter (for navigation testing)
 export const renderWithBrowserRouter = (
   ui: React.ReactElement,
   options?: RenderOptions
 ) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <BrowserRouter>{children}</BrowserRouter>
+    <BrowserRouter>
+      <Routes>
+        <Route path="*" element={children} />
+      </Routes>
+    </BrowserRouter>
   );
 
   return render(ui, { wrapper: Wrapper, ...options });
 };
 
 // Re-export everything from testing-library
-export * from '@testing-library/react'; 
+export * from '@testing-library/react';

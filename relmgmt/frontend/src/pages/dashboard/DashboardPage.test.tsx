@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import { renderWithRouter } from '../../test/test-utils';
 import DashboardPage from './DashboardPage';
@@ -93,8 +93,12 @@ describe('DashboardPage', () => {
     const statValues = screen.getAllByTestId('stat-value');
     expect(statValues).toHaveLength(4);
     expect(statValues[0]).toHaveTextContent('4');
-    // The resource count will show "..." initially while loading, then "125"
-    expect(statValues[1]).toHaveTextContent('125');
+    
+    // Wait for the resource count to load from the API
+    await waitFor(() => {
+      expect(statValues[1]).toHaveTextContent('125');
+    });
+    
     expect(statValues[2]).toHaveTextContent('3');
     expect(statValues[3]).toHaveTextContent('2');
   });

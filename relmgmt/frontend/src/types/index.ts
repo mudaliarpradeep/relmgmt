@@ -198,9 +198,94 @@ export interface Release {
   id: number;
   name: string;
   identifier: string;
+  description?: string;
+  status: ReleaseStatusEnum;
+  phases: ReleasePhase[];
+  blockers: ReleaseBlocker[];
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ReleasePhase {
+  id: number;
+  releaseId: number;
+  name: ReleasePhaseEnum;
+  startDate: string;
+  endDate: string;
+  status: PhaseStatusEnum;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReleaseBlocker {
+  id: number;
+  releaseId: number;
+  description: string;
+  severity: BlockerSeverityEnum;
+  status: BlockerStatusEnum;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReleaseRequest {
+  name: string;
+  identifier: string;
+  description?: string;
+  status: ReleaseStatusEnum;
+  phases: ReleasePhaseRequest[];
+}
+
+export interface ReleasePhaseRequest {
+  name: ReleasePhaseEnum;
+  startDate: string;
+  endDate: string;
+}
+
+// Release enums
+export const ReleaseStatus = {
+  PLANNING: 'Planning',
+  IN_PROGRESS: 'In Progress',
+  COMPLETED: 'Completed',
+  ON_HOLD: 'On Hold',
+  CANCELLED: 'Cancelled'
+} as const;
+
+export const ReleasePhase = {
+  FUNCTIONAL_DESIGN: 'Functional Design',
+  TECHNICAL_DESIGN: 'Technical Design',
+  BUILD: 'Build',
+  SIT: 'System Integration Test',
+  UAT: 'User Acceptance Test',
+  SMOKE_TESTING: 'Smoke Testing',
+  PRODUCTION_GO_LIVE: 'Production Go-Live'
+} as const;
+
+export const PhaseStatus = {
+  NOT_STARTED: 'Not Started',
+  IN_PROGRESS: 'In Progress',
+  COMPLETED: 'Completed',
+  BLOCKED: 'Blocked'
+} as const;
+
+export const BlockerSeverity = {
+  LOW: 'Low',
+  MEDIUM: 'Medium',
+  HIGH: 'High',
+  CRITICAL: 'Critical'
+} as const;
+
+export const BlockerStatus = {
+  OPEN: 'Open',
+  IN_PROGRESS: 'In Progress',
+  RESOLVED: 'Resolved',
+  CLOSED: 'Closed'
+} as const;
+
+export type ReleaseStatusEnum = typeof ReleaseStatus[keyof typeof ReleaseStatus];
+export type ReleasePhaseEnum = typeof ReleasePhase[keyof typeof ReleasePhase];
+export type PhaseStatusEnum = typeof PhaseStatus[keyof typeof PhaseStatus];
+export type BlockerSeverityEnum = typeof BlockerSeverity[keyof typeof BlockerSeverity];
+export type BlockerStatusEnum = typeof BlockerStatus[keyof typeof BlockerStatus];
 
 // Project types
 export interface Project {

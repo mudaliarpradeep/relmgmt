@@ -1,34 +1,30 @@
 import React, { useState } from 'react';
-import Sidebar from './Sidebar';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
+import Sidebar from './Sidebar';
 
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
-
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen flex bg-gray-50 overflow-x-hidden">
-      <Sidebar isOpen={sidebarOpen} />
-      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        <Header onMenuToggle={toggleSidebar} />
-        <main className="flex-1 p-2 sm:p-4 md:p-6 lg:p-8 bg-gray-50 overflow-auto" data-testid="main-content">
-          {children}
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header onMenuClick={toggleSidebar} />
+        
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+          <Outlet />
         </main>
       </div>
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 };

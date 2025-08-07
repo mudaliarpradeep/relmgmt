@@ -207,7 +207,7 @@ const ResourceForm = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          <form onSubmit={handleSubmit} className="p-6 space-y-8" role="form">
           {/* Basic Information Section */}
           <div className="border-b border-gray-200 pb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>

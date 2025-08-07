@@ -3,57 +3,77 @@ import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen: boolean;
+  onClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  const getLinkClasses = (path: string) => {
-    const baseClasses = "px-3 py-2 rounded-md transition-colors";
-    return isActive(path)
-      ? `${baseClasses} text-blue-600 font-medium bg-blue-50`
-      : `${baseClasses} text-gray-700 hover:bg-gray-100`;
-  };
+  const menuItems = [
+    { path: '/', label: 'Dashboard', icon: '📊' },
+    { path: '/resources', label: 'Resource Management', icon: '👥' },
+    { path: '/releases', label: 'Release Management', icon: '🚀' },
+    { path: '/scope', label: 'Scope Management', icon: '📋' },
+  ];
 
   return (
-    <aside
-      data-testid="sidebar"
-      className={`fixed md:relative z-50 flex flex-col w-64 bg-white border-r border-gray-200 min-h-screen py-4 px-2 transform transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-      }`}
-      aria-label="Sidebar navigation"
-    >
-      <nav className="flex flex-col space-y-2 mt-4">
-        <Link to="/dashboard" className={getLinkClasses('/dashboard')}>
-          Dashboard
-        </Link>
-        <Link to="/resources" className={getLinkClasses('/resources')}>
-          Resources
-        </Link>
-        <Link to="/releases" className={getLinkClasses('/releases')}>
-          Releases
-        </Link>
-        <Link to="/projects" className={getLinkClasses('/projects')}>
-          Projects
-        </Link>
-        <Link to="/scope" className={getLinkClasses('/scope')}>
-          Scope
-        </Link>
-        <Link to="/allocations" className={getLinkClasses('/allocations')}>
-          Allocation
-        </Link>
-        <Link to="/reports" className={getLinkClasses('/reports')}>
-          Reports
-        </Link>
-        <Link to="/audit" className={getLinkClasses('/audit')}>
-          Audit
-        </Link>
-      </nav>
-    </aside>
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div 
+        data-testid="sidebar"
+        className={`
+        fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50
+        lg:relative lg:translate-x-0 lg:shadow-none
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Logo */}
+        <div className="flex items-center justify-center h-16 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">Release Planner</h1>
+        </div>
+
+        {/* Navigation */}
+        <nav className="mt-8">
+          <div className="px-4">
+            {menuItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={onClose}
+                className={`
+                  flex items-center px-4 py-3 mb-2 text-sm font-medium rounded-lg transition-colors
+                  ${isActive(item.path)
+                    ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }
+                `}
+              >
+                <span className="mr-3 text-lg">{item.icon}</span>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        {/* Footer */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+          <div className="text-xs text-gray-500 text-center">
+            Release Management System
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
