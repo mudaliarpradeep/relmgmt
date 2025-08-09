@@ -167,4 +167,10 @@ public interface ReleaseService {
      * @return true if validation passes, false otherwise
      */
     boolean validateProductionGoLiveRule(LocalDate startDate, LocalDate endDate, Long excludeReleaseId);
+
+    /**
+     * Generate the next available release identifier for the current year
+     * @return the next available identifier in YYYY-XXX format
+     */
+    String generateNextReleaseIdentifier();
 } 

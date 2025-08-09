@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,9 +62,15 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     @Override
     public ReleaseResponse createRelease(ReleaseRequest releaseRequest) {
+        // Auto-generate identifier if not provided
+        String identifier = releaseRequest.getIdentifier();
+        if (identifier == null || identifier.trim().isEmpty()) {
+            identifier = generateNextReleaseIdentifier();
+        }
+
         // Validate unique identifier
-        if (releaseRepository.existsByIdentifier(releaseRequest.getIdentifier())) {
-            throw new ValidationException("Release with identifier '" + releaseRequest.getIdentifier() + "' already exists");
+        if (releaseRepository.existsByIdentifier(identifier)) {
+            throw new ValidationException("Release with identifier '" + identifier + "' already exists");
         }
 
         // Validate production go-live rule
@@ -71,7 +78,7 @@ public class ReleaseServiceImpl implements ReleaseService {
 
         Release release = new Release();
         release.setName(releaseRequest.getName());
-        release.setIdentifier(releaseRequest.getIdentifier());
+        release.setIdentifier(identifier);
 
         Release savedRelease = releaseRepository.save(release);
 
@@ -304,6 +311,18 @@ public class ReleaseServiceImpl implements ReleaseService {
         }
         
         return existingPhases.isEmpty();
+    }
+
+    @Override
+    public String generateNextReleaseIdentifier() {
+        int currentYear = LocalDate.now().getYear();
+        String yearStr = String.valueOf(currentYear);
+        
+        Optional<Integer> maxNumber = releaseRepository.findHighestIdentifierNumberForYear(yearStr);
+        
+        int nextNumber = maxNumber.orElse(0) + 1;
+        
+        return String.format("%s-%03d", yearStr, nextNumber);
     }
 
     // Helper methods for validation

@@ -1,11 +1,12 @@
 import apiClient from '../apiClient';
-import type { 
-  Release, 
-  ReleaseRequest, 
+import type {
+  Release,
+  ReleaseRequest,
   ReleasePhase,
   ReleaseBlocker,
   PaginatedResponse
 } from '../../../types';
+import { getPhaseEnumName } from '../../../types';
 
 /**
  * Release service for handling release CRUD operations
@@ -44,7 +45,22 @@ class ReleaseService {
    */
   async createRelease(releaseData: ReleaseRequest): Promise<Release> {
     try {
-      const response = await apiClient.post<Release>('/v1/releases', releaseData);
+      // Transform frontend payload to backend DTO shape
+      const backendPayload: {
+        name: string;
+        identifier?: string;
+        phases: Array<{ phaseType: string; startDate: string; endDate: string }>;
+      } = {
+        name: releaseData.name,
+        identifier: releaseData.identifier || undefined,
+        phases: (releaseData.phases || []).map((phase) => ({
+          phaseType: getPhaseEnumName(phase.name),
+          startDate: phase.startDate,
+          endDate: phase.endDate,
+        })),
+      };
+
+      const response = await apiClient.post<Release>('/v1/releases', backendPayload);
       return response.data;
     } catch (error: unknown) {
       this.handleError(error);
@@ -57,7 +73,22 @@ class ReleaseService {
    */
   async updateRelease(id: number, releaseData: ReleaseRequest): Promise<Release> {
     try {
-      const response = await apiClient.put<Release>(`/v1/releases/${id}`, releaseData);
+      // Transform frontend payload to backend DTO shape
+      const backendPayload: {
+        name: string;
+        identifier?: string;
+        phases: Array<{ phaseType: string; startDate: string; endDate: string }>;
+      } = {
+        name: releaseData.name,
+        identifier: releaseData.identifier || undefined,
+        phases: (releaseData.phases || []).map((phase) => ({
+          phaseType: getPhaseEnumName(phase.name),
+          startDate: phase.startDate,
+          endDate: phase.endDate,
+        })),
+      };
+
+      const response = await apiClient.put<Release>(`/v1/releases/${id}`, backendPayload);
       return response.data;
     } catch (error: unknown) {
       this.handleError(error);
@@ -173,6 +204,19 @@ class ReleaseService {
   async getReleasesByStatus(status: string): Promise<Release[]> {
     try {
       const response = await apiClient.get<Release[]>(`/v1/releases/status/${status}`);
+      return response.data;
+    } catch (error: unknown) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get next release identifier
+   */
+  async getNextReleaseIdentifier(): Promise<string> {
+    try {
+      const response = await apiClient.get<string>('/v1/releases/next-identifier');
       return response.data;
     } catch (error: unknown) {
       this.handleError(error);

@@ -7,12 +7,16 @@ import ReleaseTimeline from '../../components/dashboard/ReleaseTimeline';
 import QuickActions from '../../components/dashboard/QuickActions';
 import AllocationConflicts from '../../components/dashboard/AllocationConflicts';
 import ResourceService from '../../services/api/v1/resourceService';
+import ReleaseService from '../../services/api/v1/releaseService';
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [totalResources, setTotalResources] = useState<number>(0);
   const [resourcesLoading, setResourcesLoading] = useState<boolean>(true);
   const [resourcesError, setResourcesError] = useState<string | null>(null);
+  const [activeReleasesCount, setActiveReleasesCount] = useState<number>(0);
+  const [activeReleasesLoading, setActiveReleasesLoading] = useState<boolean>(true);
+  const [activeReleasesError, setActiveReleasesError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResourceCount = async () => {
@@ -38,6 +42,25 @@ const DashboardPage: React.FC = () => {
     fetchResourceCount();
   }, []);
 
+  useEffect(() => {
+    const fetchActiveReleasesCount = async () => {
+      try {
+        setActiveReleasesLoading(true);
+        setActiveReleasesError(null);
+        const releases = await ReleaseService.getActiveReleases();
+        setActiveReleasesCount(releases.length);
+      } catch (error) {
+        console.error('Failed to fetch active releases count:', error);
+        setActiveReleasesError('Failed to load active releases count');
+        setActiveReleasesCount(0);
+      } finally {
+        setActiveReleasesLoading(false);
+      }
+    };
+
+    fetchActiveReleasesCount();
+  }, []);
+
   // Navigation handlers for stat cards
   const handleActiveReleasesClick = () => {
     navigate('/releases'); // Assuming releases page exists
@@ -61,7 +84,7 @@ const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <StatCard 
             title="Active Releases" 
-            value={4} 
+            value={activeReleasesLoading ? '...' : activeReleasesCount} 
             color="blue" 
             onClick={handleActiveReleasesClick}
           />

@@ -92,7 +92,12 @@ Each resource in the roster shall have the following attributes:
 ### 4.2 Release Management
 
 #### 4.2.1 Release Creation
-- Users shall be able to create a new release with a unique identifier and name.
+- Users shall be able to create a new release with a name.
+- The system shall automatically generate a unique release identifier following the format YYYY-XXX, where:
+  - YYYY represents the current year (e.g., 2025, 2026)
+  - XXX is an auto-incrementing number starting from 001 for each year
+  - Examples: 2025-001, 2025-002, 2026-001, 2026-002
+- The auto-generated identifier shall be displayed as a read-only field in the release creation form.
 - Users shall be able to define the following phases for each release:
   - Functional Design
   - Technical Design

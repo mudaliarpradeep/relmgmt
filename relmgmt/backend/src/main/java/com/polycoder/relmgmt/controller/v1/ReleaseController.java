@@ -277,4 +277,16 @@ public class ReleaseController {
         releaseService.deleteBlocker(releaseId, blockerId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/next-identifier")
+    @Operation(summary = "Get next release identifier", description = "Generate the next available release identifier for the current year")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Next identifier generated successfully",
+            content = @Content(schema = @Schema(implementation = String.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<String> getNextReleaseIdentifier() {
+        String nextIdentifier = releaseService.generateNextReleaseIdentifier();
+        return ResponseEntity.ok(nextIdentifier);
+    }
 } 

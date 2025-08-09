@@ -1162,7 +1162,6 @@ Key versioning principles:
   ```json
   {
     "name": "Release 2024-Q1",
-    "identifier": "R24Q1",
     "phases": [
       {
         "phaseType": "Functional Design",
@@ -1177,7 +1176,12 @@ Key versioning principles:
     ]
   }
   ```
-- **Response**: Created release with HTTP 201
+- **Response**: Created release with auto-generated identifier and HTTP 201
+- **Auto-Generation Logic**: The system shall automatically generate a unique release identifier following the format YYYY-XXX, where:
+  - YYYY represents the current year (e.g., 2025, 2026)
+  - XXX is an auto-incrementing number starting from 001 for each year
+  - Examples: 2025-001, 2025-002, 2026-001, 2026-002
+- **Implementation**: The ReleaseService shall include a method to generate the next available identifier for the current year
 
 #### 5.4.3 Get Release
 

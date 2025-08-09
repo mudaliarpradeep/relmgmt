@@ -29,6 +29,9 @@ public class Release extends BaseEntity {
     @OneToMany(mappedBy = "release", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Blocker> blockers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "release", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Project> projects = new ArrayList<>();
+
     // Default constructor
     public Release() {}
 
@@ -71,6 +74,14 @@ public class Release extends BaseEntity {
         this.blockers = blockers;
     }
 
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+    }
+
     // Helper methods for managing relationships
     public void addPhase(Phase phase) {
         phases.add(phase);
@@ -92,6 +103,16 @@ public class Release extends BaseEntity {
         blocker.setRelease(null);
     }
 
+    public void addProject(Project project) {
+        projects.add(project);
+        project.setRelease(this);
+    }
+
+    public void removeProject(Project project) {
+        projects.remove(project);
+        project.setRelease(null);
+    }
+
     @Override
     public String toString() {
         return "Release{" +
@@ -100,6 +121,7 @@ public class Release extends BaseEntity {
                 ", identifier='" + identifier + '\'' +
                 ", phases=" + phases.size() +
                 ", blockers=" + blockers.size() +
+                ", projects=" + projects.size() +
                 ", createdAt=" + getCreatedAt() +
                 ", updatedAt=" + getUpdatedAt() +
                 '}';

@@ -82,4 +82,14 @@ public interface ReleaseRepository extends JpaRepository<Release, Long> {
     @Query("SELECT DISTINCT r FROM Release r " +
            "WHERE EXISTS (SELECT 1 FROM r.blockers b WHERE b.status IN ('OPEN', 'IN_PROGRESS'))")
     List<Release> findReleasesWithOpenBlockers();
+
+    /**
+     * Find the highest identifier number for a specific year
+     * @param year the year to search for (e.g., "2025", "2026")
+     * @return Optional containing the highest identifier number, or empty if none found
+     */
+    @Query("SELECT MAX(CAST(SUBSTRING(r.identifier, 6) AS INTEGER)) " +
+           "FROM Release r " +
+           "WHERE r.identifier LIKE CONCAT(:year, '-%')")
+    Optional<Integer> findHighestIdentifierNumberForYear(@Param("year") String year);
 } 

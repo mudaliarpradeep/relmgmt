@@ -112,6 +112,9 @@ frontend/
 
 - **ResourceForm**: Form for creating/editing resources
 - **ReleaseForm**: Form for creating/editing releases
+  - Auto-generated identifier field (read-only) following YYYY-XXX format
+  - Manual input for release name and other details
+  - Phase management with dynamic add/remove functionality
 - **ProjectForm**: Form for creating/editing projects
 - **ScopeItemForm**: Form for creating/editing scope items
 - **EffortEstimationForm**: Form for effort estimation

@@ -378,4 +378,21 @@ public class ReleaseServiceTest {
 
         assertFalse(result); // Should return false when there are existing phases
     }
+
+    @Test
+    void testGenerateNextReleaseIdentifier() {
+        // Test when no releases exist for current year
+        when(releaseRepository.findHighestIdentifierNumberForYear(anyString())).thenReturn(Optional.empty());
+        
+        String identifier = releaseService.generateNextReleaseIdentifier();
+        assertNotNull(identifier);
+        assertTrue(identifier.matches("\\d{4}-001"));
+        
+        // Test when releases exist for current year
+        when(releaseRepository.findHighestIdentifierNumberForYear(anyString())).thenReturn(Optional.of(5));
+        
+        identifier = releaseService.generateNextReleaseIdentifier();
+        assertNotNull(identifier);
+        assertTrue(identifier.matches("\\d{4}-006"));
+    }
 } 

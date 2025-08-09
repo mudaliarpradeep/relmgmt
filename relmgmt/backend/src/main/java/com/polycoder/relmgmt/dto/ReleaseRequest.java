@@ -12,7 +12,6 @@ public class ReleaseRequest {
     @Size(max = 100, message = "Release name must not exceed 100 characters")
     private String name;
 
-    @NotBlank(message = "Release identifier is required")
     @Size(max = 50, message = "Release identifier must not exceed 50 characters")
     private String identifier;
 

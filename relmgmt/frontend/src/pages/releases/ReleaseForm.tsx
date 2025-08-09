@@ -36,10 +36,12 @@ const ReleaseForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load release data for edit mode
+  // Load release data for edit mode or get next identifier for create mode
   useEffect(() => {
     if (isEditMode && id) {
       loadRelease(parseInt(id));
+    } else if (!isEditMode) {
+      loadNextIdentifier();
     }
   }, [isEditMode, id]);
 
@@ -66,16 +68,28 @@ const ReleaseForm: React.FC = () => {
     }
   };
 
+  const loadNextIdentifier = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const nextIdentifier = await ReleaseService.getNextReleaseIdentifier();
+      setFormData(prev => ({
+        ...prev,
+        identifier: nextIdentifier
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load next identifier');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
 
     // Required fields
     if (!formData.name.trim()) {
       newErrors.name = 'Release name is required';
-    }
-
-    if (!formData.identifier.trim()) {
-      newErrors.identifier = 'Release identifier is required';
     }
 
     // Validate phases
@@ -156,7 +170,7 @@ const ReleaseForm: React.FC = () => {
 
       const releaseRequest: ReleaseRequest = {
         name: formData.name.trim(),
-        identifier: formData.identifier.trim(),
+        identifier: isEditMode ? formData.identifier.trim() : undefined,
         description: formData.description.trim() || undefined,
         status: formData.status,
         phases: formData.phases
@@ -251,13 +265,11 @@ const ReleaseForm: React.FC = () => {
                     type="text"
                     id="identifier"
                     value={formData.identifier}
-                    onChange={(e) => handleInputChange('identifier', e.target.value)}
-                    className={`px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                      errors.identifier ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                    placeholder="e.g., REL-2024-001"
+                    readOnly
+                    className="px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                    placeholder="Auto-generated"
                   />
-                  {errors.identifier && <p className="mt-2 text-sm text-red-600">{errors.identifier}</p>}
+                  <p className="mt-1 text-sm text-gray-500">Auto-generated identifier</p>
                 </div>
 
                 {/* Description */}

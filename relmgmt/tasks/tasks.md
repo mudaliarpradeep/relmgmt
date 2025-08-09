@@ -65,17 +65,17 @@
    - Write tests for Gantt chart component
    - Implement Gantt chart component
 
-6. **FE-Phase-6: Project and Scope Management**
-   - Write tests for project service
-   - Implement project service
-   - Write tests for scope service
-   - Implement scope service
-   - Write tests for project management pages
-   - Implement project management pages
-   - Write tests for scope management pages
-   - Implement scope management pages
-   - Write tests for effort estimation form
-   - Implement effort estimation form
+6. **FE-Phase-6: Project and Scope Management** ✅ **COMPLETED**
+   - Write tests for project service ✅
+   - Implement project service ✅
+   - Write tests for scope service ✅
+   - Implement scope service ✅
+   - Write tests for project management pages ✅
+   - Implement project management pages ✅
+   - Write tests for scope management pages ✅
+   - Implement scope management pages ✅
+   - Write tests for effort estimation form ✅
+   - Implement effort estimation form ✅
 
 7. **FE-Phase-7: Allocation and Visualization**
    - Write tests for allocation service
@@ -180,14 +180,14 @@
    - Implement project and scope controllers
 
 6. **BE-Phase-6: Allocation Engine**
-   - Write tests for allocation algorithm components
-   - Implement allocation algorithm
-   - Write tests for allocation service
-   - Implement allocation service
-   - Write tests for allocation controller
-   - Implement allocation controller
-   - Write tests for conflict detection
-   - Implement conflict detection
+    - Write tests for allocation algorithm components ✅
+    - Implement allocation algorithm ✅
+    - Write tests for allocation service ✅
+    - Implement allocation service ✅
+    - Write tests for allocation controller ☐
+    - Implement allocation controller ☐
+    - Write tests for conflict detection ✅
+    - Implement conflict detection ✅
 
 7. **BE-Phase-7: Reporting**
    - Write tests for each report type

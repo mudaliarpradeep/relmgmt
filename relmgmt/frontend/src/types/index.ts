@@ -298,6 +298,84 @@ export interface Project {
   updatedAt: string;
 }
 
+export interface ProjectRequest {
+  name: string;
+  description?: string;
+  type: 'Day 1' | 'Day 2';
+}
+
+export const ProjectType = {
+  DAY_1: 'Day 1',
+  DAY_2: 'Day 2',
+} as const;
+
+export type ProjectTypeEnum = typeof ProjectType[keyof typeof ProjectType];
+
+export const getProjectTypeEnumName = (displayName: string): string => {
+  switch (displayName) {
+    case ProjectType.DAY_1:
+      return 'DAY_1';
+    case ProjectType.DAY_2:
+      return 'DAY_2';
+    default:
+      return displayName;
+  }
+};
+
+// Scope types
+export interface ScopeItem {
+  id: number;
+  projectId: number;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScopeItemRequest {
+  name: string;
+  description?: string;
+}
+
+export interface EffortEstimate {
+  id: number;
+  scopeItemId: number;
+  skillFunction: SkillFunctionEnum;
+  skillSubFunction?: SkillSubFunctionEnum;
+  phase: ReleasePhaseEnum;
+  effortDays: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EffortEstimateRequest {
+  skillFunction: SkillFunctionEnum;
+  skillSubFunction?: SkillSubFunctionEnum;
+  phase: ReleasePhaseEnum;
+  effortDays: number;
+}
+
+export const getPhaseEnumName = (displayName: string): string => {
+  switch (displayName) {
+    case ReleasePhase.FUNCTIONAL_DESIGN:
+      return 'FUNCTIONAL_DESIGN';
+    case ReleasePhase.TECHNICAL_DESIGN:
+      return 'TECHNICAL_DESIGN';
+    case ReleasePhase.BUILD:
+      return 'BUILD';
+    case ReleasePhase.SIT:
+      return 'SIT';
+    case ReleasePhase.UAT:
+      return 'UAT';
+    case ReleasePhase.SMOKE_TESTING:
+      return 'SMOKE_TESTING';
+    case ReleasePhase.PRODUCTION_GO_LIVE:
+      return 'PRODUCTION_GO_LIVE';
+    default:
+      return displayName;
+  }
+};
+
 // Authentication types
 export interface LoginRequest {
   username: string;
