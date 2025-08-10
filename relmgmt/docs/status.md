@@ -18,7 +18,7 @@
 | BE-Phase-2    | Authentication and User Management          | Completed   | JWT authentication implemented, user entity/repository/service with tests, security configuration with tests, 61/61 tests passing (100%), 76% code coverage |
 | BE-Phase-3    | Resource Management                         | Completed   | Complete resource management system with CRUD operations, Excel import/export, comprehensive validation, and full test coverage |
 | BE-Phase-4    | Release Management                          | Completed   | Complete release management system with CRUD operations, phase management, blocker management, comprehensive validation, and extensive test coverage (202/204 tests passing, 99% success rate) |
-| BE-Phase-5    | Project and Scope Management                | Pending    |       |
+| BE-Phase-5    | Project and Scope Management                | Completed   | Project, Scope Item, and Effort Estimate modules implemented end-to-end (entities, repositories, services, controllers, DB migration V6). Added repository and service unit tests; all tests passing. |
 | BE-Phase-6    | Allocation Engine                           | In Progress | Allocation algorithm implemented with UAT/Smoke derivations; service unit tests and conflict detection tests added; controller tests pending |
 | BE-Phase-7    | Reporting                                   | Pending    |       |
 | BE-Phase-8    | Notification System                         | Pending    |       |
@@ -37,7 +37,7 @@
 ## Test Coverage & Quality Metrics
 
 ### **Backend Test Results**
-- **Total Tests**: 204/204 passing (100% success rate)
+- **Total Tests**: 246/246 passing (100% success rate)
 - **Coverage**: 76% overall code coverage maintained
 - **Coverage Breakdown**:
   - DTOs: 100%
@@ -82,6 +82,7 @@
   - **STATUS**: Login functionality now working with plain text password
 
 ## Recent Updates
+- **BE-Phase-5 Project and Scope Management Complete (August 2025)**: Implemented `Project`, `ScopeItem`, and `EffortEstimate` entities with full CRUD APIs per spec. Added repositories (`ProjectRepository`, `ScopeItemRepository`, `EffortEstimateRepository`), services (`ProjectService`, `ScopeService`) and controllers (`ProjectController`, `ScopeController`). Included Flyway migration `V6__create_project_and_scope_management_tables.sql`. Added tests: `ProjectRepositoryTest`, `ScopeItemRepositoryTest`, `ProjectServiceTest`, `ScopeServiceTest`. Backend tests now 246/246 passing; coverage maintained.
 - Backend next-identifier endpoint fix (August 2025): Resolved 500 error on `/api/v1/releases/next-identifier` by updating JPQL to use `CONCAT(:year, '-%')` in `ReleaseRepository.findHighestIdentifierNumberForYear`. Endpoint is protected; requires JWT. Verified end-to-end (returns e.g., `2025-001`).
 - Frontend release creation payload alignment (August 2025): Updated `releaseService.createRelease` and `updateRelease` to send phases as `{ phaseType, startDate, endDate }` with enum names, matching backend `PhaseRequest`. Eliminated 500 during release creation.
 - Dashboard active releases metric (August 2025): Replaced hardcoded value with live count from backend `GET /api/v1/releases/active`. Shows '...' while loading. Note: backend defines "active" as releases with a `PRODUCTION_GO_LIVE` phase whose `endDate` is in the future.
@@ -173,10 +174,7 @@
 - [x] Status.md provides complete traceability of all changes
 
 ### **Outstanding Items for Phase 6**
-- [ ] Fix remaining frontend test failures (13 tests in ResourceForm.test.tsx)
-- [ ] Fix 2 minor backend test failures in ReleaseServiceTest (Mockito stubbing issues)
-- [ ] Revert temporary password encryption workaround  
-- [ ] Implement backend project and scope management (BE-Phase-5)
-- [ ] Implement frontend project and scope management (FE-Phase-6)
+- [ ] Revert temporary password encryption workaround
+- [ ] Allocation Engine: add controller and integration tests for allocation endpoints
 - [ ] Add comprehensive test coverage for release management components
-- [ ] Integration testing for release management features
+- [ ] End-to-end integration testing for release and allocation features

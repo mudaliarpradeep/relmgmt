@@ -116,3 +116,4 @@ public interface EffortEstimateRepository extends JpaRepository<EffortEstimate, 
     Double sumEffortDaysByReleaseIdAndSkillFunctionAndPhase(@Param("releaseId") Long releaseId, @Param("skillFunction") SkillFunctionEnum skillFunction, @Param("phase") PhaseTypeEnum phase);
 }
 
+

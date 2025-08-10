@@ -167,3 +167,4 @@ public interface ScopeService {
     boolean canDeleteScopeItem(Long scopeItemId);
 }
 
+

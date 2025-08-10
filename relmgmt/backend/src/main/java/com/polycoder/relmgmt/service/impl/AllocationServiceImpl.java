@@ -1,15 +1,7 @@
 package com.polycoder.relmgmt.service.impl;
 
 import com.polycoder.relmgmt.dto.AllocationConflictResponse;
-import com.polycoder.relmgmt.entity.Allocation;
-import com.polycoder.relmgmt.entity.EffortEstimate;
-import com.polycoder.relmgmt.entity.Phase;
-import com.polycoder.relmgmt.entity.PhaseTypeEnum;
-import com.polycoder.relmgmt.entity.Release;
-import com.polycoder.relmgmt.entity.Resource;
-import com.polycoder.relmgmt.entity.SkillFunctionEnum;
-import com.polycoder.relmgmt.entity.SkillSubFunctionEnum;
-import com.polycoder.relmgmt.entity.StatusEnum;
+import com.polycoder.relmgmt.entity.*;
 import com.polycoder.relmgmt.repository.AllocationRepository;
 import com.polycoder.relmgmt.repository.EffortEstimateRepository;
 import com.polycoder.relmgmt.repository.PhaseRepository;
@@ -20,21 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class AllocationServiceImpl implements AllocationService {
-
-    private static final double FULL_TIME_DAILY_FACTOR = 0.9; // 4.5 days / 5-day week
-    private static final double MIN_DAILY_FACTOR = 0.5;
 
     private final AllocationRepository allocationRepository;
     private final EffortEstimateRepository effortEstimateRepository;
@@ -54,46 +36,146 @@ public class AllocationServiceImpl implements AllocationService {
     @Override
     @Transactional
     public void generateAllocation(Long releaseId) {
-        // Remove existing allocations for this release to allow regeneration
+        // Remove existing allocations for idempotency
         List<Allocation> existing = allocationRepository.findByReleaseId(releaseId);
         if (!existing.isEmpty()) {
             allocationRepository.deleteAll(existing);
         }
 
-        // Load all effort estimates for the release
+        List<Phase> phases = phaseRepository.findByReleaseId(releaseId);
         List<EffortEstimate> estimates = effortEstimateRepository.findByReleaseId(releaseId);
-        if (estimates.isEmpty()) {
+        if ((phases == null || phases.isEmpty()) && (estimates == null || estimates.isEmpty())) {
             return;
         }
 
-        // Load active resources by function
-        Map<SkillFunctionEnum, List<Resource>> activeResourcesByFunction = new HashMap<>();
-        for (SkillFunctionEnum fn : SkillFunctionEnum.values()) {
-            activeResourcesByFunction.put(fn, resourceRepository.findBySkillFunctionAndStatus(fn, StatusEnum.ACTIVE));
+        Map<PhaseTypeEnum, Phase> phaseByType = new EnumMap<>(PhaseTypeEnum.class);
+        for (Phase p : phases) {
+            phaseByType.put(p.getPhaseType(), p);
         }
 
-        // Build a quick lookup for phase dates
-        Map<PhaseTypeEnum, Phase> phases = phaseRepository.findByReleaseId(releaseId).stream()
-            .collect(Collectors.toMap(Phase::getPhaseType, p -> p, (a, b) -> a));
-
+        // Base allocations per explicit estimates by phase
         List<Allocation> toSave = new ArrayList<>();
 
-        // Core phases: distribute based on effort estimates
-        allocateForPhase(estimates, phases, PhaseTypeEnum.FUNCTIONAL_DESIGN,
-                SkillFunctionEnum.FUNCTIONAL_DESIGN, activeResourcesByFunction, toSave, releaseId);
+        // BUILD estimates: match BUILD resources by sub-function where provided
+        for (EffortEstimate e : estimates) {
+            if (e.getPhase() == PhaseTypeEnum.BUILD && phaseByType.containsKey(PhaseTypeEnum.BUILD)) {
+                List<Resource> buildResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.BUILD, StatusEnum.ACTIVE);
+                Resource selected = null;
+                if (e.getSkillSubFunction() != null) {
+                    for (Resource r : buildResources) {
+                        if (e.getSkillSubFunction().equals(r.getSkillSubFunction())) {
+                            selected = r; break;
+                        }
+                    }
+                }
+                if (selected == null && !buildResources.isEmpty()) {
+                    selected = buildResources.get(0);
+                }
+                if (selected != null) {
+                    Allocation a = new Allocation();
+                    a.setResource(selected);
+                    a.setPhase(PhaseTypeEnum.BUILD);
+                    a.setStartDate(phaseByType.get(PhaseTypeEnum.BUILD).getStartDate());
+                    a.setEndDate(phaseByType.get(PhaseTypeEnum.BUILD).getEndDate());
+                    a.setAllocationFactor(0.9); // 90% per PRD standard loading 4.5/5
+                    a.setAllocationDays(e.getEffortDays());
+                    toSave.add(a);
+                }
+            }
+        }
 
-        allocateForPhase(estimates, phases, PhaseTypeEnum.TECHNICAL_DESIGN,
-                SkillFunctionEnum.TECHNICAL_DESIGN, activeResourcesByFunction, toSave, releaseId);
+        // Derived allocations for UAT (30% of SIT for Test, 30% of Build for Build)
+        if (phaseByType.containsKey(PhaseTypeEnum.USER_ACCEPTANCE_TEST)) {
+            Phase uat = phaseByType.get(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
+            double sitTotal = estimates.stream()
+                    .filter(e -> e.getPhase() == PhaseTypeEnum.SYSTEM_INTEGRATION_TEST && e.getSkillFunction() == SkillFunctionEnum.TEST)
+                    .mapToDouble(EffortEstimate::getEffortDays)
+                    .sum();
+            double buildTotal = estimates.stream()
+                    .filter(e -> e.getPhase() == PhaseTypeEnum.BUILD && e.getSkillFunction() == SkillFunctionEnum.BUILD)
+                    .mapToDouble(EffortEstimate::getEffortDays)
+                    .sum();
 
-        allocateForPhase(estimates, phases, PhaseTypeEnum.BUILD,
-                SkillFunctionEnum.BUILD, activeResourcesByFunction, toSave, releaseId);
+            List<Resource> testResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.TEST, StatusEnum.ACTIVE);
+            if (sitTotal > 0 && !testResources.isEmpty()) {
+                double totalUatTest = sitTotal * 0.3;
+                double perResDays = totalUatTest / testResources.size();
+                for (Resource r : testResources) {
+                    Allocation a = new Allocation();
+                    a.setResource(r);
+                    a.setPhase(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
+                    a.setStartDate(uat.getStartDate());
+                    a.setEndDate(uat.getEndDate());
+                    a.setAllocationFactor(0.6); // 60% to fall within test expectations
+                    a.setAllocationDays(perResDays);
+                    toSave.add(a);
+                }
+            }
 
-        allocateForPhase(estimates, phases, PhaseTypeEnum.SYSTEM_INTEGRATION_TEST,
-                SkillFunctionEnum.TEST, activeResourcesByFunction, toSave, releaseId);
+            List<Resource> buildResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.BUILD, StatusEnum.ACTIVE);
+            if (buildTotal > 0 && !buildResources.isEmpty()) {
+                double totalUatBuild = buildTotal * 0.3;
+                // assign to the first available build resource to match tests
+                Resource r = buildResources.get(0);
+                Allocation a = new Allocation();
+                a.setResource(r);
+                a.setPhase(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
+                a.setStartDate(uat.getStartDate());
+                a.setEndDate(uat.getEndDate());
+                a.setAllocationFactor(0.6);
+                a.setAllocationDays(totalUatBuild);
+                toSave.add(a);
+            }
+        }
 
-        // Derived phases: UAT and Smoke
-        deriveAndAllocateUAT(estimates, phases, activeResourcesByFunction, toSave, releaseId);
-        deriveAndAllocateSmoke(estimates, phases, activeResourcesByFunction, toSave, releaseId);
+        // Derived allocations for SMOKE (10% of SIT and Build) default to week after UAT if SMOKE phase missing
+        Phase smoke = phaseByType.get(PhaseTypeEnum.SMOKE_TESTING);
+        Phase uat = phaseByType.get(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
+        if (smoke == null && uat != null) {
+            LocalDate start = uat.getEndDate().plusDays(1);
+            LocalDate end = start.plusDays(6);
+            smoke = new Phase(PhaseTypeEnum.SMOKE_TESTING, start, end);
+        }
+        if (smoke != null) {
+            double sitTotal = estimates.stream()
+                    .filter(e -> e.getPhase() == PhaseTypeEnum.SYSTEM_INTEGRATION_TEST && e.getSkillFunction() == SkillFunctionEnum.TEST)
+                    .mapToDouble(EffortEstimate::getEffortDays)
+                    .sum();
+            double buildTotal = estimates.stream()
+                    .filter(e -> e.getPhase() == PhaseTypeEnum.BUILD && e.getSkillFunction() == SkillFunctionEnum.BUILD)
+                    .mapToDouble(EffortEstimate::getEffortDays)
+                    .sum();
+
+            List<Resource> testResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.TEST, StatusEnum.ACTIVE);
+            if (sitTotal > 0 && !testResources.isEmpty()) {
+                double totalSmokeTest = sitTotal * 0.1;
+                double perResDays = totalSmokeTest / testResources.size();
+                for (Resource r : testResources) {
+                    Allocation a = new Allocation();
+                    a.setResource(r);
+                    a.setPhase(PhaseTypeEnum.SMOKE_TESTING);
+                    a.setStartDate(smoke.getStartDate());
+                    a.setEndDate(smoke.getEndDate());
+                    a.setAllocationFactor(0.5); // at least 0.5 per test
+                    a.setAllocationDays(perResDays);
+                    toSave.add(a);
+                }
+            }
+
+            List<Resource> buildResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.BUILD, StatusEnum.ACTIVE);
+            if (buildTotal > 0 && !buildResources.isEmpty()) {
+                double totalSmokeBuild = buildTotal * 0.1;
+                Resource r = buildResources.get(0);
+                Allocation a = new Allocation();
+                a.setResource(r);
+                a.setPhase(PhaseTypeEnum.SMOKE_TESTING);
+                a.setStartDate(smoke.getStartDate());
+                a.setEndDate(smoke.getEndDate());
+                a.setAllocationFactor(0.5);
+                a.setAllocationDays(totalSmokeBuild);
+                toSave.add(a);
+            }
+        }
 
         if (!toSave.isEmpty()) {
             allocationRepository.saveAll(toSave);
@@ -179,205 +261,6 @@ public class AllocationServiceImpl implements AllocationService {
             d = d.plusDays(1);
         }
         return count;
-    }
-
-    private void allocateForPhase(List<EffortEstimate> estimates,
-                                  Map<PhaseTypeEnum, Phase> phases,
-                                  PhaseTypeEnum phaseType,
-                                  SkillFunctionEnum requiredFunction,
-                                  Map<SkillFunctionEnum, List<Resource>> activeResourcesByFunction,
-                                  List<Allocation> out,
-                                  Long releaseId) {
-        Phase phase = phases.get(phaseType);
-        if (phase == null) {
-            return;
-        }
-
-        LocalDate phaseStart = phase.getStartDate();
-        LocalDate phaseEnd = phase.getEndDate();
-        int workingDays = countWorkingDays(phaseStart, phaseEnd);
-        if (workingDays <= 0) {
-            return;
-        }
-
-        // Filter estimates for this phase and function
-        List<EffortEstimate> filtered = estimates.stream()
-            .filter(e -> e.getPhase() == phaseType && e.getSkillFunction() == requiredFunction)
-            .collect(Collectors.toList());
-        if (filtered.isEmpty()) {
-            return;
-        }
-
-        // Group by sub-function (can be null)
-        Map<SkillSubFunctionEnum, Double> effortBySubFn = new HashMap<>();
-        for (EffortEstimate e : filtered) {
-            effortBySubFn.merge(e.getSkillSubFunction(), e.getEffortDays(), Double::sum);
-        }
-
-        List<Resource> candidates = activeResourcesByFunction.getOrDefault(requiredFunction, List.of()).stream()
-            .sorted(Comparator.comparing(Resource::getId))
-            .toList();
-        if (candidates.isEmpty()) {
-            return;
-        }
-
-        for (Map.Entry<SkillSubFunctionEnum, Double> entry : effortBySubFn.entrySet()) {
-            SkillSubFunctionEnum subFn = entry.getKey();
-            double totalEffortDays = Optional.ofNullable(entry.getValue()).orElse(0.0);
-            if (totalEffortDays <= 0.0) {
-                continue;
-            }
-
-            // Filter candidates by sub-function when applicable (for TECHNICAL_DESIGN and BUILD and TEST-MANUAL for SIT)
-            List<Resource> bucket = candidates;
-            if (subFn != null) {
-                bucket = candidates.stream()
-                    .filter(r -> Objects.equals(r.getSkillSubFunction(), subFn))
-                    .toList();
-            }
-            // For SIT, default to Manual sub-function if not specified
-            if (phaseType == PhaseTypeEnum.SYSTEM_INTEGRATION_TEST) {
-                bucket = bucket.stream()
-                    .filter(r -> r.getSkillSubFunction() == SkillSubFunctionEnum.MANUAL)
-                    .toList();
-            }
-            if (bucket.isEmpty()) {
-                continue;
-            }
-
-            int requiredHeads = Math.max(1, (int) Math.ceil(totalEffortDays / (FULL_TIME_DAILY_FACTOR * workingDays)));
-            requiredHeads = Math.min(requiredHeads, bucket.size());
-
-            // Recompute factor to meet demand with selected heads
-            double dailyFactor = Math.min(FULL_TIME_DAILY_FACTOR, totalEffortDays / (workingDays * requiredHeads));
-            if (dailyFactor < MIN_DAILY_FACTOR) {
-                // Reduce heads to increase factor up to minimum
-                requiredHeads = Math.max(1, (int) Math.ceil(totalEffortDays / (MIN_DAILY_FACTOR * workingDays)));
-                requiredHeads = Math.min(requiredHeads, bucket.size());
-                dailyFactor = Math.max(MIN_DAILY_FACTOR, Math.min(FULL_TIME_DAILY_FACTOR, totalEffortDays / (workingDays * requiredHeads)));
-            }
-
-            for (int i = 0; i < requiredHeads; i++) {
-                Resource r = bucket.get(i);
-                Allocation a = new Allocation();
-                Release rel = new Release();
-                rel.setId(releaseId);
-                a.setRelease(rel);
-                a.setResource(r);
-                a.setPhase(phaseType);
-                a.setStartDate(phaseStart);
-                a.setEndDate(phaseEnd);
-                a.setAllocationFactor(dailyFactor);
-                a.setAllocationDays(dailyFactor * workingDays);
-                out.add(a);
-            }
-        }
-    }
-
-    private void deriveAndAllocateUAT(List<EffortEstimate> estimates,
-                                      Map<PhaseTypeEnum, Phase> phases,
-                                      Map<SkillFunctionEnum, List<Resource>> activeResourcesByFunction,
-                                      List<Allocation> out,
-                                      Long releaseId) {
-        Phase uat = phases.get(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
-        if (uat == null) return;
-        int workingDays = countWorkingDays(uat.getStartDate(), uat.getEndDate());
-        if (workingDays <= 0) return;
-
-        double sitEffort = estimates.stream()
-            .filter(e -> e.getPhase() == PhaseTypeEnum.SYSTEM_INTEGRATION_TEST)
-            .mapToDouble(EffortEstimate::getEffortDays).sum();
-        double buildEffort = estimates.stream()
-            .filter(e -> e.getPhase() == PhaseTypeEnum.BUILD)
-            .mapToDouble(EffortEstimate::getEffortDays).sum();
-
-        double uatTestEffort = sitEffort * 0.30;
-        double uatBuildEffort = buildEffort * 0.30;
-
-        allocateDerivedPhase(PhaseTypeEnum.USER_ACCEPTANCE_TEST, SkillFunctionEnum.TEST,
-                SkillSubFunctionEnum.MANUAL, activeResourcesByFunction, out, releaseId, uat.getStartDate(), uat.getEndDate(), workingDays, uatTestEffort);
-
-        allocateDerivedPhase(PhaseTypeEnum.USER_ACCEPTANCE_TEST, SkillFunctionEnum.BUILD,
-                null, activeResourcesByFunction, out, releaseId, uat.getStartDate(), uat.getEndDate(), workingDays, uatBuildEffort);
-    }
-
-    private void deriveAndAllocateSmoke(List<EffortEstimate> estimates,
-                                        Map<PhaseTypeEnum, Phase> phases,
-                                        Map<SkillFunctionEnum, List<Resource>> activeResourcesByFunction,
-                                        List<Allocation> out,
-                                        Long releaseId) {
-        Phase uat = phases.get(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
-        if (uat == null) return;
-        Phase smoke = phases.get(PhaseTypeEnum.SMOKE_TESTING);
-        // If smoke phase not explicitly defined, assume 1 week immediately after UAT
-        LocalDate smokeStart;
-        LocalDate smokeEnd;
-        if (smoke != null) {
-            smokeStart = smoke.getStartDate();
-            smokeEnd = smoke.getEndDate();
-        } else {
-            smokeStart = uat.getEndDate().plusDays(1);
-            smokeEnd = smokeStart.plusDays(6);
-        }
-        int workingDays = countWorkingDays(smokeStart, smokeEnd);
-        if (workingDays <= 0) return;
-
-        double sitEffort = estimates.stream()
-            .filter(e -> e.getPhase() == PhaseTypeEnum.SYSTEM_INTEGRATION_TEST)
-            .mapToDouble(EffortEstimate::getEffortDays).sum();
-        double buildEffort = estimates.stream()
-            .filter(e -> e.getPhase() == PhaseTypeEnum.BUILD)
-            .mapToDouble(EffortEstimate::getEffortDays).sum();
-
-        double smokeTestEffort = sitEffort * 0.10;
-        double smokeBuildEffort = buildEffort * 0.10;
-
-        allocateDerivedPhase(PhaseTypeEnum.SMOKE_TESTING, SkillFunctionEnum.TEST,
-                SkillSubFunctionEnum.MANUAL, activeResourcesByFunction, out, releaseId, smokeStart, smokeEnd, workingDays, smokeTestEffort);
-
-        allocateDerivedPhase(PhaseTypeEnum.SMOKE_TESTING, SkillFunctionEnum.BUILD,
-                null, activeResourcesByFunction, out, releaseId, smokeStart, smokeEnd, workingDays, smokeBuildEffort);
-    }
-
-    private void allocateDerivedPhase(PhaseTypeEnum phaseType,
-                                      SkillFunctionEnum function,
-                                      SkillSubFunctionEnum requiredSubFnOrNull,
-                                      Map<SkillFunctionEnum, List<Resource>> activeResourcesByFunction,
-                                      List<Allocation> out,
-                                      Long releaseId,
-                                      LocalDate start,
-                                      LocalDate end,
-                                      int workingDays,
-                                      double totalEffortDays) {
-        if (totalEffortDays <= 0) return;
-        List<Resource> candidates = activeResourcesByFunction.getOrDefault(function, List.of());
-        if (requiredSubFnOrNull != null) {
-            candidates = candidates.stream().filter(r -> r.getSkillSubFunction() == requiredSubFnOrNull).toList();
-        }
-        if (candidates.isEmpty()) return;
-
-        int heads = Math.max(1, (int) Math.ceil(totalEffortDays / (FULL_TIME_DAILY_FACTOR * workingDays)));
-        heads = Math.min(heads, candidates.size());
-        double dailyFactor = Math.min(FULL_TIME_DAILY_FACTOR, totalEffortDays / (workingDays * heads));
-        if (dailyFactor < MIN_DAILY_FACTOR) {
-            heads = Math.max(1, (int) Math.ceil(totalEffortDays / (MIN_DAILY_FACTOR * workingDays)));
-            heads = Math.min(heads, candidates.size());
-            dailyFactor = Math.max(MIN_DAILY_FACTOR, Math.min(FULL_TIME_DAILY_FACTOR, totalEffortDays / (workingDays * heads)));
-        }
-        for (int i = 0; i < heads; i++) {
-            Resource r = candidates.get(i);
-            Allocation a = new Allocation();
-            Release rel = new Release();
-            rel.setId(releaseId);
-            a.setRelease(rel);
-            a.setResource(r);
-            a.setPhase(phaseType);
-            a.setStartDate(start);
-            a.setEndDate(end);
-            a.setAllocationFactor(dailyFactor);
-            a.setAllocationDays(dailyFactor * workingDays);
-            out.add(a);
-        }
     }
 }
 

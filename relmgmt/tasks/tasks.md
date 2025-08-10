@@ -180,14 +180,14 @@
    - Implement project and scope controllers
 
 6. **BE-Phase-6: Allocation Engine**
-    - Write tests for allocation algorithm components ✅
-    - Implement allocation algorithm ✅
-    - Write tests for allocation service ✅
-    - Implement allocation service ✅
-    - Write tests for allocation controller ☐
-    - Implement allocation controller ☐
-    - Write tests for conflict detection ✅
-    - Implement conflict detection ✅
+   - Write tests for allocation algorithm components
+   - Implement allocation algorithm
+   - Write tests for allocation service
+   - Implement allocation service
+   - Write tests for allocation controller
+   - Implement allocation controller
+   - Write tests for conflict detection
+   - Implement conflict detection
 
 7. **BE-Phase-7: Reporting**
    - Write tests for each report type

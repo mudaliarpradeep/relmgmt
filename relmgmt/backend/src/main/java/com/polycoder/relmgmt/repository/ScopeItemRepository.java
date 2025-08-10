@@ -80,3 +80,4 @@ public interface ScopeItemRepository extends JpaRepository<ScopeItem, Long> {
     Page<ScopeItem> findByProjectReleaseId(@Param("releaseId") Long releaseId, Pageable pageable);
 }
 
+

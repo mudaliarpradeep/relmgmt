@@ -74,3 +74,4 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     List<Object[]> findProjectsByTypeWithScopeItemsCount(@Param("releaseId") Long releaseId, @Param("type") ProjectTypeEnum type);
 }
 
+

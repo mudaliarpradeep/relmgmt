@@ -65,3 +65,4 @@ CREATE TRIGGER update_scope_items_updated_at BEFORE UPDATE ON scope_items
 CREATE TRIGGER update_effort_estimates_updated_at BEFORE UPDATE ON effort_estimates
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+
