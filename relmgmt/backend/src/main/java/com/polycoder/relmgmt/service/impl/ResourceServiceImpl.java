@@ -28,12 +28,17 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.polycoder.relmgmt.entity.Allocation;
+import com.polycoder.relmgmt.repository.AllocationRepository;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
 
     @Autowired
     private ResourceRepository resourceRepository;
+
+    @Autowired
+    private AllocationRepository allocationRepository;
 
     @Override
     public Page<ResourceResponse> getAllResources(StatusEnum status, SkillFunctionEnum skillFunction, Pageable pageable) {
@@ -150,14 +155,9 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public boolean canDeleteResource(Long resourceId) {
-        // TODO: Implement allocation check when allocation entities are available
-        // For now, return true as allocation functionality is not yet implemented
-        /*
-        List<Long> allocatedResources = resourceRepository.findResourcesAllocatedToActiveReleases(
-            resourceId, LocalDate.now());
-        return allocatedResources.isEmpty();
-        */
-        return true;
+        // Check if resource has any active allocations
+        List<Allocation> allocations = allocationRepository.findByResourceId(resourceId);
+        return allocations.isEmpty();
     }
 
     // Helper methods for conversion

@@ -56,6 +56,63 @@ public class AllocationServiceImpl implements AllocationService {
         // Base allocations per explicit estimates by phase
         List<Allocation> toSave = new ArrayList<>();
 
+        // FUNCTIONAL DESIGN estimates: match Functional Design resources
+        for (EffortEstimate e : estimates) {
+            if (e.getPhase() == PhaseTypeEnum.FUNCTIONAL_DESIGN && phaseByType.containsKey(PhaseTypeEnum.FUNCTIONAL_DESIGN)) {
+                List<Resource> functionalDesignResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.FUNCTIONAL_DESIGN, StatusEnum.ACTIVE);
+                if (!functionalDesignResources.isEmpty()) {
+                    // Distribute effort across available Functional Design resources
+                    double totalEffort = e.getEffortDays();
+                    double perResourceEffort = totalEffort / functionalDesignResources.size();
+                    
+                    for (Resource r : functionalDesignResources) {
+                        Allocation a = new Allocation();
+                        a.setResource(r);
+                        a.setPhase(PhaseTypeEnum.FUNCTIONAL_DESIGN);
+                        a.setStartDate(phaseByType.get(PhaseTypeEnum.FUNCTIONAL_DESIGN).getStartDate());
+                        a.setEndDate(phaseByType.get(PhaseTypeEnum.FUNCTIONAL_DESIGN).getEndDate());
+                        a.setAllocationFactor(calculateAllocationFactor(perResourceEffort, phaseByType.get(PhaseTypeEnum.FUNCTIONAL_DESIGN)));
+                        a.setAllocationDays(perResourceEffort);
+                        toSave.add(a);
+                    }
+                }
+            }
+        }
+
+        // TECHNICAL DESIGN estimates: match Technical Design resources by sub-function where provided
+        for (EffortEstimate e : estimates) {
+            if (e.getPhase() == PhaseTypeEnum.TECHNICAL_DESIGN && phaseByType.containsKey(PhaseTypeEnum.TECHNICAL_DESIGN)) {
+                List<Resource> technicalDesignResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.TECHNICAL_DESIGN, StatusEnum.ACTIVE);
+                Resource selected = null;
+                
+                // Try to match by sub-function first
+                if (e.getSkillSubFunction() != null) {
+                    for (Resource r : technicalDesignResources) {
+                        if (e.getSkillSubFunction().equals(r.getSkillSubFunction())) {
+                            selected = r;
+                            break;
+                        }
+                    }
+                }
+                
+                // If no sub-function match, use first available resource
+                if (selected == null && !technicalDesignResources.isEmpty()) {
+                    selected = technicalDesignResources.get(0);
+                }
+                
+                if (selected != null) {
+                    Allocation a = new Allocation();
+                    a.setResource(selected);
+                    a.setPhase(PhaseTypeEnum.TECHNICAL_DESIGN);
+                    a.setStartDate(phaseByType.get(PhaseTypeEnum.TECHNICAL_DESIGN).getStartDate());
+                    a.setEndDate(phaseByType.get(PhaseTypeEnum.TECHNICAL_DESIGN).getEndDate());
+                    a.setAllocationFactor(calculateAllocationFactor(e.getEffortDays(), phaseByType.get(PhaseTypeEnum.TECHNICAL_DESIGN)));
+                    a.setAllocationDays(e.getEffortDays());
+                    toSave.add(a);
+                }
+            }
+        }
+
         // BUILD estimates: match BUILD resources by sub-function where provided
         for (EffortEstimate e : estimates) {
             if (e.getPhase() == PhaseTypeEnum.BUILD && phaseByType.containsKey(PhaseTypeEnum.BUILD)) {
@@ -77,9 +134,36 @@ public class AllocationServiceImpl implements AllocationService {
                     a.setPhase(PhaseTypeEnum.BUILD);
                     a.setStartDate(phaseByType.get(PhaseTypeEnum.BUILD).getStartDate());
                     a.setEndDate(phaseByType.get(PhaseTypeEnum.BUILD).getEndDate());
-                    a.setAllocationFactor(0.9); // 90% per PRD standard loading 4.5/5
+                    a.setAllocationFactor(calculateAllocationFactor(e.getEffortDays(), phaseByType.get(PhaseTypeEnum.BUILD)));
                     a.setAllocationDays(e.getEffortDays());
                     toSave.add(a);
+                }
+            }
+        }
+
+        // SIT estimates: match Test resources with Manual sub-function
+        for (EffortEstimate e : estimates) {
+            if (e.getPhase() == PhaseTypeEnum.SYSTEM_INTEGRATION_TEST && phaseByType.containsKey(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST)) {
+                List<Resource> testResources = resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.TEST, StatusEnum.ACTIVE);
+                List<Resource> manualTestResources = testResources.stream()
+                    .filter(r -> r.getSkillSubFunction() == SkillSubFunctionEnum.MANUAL)
+                    .collect(Collectors.toList());
+                
+                if (!manualTestResources.isEmpty()) {
+                    // Distribute effort across available Manual Test resources
+                    double totalEffort = e.getEffortDays();
+                    double perResourceEffort = totalEffort / manualTestResources.size();
+                    
+                    for (Resource r : manualTestResources) {
+                        Allocation a = new Allocation();
+                        a.setResource(r);
+                        a.setPhase(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST);
+                        a.setStartDate(phaseByType.get(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST).getStartDate());
+                        a.setEndDate(phaseByType.get(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST).getEndDate());
+                        a.setAllocationFactor(calculateAllocationFactor(perResourceEffort, phaseByType.get(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST)));
+                        a.setAllocationDays(perResourceEffort);
+                        toSave.add(a);
+                    }
                 }
             }
         }
@@ -106,7 +190,7 @@ public class AllocationServiceImpl implements AllocationService {
                     a.setPhase(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
                     a.setStartDate(uat.getStartDate());
                     a.setEndDate(uat.getEndDate());
-                    a.setAllocationFactor(0.6); // 60% to fall within test expectations
+                    a.setAllocationFactor(calculateAllocationFactor(perResDays, uat));
                     a.setAllocationDays(perResDays);
                     toSave.add(a);
                 }
@@ -122,7 +206,7 @@ public class AllocationServiceImpl implements AllocationService {
                 a.setPhase(PhaseTypeEnum.USER_ACCEPTANCE_TEST);
                 a.setStartDate(uat.getStartDate());
                 a.setEndDate(uat.getEndDate());
-                a.setAllocationFactor(0.6);
+                a.setAllocationFactor(calculateAllocationFactor(totalUatBuild, uat));
                 a.setAllocationDays(totalUatBuild);
                 toSave.add(a);
             }
@@ -156,7 +240,7 @@ public class AllocationServiceImpl implements AllocationService {
                     a.setPhase(PhaseTypeEnum.SMOKE_TESTING);
                     a.setStartDate(smoke.getStartDate());
                     a.setEndDate(smoke.getEndDate());
-                    a.setAllocationFactor(0.5); // at least 0.5 per test
+                    a.setAllocationFactor(calculateAllocationFactor(perResDays, smoke));
                     a.setAllocationDays(perResDays);
                     toSave.add(a);
                 }
@@ -171,7 +255,7 @@ public class AllocationServiceImpl implements AllocationService {
                 a.setPhase(PhaseTypeEnum.SMOKE_TESTING);
                 a.setStartDate(smoke.getStartDate());
                 a.setEndDate(smoke.getEndDate());
-                a.setAllocationFactor(0.5);
+                a.setAllocationFactor(calculateAllocationFactor(totalSmokeBuild, smoke));
                 a.setAllocationDays(totalSmokeBuild);
                 toSave.add(a);
             }
@@ -180,6 +264,28 @@ public class AllocationServiceImpl implements AllocationService {
         if (!toSave.isEmpty()) {
             allocationRepository.saveAll(toSave);
         }
+    }
+
+    /**
+     * Calculate allocation factor based on effort days and phase duration
+     * Ensures allocation factor stays within PRD limits (0.5-1.0 person-days)
+     */
+    private double calculateAllocationFactor(double effortDays, Phase phase) {
+        int workingDays = countWorkingDays(phase.getStartDate(), phase.getEndDate());
+        if (workingDays == 0) {
+            return 0.5; // Minimum allocation factor
+        }
+        
+        double calculatedFactor = effortDays / workingDays;
+        
+        // Enforce PRD limits: minimum 0.5, maximum 1.0 person-days
+        if (calculatedFactor < 0.5) {
+            return 0.5;
+        } else if (calculatedFactor > 1.0) {
+            return 1.0;
+        }
+        
+        return calculatedFactor;
     }
 
     @Override

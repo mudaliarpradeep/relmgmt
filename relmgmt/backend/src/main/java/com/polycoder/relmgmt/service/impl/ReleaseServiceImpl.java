@@ -7,6 +7,7 @@ import com.polycoder.relmgmt.exception.ValidationException;
 import com.polycoder.relmgmt.repository.ReleaseRepository;
 import com.polycoder.relmgmt.repository.PhaseRepository;
 import com.polycoder.relmgmt.repository.BlockerRepository;
+import com.polycoder.relmgmt.repository.AllocationRepository;
 import com.polycoder.relmgmt.service.ReleaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,9 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     @Autowired
     private BlockerRepository blockerRepository;
+
+    @Autowired
+    private AllocationRepository allocationRepository;
 
     @Override
     public Page<ReleaseResponse> getAllReleases(String name, String identifier, Pageable pageable) {
@@ -295,9 +299,9 @@ public class ReleaseServiceImpl implements ReleaseService {
 
     @Override
     public boolean canDeleteRelease(Long releaseId) {
-        // For now, always allow deletion since allocation entities are not yet implemented
-        // This will be updated when allocation functionality is added
-        return true;
+        // Check if release has any active allocations
+        List<Allocation> allocations = allocationRepository.findByReleaseId(releaseId);
+        return allocations.isEmpty();
     }
 
     @Override

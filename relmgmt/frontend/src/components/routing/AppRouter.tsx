@@ -17,6 +17,8 @@ import ProjectDetailPage from '../../pages/projects/ProjectDetailPage';
 import ScopeItemForm from '../../pages/scope/ScopeItemForm';
 import ScopeItemDetailPage from '../../pages/scope/ScopeItemDetailPage';
 import EffortEstimationForm from '../../pages/scope/EffortEstimationForm';
+import AllocationListPage from '../../pages/allocations/AllocationListPage';
+import AllocationDetailPage from '../../pages/allocations/AllocationDetailPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -49,6 +51,10 @@ const AppRouter: React.FC = () => {
         <Route path="scope/:id" element={<ScopeItemDetailPage />} />
         <Route path="scope/:id/edit" element={<ScopeItemForm />} />
         <Route path="scope/:id/estimates/new" element={<EffortEstimationForm />} />
+        
+        {/* Allocation Management */}
+        <Route path="allocations" element={<AllocationListPage />} />
+        <Route path="releases/:releaseId/allocations" element={<AllocationDetailPage />} />
         
         {/* Placeholder routes for future features */}
       </Route>

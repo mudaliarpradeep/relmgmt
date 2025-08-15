@@ -10,6 +10,7 @@ import com.polycoder.relmgmt.entity.SkillSubFunctionEnum;
 import com.polycoder.relmgmt.exception.ResourceNotFoundException;
 import com.polycoder.relmgmt.exception.ValidationException;
 import com.polycoder.relmgmt.repository.ResourceRepository;
+import com.polycoder.relmgmt.repository.AllocationRepository;
 import com.polycoder.relmgmt.service.impl.ResourceServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,9 @@ class ResourceServiceTest {
 
     @Mock
     private ResourceRepository resourceRepository;
+
+    @Mock
+    private AllocationRepository allocationRepository;
 
     @InjectMocks
     private ResourceServiceImpl resourceService;
@@ -310,10 +314,24 @@ class ResourceServiceTest {
 
     @Test
     void testCanDeleteResource() {
-        // This test will be enhanced when allocation functionality is implemented
+        // Mock empty allocations - resource can be deleted
+        when(allocationRepository.findByResourceId(1L)).thenReturn(Arrays.asList());
+        
         boolean result = resourceService.canDeleteResource(1L);
         
-        assertTrue(result); // Currently returns true as allocation check is not implemented
+        assertTrue(result);
+        verify(allocationRepository).findByResourceId(1L);
+    }
+
+    @Test
+    void testCanDeleteResource_WithAllocations() {
+        // Mock allocations - resource cannot be deleted
+        when(allocationRepository.findByResourceId(1L)).thenReturn(Arrays.asList(new com.polycoder.relmgmt.entity.Allocation()));
+        
+        boolean result = resourceService.canDeleteResource(1L);
+        
+        assertFalse(result);
+        verify(allocationRepository).findByResourceId(1L);
     }
 
     @Test

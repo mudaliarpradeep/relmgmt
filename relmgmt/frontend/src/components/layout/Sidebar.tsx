@@ -18,6 +18,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { path: '/resources', label: 'Resource Management', icon: '👥' },
     { path: '/releases', label: 'Release Management', icon: '🚀' },
     { path: '/scope', label: 'Scope Management', icon: '📋' },
+    { path: '/allocations', label: 'Allocation Management', icon: '⚖️' },
   ];
 
   return (

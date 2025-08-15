@@ -148,6 +148,12 @@ const ReleaseDetailPage: React.FC = () => {
             </div>
             <div className="flex space-x-3">
               <Link
+                to={`/releases/${release.id}/allocations`}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+              >
+                View Allocations
+              </Link>
+              <Link
                 to={`/releases/${release.id}/edit`}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
               >

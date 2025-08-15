@@ -7,6 +7,7 @@ import com.polycoder.relmgmt.exception.ValidationException;
 import com.polycoder.relmgmt.repository.ReleaseRepository;
 import com.polycoder.relmgmt.repository.PhaseRepository;
 import com.polycoder.relmgmt.repository.BlockerRepository;
+import com.polycoder.relmgmt.repository.AllocationRepository;
 import com.polycoder.relmgmt.service.impl.ReleaseServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ public class ReleaseServiceTest {
 
     @Mock
     private BlockerRepository blockerRepository;
+
+    @Mock
+    private AllocationRepository allocationRepository;
 
     @InjectMocks
     private ReleaseServiceImpl releaseService;
@@ -364,8 +368,24 @@ public class ReleaseServiceTest {
 
     @Test
     void testCanDeleteRelease() {
+        // Mock empty allocations - release can be deleted
+        when(allocationRepository.findByReleaseId(1L)).thenReturn(Arrays.asList());
+        
         boolean result = releaseService.canDeleteRelease(1L);
-        assertTrue(result); // Currently always returns true
+        
+        assertTrue(result);
+        verify(allocationRepository).findByReleaseId(1L);
+    }
+
+    @Test
+    void testCanDeleteRelease_WithAllocations() {
+        // Mock allocations - release cannot be deleted
+        when(allocationRepository.findByReleaseId(1L)).thenReturn(Arrays.asList(new Allocation()));
+        
+        boolean result = releaseService.canDeleteRelease(1L);
+        
+        assertFalse(result);
+        verify(allocationRepository).findByReleaseId(1L);
     }
 
     @Test
