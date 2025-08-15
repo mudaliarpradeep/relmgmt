@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { allocationService } from '../../services/api/v1/allocationService';
 import type { AllocationConflictResponse } from '../../services/api/v1/allocationService';
 import StatCard from '../../components/ui/StatCard';
+import ConflictsChart from '../../components/charts/ConflictsChart';
 
 const AllocationListPage: React.FC = () => {
   const [conflicts, setConflicts] = useState<AllocationConflictResponse[]>([]);
@@ -115,6 +116,10 @@ const AllocationListPage: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
+            <div className="px-6 pt-6">
+              <h3 className="text-md font-medium text-gray-900 mb-2">Over-Allocation by Resource</h3>
+              <ConflictsChart conflicts={conflicts} />
+            </div>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

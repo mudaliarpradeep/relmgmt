@@ -10,8 +10,8 @@
 | FE-Phase-4    | Resource Management                         | Completed   | ResourceListPage, ResourceForm, ResourceDetailPage implemented with comprehensive tests (64/64 tests passing). Full CRUD operations, validation, filtering, pagination, and Excel import/export functionality working. |
 | FE-Phase-5    | Release Management                          | Completed   | ReleaseListPage, ReleaseForm, ReleaseDetailPage implemented with comprehensive CRUD operations, phase management, blocker management, and validation. Release service with full API integration. Updated routing and navigation to include release management. |
 | FE-Phase-6    | Project and Scope Management                | Completed   | Project/Scope services with tests, list/detail/create/edit pages, effort estimation form implemented with Zod/RHF validation; routes integrated |
-| FE-Phase-7    | Allocation and Visualization                | Pending    |       |
-| FE-Phase-8    | Reports and Data Export                     | Pending    |       |
+| FE-Phase-7    | Allocation and Visualization                | Completed   | AllocationListPage includes ConflictsChart; AllocationDetailPage includes Weekly Allocation Grid and CapacityChart with weekly/max toggle; color coding per PRD; loading/empty/error states; Storybook stories added; tests passing (181) |
+| FE-Phase-8    | Reports and Data Export                     | In Progress | Added report pages (Allocation Conflicts, Resource Utilization, Release Timeline) with Export to Excel buttons; filters (date range/year) wired to export and data load; tests passing (193) |
 | FE-Phase-9    | Notification System                         | Pending    |       |
 | FE-Phase-10   | Audit Log and Final Integration             | Pending    |       |
 | BE-Phase-1    | Project Setup and Core Infrastructure       | Completed   | All dependencies added, proper package structure, CI/CD pipeline, configuration files, and basic infrastructure implemented |
@@ -52,7 +52,7 @@
 - **New Features**: ✅ Release Management system fully implemented and tested
 
 ### **Frontend Test Results**
-- **Total Tests**: 160/160 passing (0 skipped)
+- **Total Tests**: 193/193 passing (0 skipped)
 - **Coverage**: 55% overall (to be re-measured after Phase 6 build-out)
 - **Coverage Breakdown**:
   - Dashboard components: 100%
@@ -69,7 +69,7 @@
 - **Authentication**: ✅ Full frontend-backend authentication integration functional
 - **UI/UX**: ✅ Responsive design tested across device sizes
 - **Code Quality**: ✅ All linting rules enforced
-- **Test Suite**: ✅ 160/160 tests passing (0 skipped)
+- **Test Suite**: ✅ 193/193 tests passing (0 skipped)
 - **Documentation**: ✅ All specs updated and synchronized
 - **Routing**: ✅ React Router with protected routes implemented
 
@@ -87,7 +87,7 @@
 - Frontend release creation payload alignment (August 2025): Updated `releaseService.createRelease` and `updateRelease` to send phases as `{ phaseType, startDate, endDate }` with enum names, matching backend `PhaseRequest`. Eliminated 500 during release creation.
 - Dashboard active releases metric (August 2025): Replaced hardcoded value with live count from backend `GET /api/v1/releases/active`. Shows '...' while loading. Note: backend defines "active" as releases with a `PRODUCTION_GO_LIVE` phase whose `endDate` is in the future.
 - Local Docker run (August 2025): Verified full stack via Docker Compose (PostgreSQL, backend, frontend). Backend health `/actuator/health` UP; frontend accessible on port 3000.
-- **BE-Phase-6 Allocation Engine Complete (January 2025)**: ✅ **COMPLETED** - Implemented comprehensive allocation generation algorithm per PRD rules including all missing phases: Functional Design (distributes effort across available resources), Technical Design (matches by sub-function), SIT (matches Manual test resources), plus existing BUILD, UAT (30% derivation), and Smoke (10% derivation). Added allocation factor validation (0.5-1.0 person-days) with `calculateAllocationFactor()` method. Enhanced skill function matching for all phases. **Database Migration**: Created `V7__create_allocations_table.sql` with proper foreign key constraints, indexes, and data integrity checks. **Integration Features**: Implemented resource/release deletion validation in `ResourceService` and `ReleaseService` to prevent deletion of entities with active allocations. **Frontend Integration**: Created comprehensive allocation management system including `allocationService.ts` API client, `AllocationListPage.tsx` for viewing conflicts, `AllocationDetailPage.tsx` for release-specific allocations, updated routing in `AppRouter.tsx`, added navigation in `Sidebar.tsx`, and integrated allocation links in `ReleaseDetailPage.tsx`. Added comprehensive unit tests covering all new allocation features. All backend tests passing (246/246, 100% success rate). BE-Phase-6 is now **100% complete** with full PRD compliance.
+- **FE-Phase-8 Reports – Exports and Filters (August 2025)**: Implemented Export to Excel across all report pages with filters wired to both data loading and export filenames: `AllocationConflictsReportPage` (from/to date), `ResourceUtilizationReportPage` (from/to date), `ReleaseTimelineReportPage` (year). Added unit tests for export initiation with URL polyfills. Entire frontend suite green (193/193). Next: finalize backend export endpoints if needed and add integration tests.
 - **FE-Phase-6 Completed (January 2025)**: Finalized Project and Scope Management on the frontend. Added React Hook Form + Zod validation to `ProjectForm`, `ScopeItemForm`, and `EffortEstimationForm`. Implemented full flows for create/edit/detail/list pages with aligned API services (`projectService`, `scopeService`) and comprehensive unit tests. Updated routing for all new pages. Frontend test suite now passes 160/161 tests (1 skipped), no lint errors.
 - **FE-Phase-6 Kickoff (January 2025)**: Began Project and Scope Management implementation on the frontend. Added strong TypeScript types (`ProjectRequest`, `ScopeItem`, `EffortEstimate`), conversion helpers, fully-typed API services (`projectService`, `scopeService`) aligned to backend endpoints with comprehensive unit tests, basic pages (`ProjectListPage`, `ScopeListPage`) and integrated routes (`/releases/:id/projects`, `/projects/:id/scope`). Frontend test suite now passes (154/155 with 1 skipped); no lint errors.
 - **Auto-Generated Release Identifier Feature Implemented (January 2025)**: Successfully implemented auto-generated release identifier feature following YYYY-XXX format. **Backend Changes**: Added generateNextReleaseIdentifier() method to ReleaseService interface and implementation, added findHighestIdentifierNumberForYear() method to ReleaseRepository with SQL query to find max identifier number for a year, updated createRelease() method to auto-generate identifier when not provided, added /api/v1/releases/next-identifier endpoint to ReleaseController, and made identifier field optional in ReleaseRequest DTO. **Frontend Changes**: Updated ReleaseService to include getNextReleaseIdentifier() method, modified ReleaseForm to fetch and display auto-generated identifier as read-only field, updated form validation to remove identifier requirement, and updated form submission to not send identifier in create mode. **Documentation Updates**: Updated PRD to specify auto-generation requirement, updated backend technical specification to include auto-generation logic, and updated frontend technical specification to document read-only identifier field. **Test Results**: All backend tests passing (204/204, 100% success rate), frontend builds successfully. **Technical Details**: Identifier format follows YYYY-XXX pattern where YYYY is current year and XXX is auto-incrementing number starting from 001 for each year (e.g., 2025-001, 2025-002, 2026-001).
@@ -173,7 +173,7 @@
 - [x] Tasks.md updated with completion status and next phase priorities
 - [x] Status.md provides complete traceability of all changes
 
-### **Outstanding Items for Phase 6**
+### **Outstanding Items (Next Phases)**
 - [ ] Revert temporary password encryption workaround
 - [ ] Allocation Engine: add controller and integration tests for allocation endpoints
 - [ ] Add comprehensive test coverage for release management components

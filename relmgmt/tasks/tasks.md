@@ -78,14 +78,14 @@
    - Implement effort estimation form ✅
 
 7. **FE-Phase-7: Allocation and Visualization**
-   - Write tests for allocation service
-   - Implement allocation service
-   - Write tests for allocation page
-   - Implement allocation page
-   - Write tests for capacity chart component
-   - Implement capacity chart component
-   - Write tests for allocation conflicts page
-   - Implement allocation conflicts page
+   - Write tests for allocation service ✅
+   - Implement allocation service (existing) ✅
+   - Write tests for allocation page ✅
+   - Implement allocation page (existing list/detail) ✅
+   - Write tests for capacity chart component ✅
+   - Implement capacity chart component (basic) ✅
+   - Write tests for allocation conflicts page ✅
+   - Implement allocation conflicts page (existing) ✅
 
 8. **FE-Phase-8: Reports and Data Export**
    - Write tests for report services

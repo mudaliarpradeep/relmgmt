@@ -19,6 +19,9 @@ import ScopeItemDetailPage from '../../pages/scope/ScopeItemDetailPage';
 import EffortEstimationForm from '../../pages/scope/EffortEstimationForm';
 import AllocationListPage from '../../pages/allocations/AllocationListPage';
 import AllocationDetailPage from '../../pages/allocations/AllocationDetailPage';
+import AllocationConflictsReportPage from '../../pages/reports/AllocationConflictsReportPage';
+import ResourceUtilizationReportPage from '../../pages/reports/ResourceUtilizationReportPage';
+import ReleaseTimelineReportPage from '../../pages/reports/ReleaseTimelineReportPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -55,6 +58,11 @@ const AppRouter: React.FC = () => {
         {/* Allocation Management */}
         <Route path="allocations" element={<AllocationListPage />} />
         <Route path="releases/:releaseId/allocations" element={<AllocationDetailPage />} />
+        
+        {/* Reports */}
+        <Route path="reports/allocation-conflicts" element={<AllocationConflictsReportPage />} />
+        <Route path="reports/resource-utilization" element={<ResourceUtilizationReportPage />} />
+        <Route path="reports/release-timeline" element={<ReleaseTimelineReportPage />} />
         
         {/* Placeholder routes for future features */}
       </Route>

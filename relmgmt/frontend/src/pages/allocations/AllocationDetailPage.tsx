@@ -4,6 +4,9 @@ import { allocationService } from '../../services/api/v1/allocationService';
 import type { Allocation } from '../../services/api/v1/allocationService';
 import releaseService from '../../services/api/v1/releaseService';
 import type { Release } from '../../types';
+import CapacityChart from '../../components/charts/CapacityChart';
+import { computeMaxWeeklyAllocationPerResource, enumerateWeeks, computeWeeklyAllocationForWeek } from '../../lib/capacity';
+import AllocationGrid from '../../components/allocation/AllocationGrid';
 
 const AllocationDetailPage: React.FC = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
@@ -12,6 +15,8 @@ const AllocationDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'max' | 'weekly'>('max');
+  const [selectedWeek, setSelectedWeek] = useState<string>('');
 
   useEffect(() => {
     if (releaseId) {
@@ -28,6 +33,8 @@ const AllocationDetailPage: React.FC = () => {
       ]);
       setRelease(releaseData);
       setAllocations(allocationsData);
+      const weeks = enumerateWeeks(allocationsData);
+      setSelectedWeek(weeks[0] || '');
       setError(null);
     } catch (err) {
       setError('Failed to load release and allocation data');
@@ -182,7 +189,7 @@ const AllocationDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Allocations Table */}
+      {/* Allocation Grid & Table */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Resource Allocations</h2>
@@ -212,6 +219,49 @@ const AllocationDetailPage: React.FC = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
+            {/* Weekly Allocation Grid */}
+            <div className="px-6 pt-6">
+              <h3 className="text-md font-medium text-gray-900 mb-2">Weekly Allocation Grid</h3>
+              <AllocationGrid allocations={allocations} />
+            </div>
+
+            {/* Capacity Chart */}
+            <div className="px-6 pt-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-md font-medium text-gray-900">Capacity Load</h3>
+                <div className="flex items-center space-x-3">
+                  <select
+                    aria-label="View Mode"
+                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                    value={viewMode}
+                    onChange={(e) => setViewMode(e.target.value as 'max' | 'weekly')}
+                  >
+                    <option value="max">Max per Resource</option>
+                    <option value="weekly">Specific Week</option>
+                  </select>
+                  {viewMode === 'weekly' && (
+                    <select
+                      aria-label="Week Selector"
+                      className="border border-gray-300 rounded px-2 py-1 text-sm"
+                      value={selectedWeek}
+                      onChange={(e) => setSelectedWeek(e.target.value)}
+                    >
+                      {enumerateWeeks(allocations).map((wk) => (
+                        <option key={wk} value={wk}>{wk}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+              <CapacityChart
+                data={
+                  viewMode === 'max'
+                    ? computeMaxWeeklyAllocationPerResource(allocations)
+                    : (selectedWeek ? computeWeeklyAllocationForWeek(allocations, selectedWeek) : [])
+                }
+              />
+            </div>
+
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

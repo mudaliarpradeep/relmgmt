@@ -134,9 +134,18 @@ frontend/
 
 - **GanttChart**: Component for displaying Gantt charts
 - **CapacityChart**: Component for displaying capacity load
+- Supports weekly and max-per-resource modes with selector in `AllocationDetailPage`
+- Color coding per PRD 4.4.2: GREEN = exactly 4.5 days, YELLOW = under 4.5, RED = over 4.5
+- Loading/empty/error states implemented
+- Storybook stories with height/loading/error controls
 - **UtilizationChart**: Component for displaying resource utilization
 - **TimelineChart**: Component for displaying release timeline
 - **SkillCapacityChart**: Component for displaying skill-based capacity with available and allocated capacity
+
+- **ConflictsChart**: Component for visualizing weekly over-allocation by resource
+  - Transforms `AllocationConflictResponse` into bar chart data
+  - Loading/empty/error states implemented
+  - Storybook stories available
 
 #### 4.1.7 Modal Components
 
@@ -190,6 +199,13 @@ frontend/
 
 - **AllocationPage**: Page for viewing and managing allocations
 - **AllocationConflictsPage**: Page for viewing allocation conflicts
+  - Displays `ConflictsChart` above conflicts table
+  - Table lists weekly conflicts per resource with severity styles
+
+- **AllocationDetailPage** (Release-level allocations):
+  - Weekly Allocation Grid: resources as rows, weeks as columns, values show allocated days (Mon–Fri only)
+  - Capacity Load: `CapacityChart` with toggle between Max-per-resource and Specific Week
+  - Generate allocations action triggers backend and reloads data
 
 #### 4.2.8 Reports
 
@@ -453,9 +469,15 @@ const routes = [
 
 - Display resource loading with color coding
 - GREEN: Resource loaded for exactly 4.5 person-days in a week
-- AMBER: Resource loaded for over 4.5 person-days in a week
-- YELLOW: Resource loaded for less than 4.5 person-days in a week
+- RED: Resource loaded for over 4.5 person-days in a week
+- YELLOW (Amber): Resource loaded for less than 4.5 person-days in a week
 - Filtering by time period and resource attributes
+
+### 9.5 Allocation Grid
+
+- Weekly grid (Mon–Fri business days) with resources as rows and week-start dates as columns
+- Cell values equal number of business days overlapping allocation range multiplied by allocation factor
+- Used within `AllocationDetailPage` as an at-a-glance planning matrix
 
 ### 9.3 Resource Utilization Chart
 
