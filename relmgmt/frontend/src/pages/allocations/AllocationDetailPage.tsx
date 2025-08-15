@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { allocationService, Allocation } from '../../services/api/v1/allocationService';
-import { releaseService } from '../../services/api/v1/releaseService';
-import { ReleaseResponse } from '../../services/api/v1/releaseService';
+import { allocationService } from '../../services/api/v1/allocationService';
+import type { Allocation } from '../../services/api/v1/allocationService';
+import releaseService from '../../services/api/v1/releaseService';
+import type { Release } from '../../types';
 
 const AllocationDetailPage: React.FC = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const [allocations, setAllocations] = useState<Allocation[]>([]);
-  const [release, setRelease] = useState<ReleaseResponse | null>(null);
+  const [release, setRelease] = useState<Release | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +23,7 @@ const AllocationDetailPage: React.FC = () => {
     try {
       setLoading(true);
       const [releaseData, allocationsData] = await Promise.all([
-        releaseService.getReleaseById(parseInt(releaseId!)),
+        releaseService.getRelease(parseInt(releaseId!)),
         allocationService.getAllocationsForRelease(parseInt(releaseId!))
       ]);
       setRelease(releaseData);

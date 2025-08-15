@@ -301,6 +301,7 @@ public class AllocationServiceImpl implements AllocationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AllocationConflictResponse> getAllocationConflicts() {
         List<Allocation> all = allocationRepository.findAll();
         if (all.isEmpty()) {

@@ -37,14 +37,14 @@ class AllocationService {
    * Generate allocations for a release
    */
   async generateAllocation(releaseId: number): Promise<void> {
-    await apiClient.post(`/api/v1/releases/${releaseId}/allocate`);
+    await apiClient.post(`/v1/releases/${releaseId}/allocate`);
   }
 
   /**
    * Get all allocations for a release
    */
   async getAllocationsForRelease(releaseId: number): Promise<Allocation[]> {
-    const response = await apiClient.get(`/api/v1/releases/${releaseId}/allocations`);
+    const response = await apiClient.get(`/v1/releases/${releaseId}/allocations`);
     return response.data;
   }
 
@@ -52,7 +52,7 @@ class AllocationService {
    * Get all allocations for a resource
    */
   async getAllocationsForResource(resourceId: number): Promise<Allocation[]> {
-    const response = await apiClient.get(`/api/v1/resources/${resourceId}/allocations`);
+    const response = await apiClient.get(`/v1/resources/${resourceId}/allocations`);
     return response.data;
   }
 
@@ -60,7 +60,7 @@ class AllocationService {
    * Get allocation conflicts
    */
   async getAllocationConflicts(): Promise<AllocationConflictResponse[]> {
-    const response = await apiClient.get('/api/v1/allocations/conflicts');
+    const response = await apiClient.get('/v1/allocations/conflicts');
     return response.data;
   }
 }

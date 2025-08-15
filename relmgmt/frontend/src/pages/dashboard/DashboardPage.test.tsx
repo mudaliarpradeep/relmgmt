@@ -62,6 +62,13 @@ vi.mock('../../services/api/v1/resourceService', () => ({
   }
 }));
 
+// Mock ReleaseService
+vi.mock('../../services/api/v1/releaseService', () => ({
+  default: {
+    getActiveReleases: vi.fn().mockResolvedValue([{}, {}, {}, {}]),
+  }
+}));
+
 describe('DashboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -92,7 +99,9 @@ describe('DashboardPage', () => {
     // Check that stat values are present
     const statValues = screen.getAllByTestId('stat-value');
     expect(statValues).toHaveLength(4);
-    expect(statValues[0]).toHaveTextContent('4');
+    await waitFor(() => {
+      expect(screen.getAllByTestId('stat-value')[0]).toHaveTextContent('4');
+    });
     
     // Wait for the resource count to load from the API
     await waitFor(() => {

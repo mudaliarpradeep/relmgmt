@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { allocationService, AllocationConflictResponse } from '../../services/api/v1/allocationService';
-import { StatCard } from '../../components/ui/StatCard';
+import { allocationService } from '../../services/api/v1/allocationService';
+import type { AllocationConflictResponse } from '../../services/api/v1/allocationService';
+import StatCard from '../../components/ui/StatCard';
 
 const AllocationListPage: React.FC = () => {
   const [conflicts, setConflicts] = useState<AllocationConflictResponse[]>([]);
@@ -76,22 +77,19 @@ const AllocationListPage: React.FC = () => {
         <StatCard
           title="Total Conflicts"
           value={conflicts.length.toString()}
-          description="Resources with allocation conflicts"
-          icon="⚠️"
+          color="red"
           onClick={() => {}}
         />
         <StatCard
           title="Active Releases"
           value="View All"
-          description="Manage release allocations"
-          icon="📋"
+          color="blue"
           onClick={() => window.location.href = '/releases'}
         />
         <StatCard
           title="Resource Management"
           value="View All"
-          description="Manage resource allocations"
-          icon="👥"
+          color="green"
           onClick={() => window.location.href = '/resources'}
         />
       </div>
