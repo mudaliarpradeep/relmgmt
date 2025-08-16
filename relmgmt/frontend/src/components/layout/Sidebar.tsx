@@ -19,6 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { path: '/releases', label: 'Release Management', icon: '🚀' },
     { path: '/scope', label: 'Scope Management', icon: '📋' },
     { path: '/allocations', label: 'Allocation Management', icon: '⚖️' },
+    { path: '/notifications', label: 'Notifications', icon: '🔔' },
   ];
 
   const reportItems = [

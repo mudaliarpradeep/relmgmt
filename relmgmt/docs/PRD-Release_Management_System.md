@@ -207,6 +207,26 @@ The system shall allocate resources to releases based on the following rules:
 - Users shall be able to view a history of notifications.
 - Users shall be able to dismiss notifications.
 
+#### 4.6.3 Notification Detail
+- Users shall be able to view the full details of a notification in a popup (modal), including:
+  - Event type, message, timestamp, and read status
+  - Related entity type and identifier (e.g., resource, release, or phase)
+  - Contextual action link to navigate to the related entity (when applicable)
+- The detail popup shall allow marking the notification as read and dismissing it.
+
+#### 4.6.4 Notification Header Preview
+- The header shall display an unread badge on the notification bell when there are unread notifications.
+- Clicking the bell shall open a dropdown preview that:
+  - Shows the latest 5 notifications sorted by most recent first
+  - Visually distinguishes unread items (emphasis style)
+  - Allows per-item actions: Mark as read, Open (navigates to related entity when available)
+  - Provides a "Mark all as read" action (affects only current user)
+  - Provides a "View all" link that navigates to the full notifications page (`/notifications`)
+- The dropdown shall show informative states:
+  - Loading state while fetching notifications
+  - Error state with a retry affordance on failure
+  - Empty state when there are no notifications
+
 ### 4.7 Audit and Transaction Logging
 
 #### 4.7.1 Transaction Logging

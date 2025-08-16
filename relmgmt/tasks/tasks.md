@@ -99,15 +99,17 @@
    - Add Sidebar navigation for Reports ✅
    - Add router-based integration test to navigate and trigger export ✅
 
-9. **FE-Phase-9: Notification System**
-   - Write tests for notification service
-   - Implement notification service
-   - Write tests for notification hooks
-   - Implement notification hooks
-   - Write tests for notification components
-   - Implement notification components
-   - Write tests for notification pages
-   - Implement notification pages
+9. **FE-Phase-9: Notification System** ✅ **COMPLETED**
+   - Write tests for notification service ✅
+   - Implement notification service ✅
+   - Write tests for notification hooks ✅
+   - Implement notification hooks ✅
+   - Write tests for notification components ✅
+   - Implement notification components (Header preview, Detail modal) ✅
+   - Write tests for notification pages ✅
+   - Implement notification pages (`/notifications` list with filters, pagination) ✅
+   - Add Storybook: list state variants (loading/error/empty) and modal ✅
+   - Add header preview interaction tests (badge decrement, mark-all) ✅
 
 10. **FE-Phase-10: Audit Log and Final Integration**
     - Write tests for audit log service

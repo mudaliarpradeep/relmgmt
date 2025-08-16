@@ -56,6 +56,15 @@ export const handlers = [
       empty: true,
     })
   }),
+  http.put('http://localhost:8080/api/v1/notifications/:id/read', () => {
+    return HttpResponse.json({});
+  }),
+  http.put('http://localhost:8080/api/v1/notifications/read-all', () => {
+    return HttpResponse.json({});
+  }),
+  http.delete('http://localhost:8080/api/v1/notifications/:id', () => {
+    return HttpResponse.json({});
+  }),
   // Dashboard dependent endpoints
   http.get('http://localhost:8080/api/v1/resources', ({ request }) => {
     // Return minimal pageable shape

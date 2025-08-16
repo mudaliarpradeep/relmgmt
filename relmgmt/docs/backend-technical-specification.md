@@ -1680,6 +1680,23 @@ Key versioning principles:
 - **Endpoint**: `DELETE /api/v1/notifications/{id}`
 - **Response**: HTTP 204 No Content
 
+#### 5.8.5 Get Notification Detail
+
+- **Endpoint**: `GET /api/v1/notifications/{id}`
+- **Response**: Notification detail object
+  ```json
+  {
+    "id": 1,
+    "eventType": "ALLOCATION_CONFLICT",
+    "entityType": "Resource",
+    "entityId": 5,
+    "message": "Resource John Doe has allocation conflict in week of 2025-01-06",
+    "isRead": false,
+    "createdAt": "2025-01-06T10:15:30Z",
+    "readAt": null
+  }
+  ```
+
 ### 5.9 Reports
 
 #### 5.9.1 Resource Utilization Report

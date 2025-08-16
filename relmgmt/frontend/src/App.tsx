@@ -9,7 +9,7 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <NotificationsProvider pollMs={Number(import.meta.env.VITE_NOTIF_POLL_MS) || 30000}>
+        <NotificationsProvider pollMs={Number(import.meta.env.VITE_NOTIF_POLL_MS) || 120000}>
           <AppRouter />
         </NotificationsProvider>
       </AuthProvider>

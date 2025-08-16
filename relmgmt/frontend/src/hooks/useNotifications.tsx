@@ -18,12 +18,16 @@ const NotificationsContext = createContext<NotificationsContextValue | undefined
 interface NotificationsProviderProps {
   children: ReactNode;
   pollMs?: number;
+  initialNotifications?: Notification[];
+  initialLoading?: boolean;
+  initialError?: string | null;
+  disableInitialFetch?: boolean;
 }
 
-export function NotificationsProvider({ children, pollMs }: NotificationsProviderProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export function NotificationsProvider({ children, pollMs, initialNotifications, initialLoading, initialError, disableInitialFetch }: NotificationsProviderProps) {
+  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications ?? []);
+  const [loading, setLoading] = useState<boolean>(initialLoading ?? false);
+  const [error, setError] = useState<string | null>(initialError ?? null);
   const pollRef = useRef<number | null>(null);
   const lastFiltersRef = useRef<NotificationFilters | undefined>(undefined);
 
@@ -61,9 +65,11 @@ export function NotificationsProvider({ children, pollMs }: NotificationsProvide
 
   // Initial load
   useEffect(() => {
-    fetchNotifications();
+    if (!disableInitialFetch) {
+      fetchNotifications();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [disableInitialFetch]);
 
   // Polling (optional)
   useEffect(() => {

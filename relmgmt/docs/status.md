@@ -12,7 +12,7 @@
 | FE-Phase-6    | Project and Scope Management                | Completed   | Project/Scope services with tests, list/detail/create/edit pages, effort estimation form implemented with Zod/RHF validation; routes integrated |
 | FE-Phase-7    | Allocation and Visualization                | Completed   | AllocationListPage includes ConflictsChart; AllocationDetailPage includes Weekly Allocation Grid and CapacityChart with weekly/max toggle; color coding per PRD; loading/empty/error states; Storybook stories added; tests passing (181) |
 | FE-Phase-8    | Reports and Data Export                     | Completed   | Report pages (Allocation Conflicts, Resource Utilization, Release Timeline) implemented with filters (from/to/year), export-to-Excel with filename suffixes, Sidebar navigation, router integration test; all tests passing (196) |
-| FE-Phase-9    | Notification System                         | In Progress | Implemented notification types, API service (get/mark read/mark all/delete), hook + context provider with polling, unread badge in `Header`, MSW handler, route `/notifications`, and `NotificationListPage` with filters and actions; tests added and passing |
+| FE-Phase-9    | Notification System                         | Completed   | Header preview dropdown (latest 5, unread emphasis, per-item Mark read/Open, Mark all as read, View all), `NotificationDetail` modal wired from list and header, list filters + pagination, Storybook states; integration and unit tests added |
 | FE-Phase-10   | Audit Log and Final Integration             | Pending    |       |
 | BE-Phase-1    | Project Setup and Core Infrastructure       | Completed   | All dependencies added, proper package structure, CI/CD pipeline, configuration files, and basic infrastructure implemented |
 | BE-Phase-2    | Authentication and User Management          | Completed   | JWT authentication implemented, user entity/repository/service with tests, security configuration with tests, 61/61 tests passing (100%), 76% code coverage |
@@ -21,7 +21,7 @@
 | BE-Phase-5    | Project and Scope Management                | Completed   | Project, Scope Item, and Effort Estimate modules implemented end-to-end (entities, repositories, services, controllers, DB migration V6). Added repository and service unit tests; all tests passing. |
 | BE-Phase-6    | Allocation Engine                           | Completed   | Comprehensive allocation algorithm implemented with all PRD phases (Functional Design, Technical Design, SIT, BUILD, UAT, Smoke), allocation factor validation (0.5-1.0 person-days), enhanced skill function matching, and full test coverage |
 | BE-Phase-7    | Reporting                                   | Completed | Implemented reporting: allocation conflicts, resource utilization (from/to, resourceIds), release timeline (year), capacity forecast (optional skill filters), skill-based capacity forecast (optional skill filters), and enhanced Excel export. Added controller + service tests; all passing. |
-| BE-Phase-8    | Notification System                         | Pending    |       |
+| BE-Phase-8    | Notification System                         | Completed   | Complete notification system with entity, repository, service, controller, and comprehensive tests. All endpoints match frontend expectations. |
 | BE-Phase-9    | Audit and Transaction Logging               | Pending    |       |
 | BE-Phase-10   | Integration Testing and Performance Optimization | Pending |   |
 
@@ -37,7 +37,7 @@
 ## Test Coverage & Quality Metrics
 
 ### **Backend Test Results**
-- **Total Tests**: 246/246 passing (100% success rate)
+- **Total Tests**: 284/284 passing (100% success rate)
 - **Coverage**: 76% overall code coverage maintained
 - **Coverage Breakdown**:
   - DTOs: 100%
@@ -49,10 +49,10 @@
   - Release Management: 99% (comprehensive test coverage for all components)
 - **Build**: ✅ `./gradlew build` successful
 - **Linting**: ✅ No issues detected
-- **New Features**: ✅ Release Management system fully implemented and tested
+- **New Features**: ✅ Notification system fully implemented and tested with complete CRUD operations, filtering, and pagination
 
 ### **Frontend Test Results**
-- **Total Tests**: 196/196 passing (0 skipped)
+- **Total Tests**: 217/217 passing (0 skipped)
 - **Coverage**: 55% overall (to be re-measured after Phase 6 build-out)
 - **Coverage Breakdown**:
   - Dashboard components: 100%
@@ -69,7 +69,7 @@
 - **Authentication**: ✅ Full frontend-backend authentication integration functional
 - **UI/UX**: ✅ Responsive design tested across device sizes
 - **Code Quality**: ✅ All linting rules enforced
-- **Test Suite**: ✅ 196/196 tests passing (0 skipped)
+- **Test Suite**: ✅ 217/217 tests passing (0 skipped)
 - **Documentation**: ✅ All specs updated and synchronized
 - **Routing**: ✅ React Router with protected routes implemented
 
@@ -82,7 +82,8 @@
   - **STATUS**: Login functionality now working with plain text password
 
 ## Recent Updates
-- **FE-Phase-9 Notifications – Progress (August 2025)**: Frontend notifications foundation implemented. Added notification domain types (`EventType`, `Notification`, `NotificationFilters`) and enum helpers in `frontend/src/types/index.ts`. Created `notificationService` with endpoints: `getNotifications`, `markAsRead`, `markAllAsRead`, `deleteNotification`, with unit tests (5/5 passing). Built `useNotifications` hook and `NotificationsProvider` context supporting initial load, optimistic mark-read/mark-all/delete, and optional window-focused polling (configurable via `VITE_NOTIF_POLL_MS`, default 30s; disabled in tests). Integrated provider in `App.tsx` and added unread badge to `Header` bell. Added MSW handler for `/api/v1/notifications`. Introduced `/notifications` route and `NotificationListPage` with filters (event type, read/unread) and actions (mark read, mark all, dismiss). Updated test utilities to wrap with `NotificationsProvider`. Entire frontend test suite is green (205/205) after wrapping `ReportsIntegration` with provider and disabling polling in that test to avoid timeouts.
+- **BE-Phase-8 Notification System – Completed (August 2025)**: Backend notification system fully implemented with TDD approach. Created `EventTypeEnum` with all required event types (ALLOCATION_CONFLICT, OVER_ALLOCATION, DEADLINE_APPROACHING, BLOCKER_ADDED, BLOCKER_RESOLVED). Implemented `Notification` entity extending `BaseEntity` with proper JPA annotations and relationships. Built `NotificationRepository` with pagination and filtering methods (by user, read status, event type). Created `NotificationService` interface and implementation with current user context, mark-as-read functionality, and bulk operations. Implemented `NotificationController` with REST endpoints matching frontend expectations: `GET /api/v1/notifications` (with filters), `PUT /api/v1/notifications/{id}/read`, `PUT /api/v1/notifications/read-all`, `DELETE /api/v1/notifications/{id}`. Added comprehensive test coverage: repository tests (4 tests), service tests (8 tests), controller tests (5 tests). Created Flyway migration `V8__create_notifications_table.sql` with proper indexes. All backend tests passing (284/284, 100% success rate). System ready for frontend integration.
+- **FE-Phase-9 Notifications – Progress (August 2025)**: Frontend notifications foundation implemented. Added notification domain types (`EventType`, `Notification`, `NotificationFilters`) and enum helpers in `frontend/src/types/index.ts`. Created `notificationService` with endpoints: `getNotifications`, `markAsRead`, `markAllAsRead`, `deleteNotification`, with unit tests (5/5 passing). Built `useNotifications` hook and `NotificationsProvider` context supporting initial load, optimistic mark-read/mark-all/delete, and optional window-focused polling (configurable via `VITE_NOTIF_POLL_MS`, default 120s; disabled in tests). Integrated provider in `App.tsx` and added unread badge to `Header` bell. Added MSW handler for `/api/v1/notifications`. Introduced `/notifications` route and `NotificationListPage` with filters (event type, read/unread) and actions (mark read, mark all, dismiss). Updated test utilities to wrap with `NotificationsProvider`. Entire frontend test suite is green (205/205) after wrapping `ReportsIntegration` with provider and disabling polling in that test to avoid timeouts.
 - **BE-Phase-7 Reporting – Progress (August 2025)**: Implemented backend reporting endpoints and service logic. `ReportController` now supports: Allocation Conflicts (`/api/v1/reports/allocation-conflicts`), Resource Utilization with date range and `resourceIds` (`/api/v1/reports/resource-utilization?from&to&resourceIds`), Release Timeline with year filter (`/api/v1/reports/release-timeline?year`), Capacity Forecast (`/api/v1/reports/capacity-forecast?from&to&skillFunction&skillSubFunction`), Skill Capacity Forecast (`/api/v1/reports/skill-capacity-forecast?from&to&skillFunction&skillSubFunction`), and Excel export (query and path variants) with meaningful headers and filter summary. Added DTOs (`ResourceUtilizationRow`, `ReleaseTimelineRow`, `CapacityForecastResponse`, `SkillCapacityForecastResponse`), date validation (400 on invalid ranges), and date-scoped allocation query. Tests updated; all green.
 - **BE-Phase-5 Project and Scope Management Complete (August 2025)**: Implemented `Project`, `ScopeItem`, and `EffortEstimate` entities with full CRUD APIs per spec. Added repositories (`ProjectRepository`, `ScopeItemRepository`, `EffortEstimateRepository`), services (`ProjectService`, `ScopeService`) and controllers (`ProjectController`, `ScopeController`). Included Flyway migration `V6__create_project_and_scope_management_tables.sql`. Added tests: `ProjectRepositoryTest`, `ScopeItemRepositoryTest`, `ProjectServiceTest`, `ScopeServiceTest`. Backend tests now 246/246 passing; coverage maintained.
 - Backend next-identifier endpoint fix (August 2025): Resolved 500 error on `/api/v1/releases/next-identifier` by updating JPQL to use `CONCAT(:year, '-%')` in `ReleaseRepository.findHighestIdentifierNumberForYear`. Endpoint is protected; requires JWT. Verified end-to-end (returns e.g., `2025-001`).

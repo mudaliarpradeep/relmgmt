@@ -49,6 +49,7 @@ These variables are required across all environments:
 | `VITE_API_URL` | URL for the backend API | Yes | `http://localhost:8080/api` | `http://localhost:8080/api` |
 | `VITE_APP_TITLE` | Application title | No | `Release Management System` | `Release Management System - Dev` |
 | `VITE_LOG_LEVEL` | Client-side logging level | No | `info` | `debug`, `info`, `warn`, `error` |
+| `VITE_NOTIF_POLL_MS` | Notifications polling interval in ms (set 0 to disable) | No | `120000` | `120000` |
 
 ### Environment-Specific Variables
 
@@ -72,6 +73,7 @@ These variables are required across all environments:
 | `VITE_API_URL` | `http://localhost:8080/api` | Local backend API (CORS configured) |
 | `VITE_LOG_LEVEL` | `debug` | Verbose logging for development |
 | `VITE_MOCK_API` | `false` | Use real API instead of mocks |
+| `VITE_NOTIF_POLL_MS` | `120000` | Poll notifications every 120s (0 to disable) |
 
 #### Testing Environment
 
@@ -91,6 +93,7 @@ These variables are required across all environments:
 |----------|-------|-------------|
 | `VITE_API_URL` | `http://localhost:8080/api` | Test backend API (CORS configured) |
 | `VITE_MOCK_API` | `true` | Use mock API for component tests |
+| `VITE_NOTIF_POLL_MS` | `0` | Disable polling during tests |
 
 #### Staging Environment
 
@@ -109,6 +112,7 @@ These variables are required across all environments:
 |----------|-------|-------------|
 | `VITE_API_URL` | `https://staging-api.example.com/api/v1` | Staging backend API |
 | `VITE_APP_TITLE` | `Release Management System - Staging` | Staging environment indicator |
+| `VITE_NOTIF_POLL_MS` | `120000` | Poll notifications every 120s |
 
 #### Production Environment
 
@@ -129,6 +133,7 @@ These variables are required across all environments:
 |----------|-------|-------------|
 | `VITE_API_URL` | `https://api.example.com/api/v1` | Production backend API |
 | `VITE_LOG_LEVEL` | `error` | Minimal logging in production |
+| `VITE_NOTIF_POLL_MS` | `120000` | Poll notifications every 120s |
 
 ## Configuration Files
 
@@ -391,6 +396,7 @@ logging:
 VITE_APP_TITLE=Release Management System
 VITE_LOG_LEVEL=info
 VITE_MOCK_API=false
+VITE_NOTIF_POLL_MS=120000
 ```
 
 #### .env.development (Development Configuration)
@@ -398,6 +404,7 @@ VITE_MOCK_API=false
 ```
 VITE_API_URL=http://localhost:8080/api/v1
 VITE_LOG_LEVEL=debug
+VITE_NOTIF_POLL_MS=120000
 ```
 
 #### .env.production (Production Configuration)
@@ -405,6 +412,7 @@ VITE_LOG_LEVEL=debug
 ```
 VITE_API_URL=/api/v1
 VITE_LOG_LEVEL=error
+VITE_NOTIF_POLL_MS=120000
 ```
 
 ### Docker Environment Variables

@@ -228,8 +228,18 @@ frontend/
 
 #### 4.2.9 Notification Management
 
-- **NotificationListPage**: List of all notifications with filters
-- **NotificationDetailPage**: Detailed view of a notification
+- **NotificationListPage**: List of all notifications with filters and pagination
+  - Filters: `eventType` (optional), `isRead` (optional)
+  - Pagination: `page`, `size`; controls persist current filters
+  - Actions: per-item Mark as read, Dismiss; toolbar Mark all as read
+  - States: loading spinner, inline error banner, empty list message
+- **Header Notification Preview**: Dropdown from bell icon
+  - Shows up to 5 most recent notifications with unread emphasis
+  - Actions: per-item Mark as read, Open (navigates to related entity when available), Mark all as read, View all
+  - States: loading, error (with retry), empty
+- **Notification Detail (Modal)**: Popup showing full notification details (event, message, timestamp, related entity link)
+  - Actions: Mark read, Dismiss, Close
+  - Invoked from NotificationList row or Header preview
 
 #### 4.2.10 Audit
 
@@ -368,6 +378,7 @@ The frontend is configured to work with the backend CORS settings:
 - `markAsRead(id)`: Mark notification as read
 - `markAllAsRead()`: Mark all notifications as read
 - `deleteNotification(id)`: Delete notification
+- Provider configuration: `NotificationsProvider` supports polling via `VITE_NOTIF_POLL_MS`, and optional `initialNotifications` / `initialLoading` / `initialError` / `disableInitialFetch` for Storybook/testing
 
 #### 6.2.9 Audit Service
 
@@ -424,10 +435,6 @@ const routes = [
           {
             index: true,
             element: <NotificationListPage />
-          },
-          {
-            path: ":id",
-            element: <NotificationDetailPage />
           }
         ]
       },
