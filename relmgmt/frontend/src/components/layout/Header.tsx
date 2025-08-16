@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { useNotifications } from '../../hooks/useNotifications';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -7,6 +8,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const handleLogout = () => {
@@ -44,6 +46,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM10.5 3.75a6 6 0 0 1 6 6v4.5l2.25 2.25a1.5 1.5 0 0 1-1.5 2.25h-13.5a1.5 1.5 0 0 1-1.5-2.25L6 14.25V9.75a6 6 0 0 1 6-6z" />
               </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold leading-none text-white bg-red-600 rounded-full" data-testid="unread-badge">
+                  {unreadCount}
+                </span>
+              )}
             </button>
 
             {/* Notifications dropdown */}
@@ -55,6 +62,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   </div>
                   <div className="px-4 py-3 text-sm text-gray-500">
                     No new notifications
+                    <div className="mt-2">
+                      <a href="/notifications" className="text-blue-600 hover:underline text-sm">View all</a>
+                    </div>
                   </div>
                 </div>
               </div>

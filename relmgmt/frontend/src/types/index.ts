@@ -414,3 +414,51 @@ export interface FormField {
   options?: { value: string; label: string }[];
   validation?: Record<string, unknown>;
 } 
+
+// Notification types
+export const EventType = {
+  ALLOCATION_CONFLICT: 'Allocation Conflict',
+  OVER_ALLOCATION: 'Over Allocation',
+  DEADLINE_APPROACHING: 'Deadline Approaching',
+  BLOCKER_ADDED: 'Blocker Added',
+  BLOCKER_RESOLVED: 'Blocker Resolved'
+} as const;
+
+export type EventTypeEnum = typeof EventType[keyof typeof EventType];
+
+export const getEventTypeEnumName = (displayName: string): string => {
+  switch (displayName) {
+    case EventType.ALLOCATION_CONFLICT:
+      return 'ALLOCATION_CONFLICT';
+    case EventType.OVER_ALLOCATION:
+      return 'OVER_ALLOCATION';
+    case EventType.DEADLINE_APPROACHING:
+      return 'DEADLINE_APPROACHING';
+    case EventType.BLOCKER_ADDED:
+      return 'BLOCKER_ADDED';
+    case EventType.BLOCKER_RESOLVED:
+      return 'BLOCKER_RESOLVED';
+    default:
+      return displayName;
+  }
+};
+
+export interface Notification {
+  id: number;
+  userId?: number;
+  eventType: EventTypeEnum;
+  entityType?: string;
+  entityId?: number;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  readAt?: string;
+}
+
+export interface NotificationFilters {
+  eventType?: EventTypeEnum;
+  isRead?: boolean;
+  page?: number;
+  size?: number;
+  sort?: string;
+}

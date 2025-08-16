@@ -191,13 +191,15 @@
    - Write tests for conflict detection
    - Implement conflict detection
 
-7. **BE-Phase-7: Reporting**
-   - Write tests for each report type
-   - Implement report generation services
-   - Write tests for report controllers
-   - Implement report controllers
-   - Write tests for export functionality
-   - Implement export functionality
+7. **BE-Phase-7: Reporting** ✅
+   - Write tests for each report type ✅ (Allocation Conflicts, Resource Utilization, Release Timeline, Capacity Forecast, Skill Capacity Forecast)
+   - Implement report generation services ✅ (utilization weekly aggregation, timeline min/max per release, forecasts)
+   - Write tests for report controllers ✅ (validation, export query + path variants)
+   - Implement report controllers ✅ (endpoints with filters and date validation)
+   - Write tests for export functionality ✅ (content-type, attachment, params)
+   - Implement export functionality ✅ (Summary + Data sheets; headers, filter summary)
+   - Add skill filters to forecast endpoints ✅ (skillFunction, skillSubFunction)
+   - Update backend technical specification ✅ (new DTOs, endpoints, validation, export)
 
 8. **BE-Phase-8: Notification System**
    - Write tests for notification repository

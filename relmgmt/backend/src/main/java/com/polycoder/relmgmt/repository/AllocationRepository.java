@@ -14,10 +14,9 @@ public interface AllocationRepository extends JpaRepository<Allocation, Long> {
 
     List<Allocation> findByResourceId(Long resourceId);
 
-    @Query("select a from Allocation a where a.resource.id = :resourceId and ((a.startDate <= :endDate and a.endDate >= :startDate))")
-    List<Allocation> findOverlappingAllocations(@Param("resourceId") Long resourceId,
-                                                @Param("startDate") LocalDate startDate,
-                                                @Param("endDate") LocalDate endDate);
+    @Query("select a from Allocation a where (:from is null or a.endDate >= :from) and (:to is null or a.startDate <= :to)")
+    List<Allocation> findOverlapping(@Param("from") LocalDate from,
+                                     @Param("to") LocalDate to);
 }
 
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { BrowserRouter, MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../hooks/useAuth';
+import { NotificationsProvider } from '../hooks/useNotifications';
 
 // Custom render function that includes Router context
 const AllTheProviders = ({ children, initialEntries = ['/'] }: { children: React.ReactNode; initialEntries?: string[] }) => {
@@ -34,9 +35,11 @@ export const renderWithAuth = (
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <MemoryRouter initialEntries={initialEntries}>
       <AuthProvider>
-        <Routes>
-          <Route path="*" element={children} />
-        </Routes>
+        <NotificationsProvider>
+          <Routes>
+            <Route path="*" element={children} />
+          </Routes>
+        </NotificationsProvider>
       </AuthProvider>
     </MemoryRouter>
   );

@@ -33,6 +33,29 @@ export const handlers = [
       },
     })
   }),
+  // Notifications
+  http.get('http://localhost:8080/api/v1/notifications', () => {
+    return HttpResponse.json({
+      content: [],
+      pageable: {
+        pageNumber: 0,
+        pageSize: 20,
+        sort: { sorted: true, unsorted: false, empty: false },
+        offset: 0,
+        paged: true,
+        unpaged: false,
+      },
+      totalElements: 0,
+      totalPages: 0,
+      last: true,
+      size: 20,
+      number: 0,
+      sort: { sorted: true, unsorted: false, empty: false },
+      numberOfElements: 0,
+      first: true,
+      empty: true,
+    })
+  }),
   // Dashboard dependent endpoints
   http.get('http://localhost:8080/api/v1/resources', ({ request }) => {
     // Return minimal pageable shape
