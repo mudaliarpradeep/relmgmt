@@ -211,10 +211,20 @@ frontend/
 
 - **ReportDashboardPage**: Overview of available reports
 - **ResourceUtilizationReportPage**: Resource utilization report
+  - Filters: `from` and `to` date inputs; Apply to reload data with filters
+  - Export: Excel via Export button; includes filters as query params; filename suffix includes selected range
+  - States: loading spinner, error banner, empty table handling; Export disabled while loading or when no data
 - **ReleaseTimelineReportPage**: Release timeline report
+  - Filter: `year` numeric input; Apply to reload timeline for the year
+  - Export: Excel via Export button; includes `year` param; filename suffix includes the year
+  - States: loading spinner, error banner, empty table handling; Export disabled while loading or when no data
 - **AllocationConflictsReportPage**: Allocation conflicts report
-- **CapacityForecastReportPage**: Capacity forecast report
-- **SkillCapacityForecastReportPage**: Skill-based capacity forecast report showing allocated vs. available capacity by skill function and sub-function
+  - Visualization: `ConflictsChart` (bar chart), plus details table (resource, week, totals)
+  - Filters: `from` and `to` date inputs for report/export scoping
+  - Export: Excel via Export button; includes filters as query params; filename suffix includes selected range
+  - States: loading (chart placeholder), error banner, empty table handling; Export disabled while loading or when no data
+- **CapacityForecastReportPage**: Capacity forecast report (planned)
+- **SkillCapacityForecastReportPage**: Skill-based capacity forecast report showing allocated vs. available capacity by skill function and sub-function (planned)
 
 #### 4.2.9 Notification Management
 
@@ -484,12 +494,14 @@ const routes = [
 - Display allocation percentage for each resource across time
 - Highlighting under/over-allocation periods
 - Filtering by resource attributes
+ - Report page shows a tabular summary with per-resource utilization and supports date filters and Excel export
 
 ### 9.4 Release Timeline Chart
 
 - Display all releases with their phases on a timeline
 - Identify potential bottlenecks
 - Filtering by year or time period
+ - Report page shows a tabular summary of releases with start/end dates; supports year filter and Excel export
 
 ## 10. Forms and Validation
 

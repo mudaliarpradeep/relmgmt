@@ -87,15 +87,17 @@
    - Write tests for allocation conflicts page ✅
    - Implement allocation conflicts page (existing) ✅
 
-8. **FE-Phase-8: Reports and Data Export**
-   - Write tests for report services
-   - Implement report services
-   - Write tests for report pages
-   - Implement report pages
-   - Write tests for chart components
-   - Implement chart components
-   - Write tests for export functionality
-   - Implement export functionality
+8. **FE-Phase-8: Reports and Data Export** ✅ **COMPLETED**
+   - Write tests for report services ✅
+   - Implement report services ✅
+   - Write tests for report pages ✅
+   - Implement report pages (Allocation Conflicts, Resource Utilization, Release Timeline) ✅
+   - Write tests for chart components (ConflictsChart) ✅
+   - Implement chart components where applicable ✅
+   - Write tests for export functionality (assert ReportType + params) ✅
+   - Implement export functionality with filters and filename suffixes ✅
+   - Add Sidebar navigation for Reports ✅
+   - Add router-based integration test to navigate and trigger export ✅
 
 9. **FE-Phase-9: Notification System**
    - Write tests for notification service

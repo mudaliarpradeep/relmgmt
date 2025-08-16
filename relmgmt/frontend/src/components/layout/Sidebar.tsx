@@ -21,6 +21,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { path: '/allocations', label: 'Allocation Management', icon: '⚖️' },
   ];
 
+  const reportItems = [
+    { path: '/reports/allocation-conflicts', label: 'Allocation Conflicts', icon: '❗' },
+    { path: '/reports/resource-utilization', label: 'Resource Utilization', icon: '📈' },
+    { path: '/reports/release-timeline', label: 'Release Timeline', icon: '🗓️' },
+  ];
+
   return (
     <>
       {/* Mobile overlay */}
@@ -48,6 +54,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <nav className="mt-8">
           <div className="px-4">
             {menuItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={onClose}
+                className={`
+                  flex items-center px-4 py-3 mb-2 text-sm font-medium rounded-lg transition-colors
+                  ${isActive(item.path)
+                    ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }
+                `}
+              >
+                <span className="mr-3 text-lg">{item.icon}</span>
+                {item.label}
+              </Link>
+            ))}
+
+            {/* Reports section */}
+            <div className="mt-6 mb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Reports
+            </div>
+            {reportItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
