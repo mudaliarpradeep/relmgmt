@@ -3,6 +3,7 @@ package com.polycoder.relmgmt.repository;
 import com.polycoder.relmgmt.entity.Resource;
 import com.polycoder.relmgmt.entity.StatusEnum;
 import com.polycoder.relmgmt.entity.SkillFunctionEnum;
+import com.polycoder.relmgmt.entity.SkillSubFunctionEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -69,6 +70,42 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
      * @return Page of resources with the specified status and skill function
      */
     Page<Resource> findByStatusAndSkillFunction(StatusEnum status, SkillFunctionEnum skillFunction, Pageable pageable);
+
+    /**
+     * Find resources by skill sub-function
+     * @param skillSubFunction the skill sub-function to filter by
+     * @param pageable pagination information
+     * @return Page of resources with the specified skill sub-function
+     */
+    Page<Resource> findBySkillSubFunction(SkillSubFunctionEnum skillSubFunction, Pageable pageable);
+
+    /**
+     * Find resources by status and skill sub-function
+     * @param status the status to filter by
+     * @param skillSubFunction the skill sub-function to filter by
+     * @param pageable pagination information
+     * @return Page of resources with the specified status and skill sub-function
+     */
+    Page<Resource> findByStatusAndSkillSubFunction(StatusEnum status, SkillSubFunctionEnum skillSubFunction, Pageable pageable);
+
+    /**
+     * Find resources by skill function and skill sub-function
+     * @param skillFunction the skill function to filter by
+     * @param skillSubFunction the skill sub-function to filter by
+     * @param pageable pagination information
+     * @return Page of resources with the specified skill function and skill sub-function
+     */
+    Page<Resource> findBySkillFunctionAndSkillSubFunction(SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction, Pageable pageable);
+
+    /**
+     * Find resources by status, skill function, and skill sub-function
+     * @param status the status to filter by
+     * @param skillFunction the skill function to filter by
+     * @param skillSubFunction the skill sub-function to filter by
+     * @param pageable pagination information
+     * @return Page of resources with the specified status, skill function, and skill sub-function
+     */
+    Page<Resource> findByStatusAndSkillFunctionAndSkillSubFunction(StatusEnum status, SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction, Pageable pageable);
 
     /**
      * Find all resources with active status

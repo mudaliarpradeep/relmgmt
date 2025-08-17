@@ -82,7 +82,7 @@ class ResourceControllerTest {
     void testGetAllResources() throws Exception {
         // Arrange
         Page<ResourceResponse> resourcePage = new PageImpl<>(Arrays.asList(resourceResponse));
-        when(resourceService.getAllResources(any(), any(), any())).thenReturn(resourcePage);
+        when(resourceService.getAllResources(any(), any(), any(), any())).thenReturn(resourcePage);
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/resources")
@@ -92,7 +92,7 @@ class ResourceControllerTest {
                 .andExpect(jsonPath("$.content[0].name").value("John Doe"))
                 .andExpect(jsonPath("$.content[0].employeeNumber").value("12345678"));
 
-        verify(resourceService).getAllResources(any(), any(), any());
+        verify(resourceService).getAllResources(any(), any(), any(), any());
     }
 
     @Test
@@ -100,7 +100,7 @@ class ResourceControllerTest {
     void testGetAllResourcesWithFilters() throws Exception {
         // Arrange
         Page<ResourceResponse> resourcePage = new PageImpl<>(Arrays.asList(resourceResponse));
-        when(resourceService.getAllResources(eq(StatusEnum.ACTIVE), eq(SkillFunctionEnum.BUILD), any()))
+        when(resourceService.getAllResources(eq(StatusEnum.ACTIVE), eq(SkillFunctionEnum.BUILD), any(), any()))
             .thenReturn(resourcePage);
 
         // Act & Assert
@@ -114,7 +114,7 @@ class ResourceControllerTest {
                 .andExpect(jsonPath("$.content").exists())
                 .andExpect(jsonPath("$.content[0].name").value("John Doe"));
 
-        verify(resourceService).getAllResources(eq(StatusEnum.ACTIVE), eq(SkillFunctionEnum.BUILD), any());
+        verify(resourceService).getAllResources(eq(StatusEnum.ACTIVE), eq(SkillFunctionEnum.BUILD), any(), any());
     }
 
     @Test

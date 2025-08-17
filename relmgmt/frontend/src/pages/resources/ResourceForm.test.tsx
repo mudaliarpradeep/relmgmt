@@ -170,7 +170,7 @@ describe('ResourceForm', () => {
           projectEndDate: undefined,
           employeeGrade: 'Level 1',
           skillFunction: 'Functional Design',
-          skillSubFunction: 'Talend'
+          skillSubFunction: undefined
         });
         expect(mockNavigate).toHaveBeenCalledWith('/resources');
       });

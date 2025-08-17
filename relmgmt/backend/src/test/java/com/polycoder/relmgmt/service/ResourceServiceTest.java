@@ -98,7 +98,7 @@ class ResourceServiceTest {
         
         when(resourceRepository.findAll(pageable)).thenReturn(resourcePage);
         
-        Page<ResourceResponse> result = resourceService.getAllResources(null, null, pageable);
+        Page<ResourceResponse> result = resourceService.getAllResources(null, null, null, pageable);
         
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -113,7 +113,7 @@ class ResourceServiceTest {
         
         when(resourceRepository.findByStatus(StatusEnum.ACTIVE, pageable)).thenReturn(resourcePage);
         
-        Page<ResourceResponse> result = resourceService.getAllResources(StatusEnum.ACTIVE, null, pageable);
+        Page<ResourceResponse> result = resourceService.getAllResources(StatusEnum.ACTIVE, null, null, pageable);
         
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -128,7 +128,7 @@ class ResourceServiceTest {
         
         when(resourceRepository.findBySkillFunction(SkillFunctionEnum.BUILD, pageable)).thenReturn(resourcePage);
         
-        Page<ResourceResponse> result = resourceService.getAllResources(null, SkillFunctionEnum.BUILD, pageable);
+        Page<ResourceResponse> result = resourceService.getAllResources(null, SkillFunctionEnum.BUILD, null, pageable);
         
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -144,7 +144,7 @@ class ResourceServiceTest {
         when(resourceRepository.findByStatusAndSkillFunction(StatusEnum.ACTIVE, SkillFunctionEnum.BUILD, pageable))
             .thenReturn(resourcePage);
         
-        Page<ResourceResponse> result = resourceService.getAllResources(StatusEnum.ACTIVE, SkillFunctionEnum.BUILD, pageable);
+        Page<ResourceResponse> result = resourceService.getAllResources(StatusEnum.ACTIVE, SkillFunctionEnum.BUILD, null, pageable);
         
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());

@@ -37,7 +37,7 @@ const ResourceForm = () => {
     projectEndDate: '',
     employeeGrade: EmployeeGrade.LEVEL_1,
     skillFunction: SkillFunction.FUNCTIONAL_DESIGN,
-    skillSubFunction: SkillSubFunction.TALEND
+    skillSubFunction: ''
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -57,6 +57,14 @@ const ResourceForm = () => {
       setLoading(true);
       setError(null);
       const resource = await ResourceService.getResource(resourceId);
+      
+      // Validate skill sub-function against skill function to ensure it's still applicable
+      const applicableSubFunctions = getApplicableSubFunctions(resource.skillFunction as any);
+      const validSkillSubFunction = resource.skillSubFunction && 
+        applicableSubFunctions.includes(resource.skillSubFunction as any) 
+        ? resource.skillSubFunction 
+        : '';
+      
       setFormData({
         name: resource.name,
         employeeNumber: resource.employeeNumber,
@@ -66,7 +74,7 @@ const ResourceForm = () => {
         projectEndDate: resource.projectEndDate || '',
         employeeGrade: resource.employeeGrade,
         skillFunction: resource.skillFunction,
-        skillSubFunction: resource.skillSubFunction
+        skillSubFunction: validSkillSubFunction
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load resource');
@@ -147,7 +155,7 @@ const ResourceForm = () => {
         projectEndDate: formData.projectEndDate || undefined,
         employeeGrade: formData.employeeGrade as any,
         skillFunction: formData.skillFunction as any,
-        skillSubFunction: formData.skillSubFunction as any
+        skillSubFunction: formData.skillSubFunction && formData.skillSubFunction.trim() !== '' ? formData.skillSubFunction as any : undefined
       };
 
       if (isEditMode && id) {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
@@ -8,9 +8,14 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const [showReportsSubmenu, setShowReportsSubmenu] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  const isReportsActive = () => {
+    return location.pathname.startsWith('/reports');
   };
 
   const menuItems = [
@@ -27,6 +32,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { path: '/reports/resource-utilization', label: 'Resource Utilization', icon: '📈' },
     { path: '/reports/release-timeline', label: 'Release Timeline', icon: '🗓️' },
   ];
+
+  const handleReportsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowReportsSubmenu(!showReportsSubmenu);
+  };
+
+  const handleReportItemClick = () => {
+    setShowReportsSubmenu(false);
+    onClose();
+  };
 
   return (
     <>
@@ -72,27 +87,52 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </Link>
             ))}
 
-            {/* Reports section */}
-            <div className="mt-6 mb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Reports
-            </div>
-            {reportItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={onClose}
+            {/* Reports Menu Item */}
+            <div className="relative">
+              <button
+                onClick={handleReportsClick}
                 className={`
-                  flex items-center px-4 py-3 mb-2 text-sm font-medium rounded-lg transition-colors
-                  ${isActive(item.path)
+                  w-full flex items-center justify-between px-4 py-3 mb-2 text-sm font-medium rounded-lg transition-colors
+                  ${isReportsActive()
                     ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }
                 `}
               >
-                <span className="mr-3 text-lg">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
+                <div className="flex items-center">
+                  <span className="mr-3 text-lg">📊</span>
+                  <span>Reports</span>
+                </div>
+                <span className={`transform transition-transform duration-200 ${showReportsSubmenu ? 'rotate-90' : ''}`}>
+                  ▶
+                </span>
+              </button>
+
+              {/* Reports Submenu Overlay */}
+              {showReportsSubmenu && (
+                <div className="absolute left-full top-0 ml-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="py-2">
+                    {reportItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={handleReportItemClick}
+                        className={`
+                          flex items-center px-4 py-3 text-sm font-medium transition-colors
+                          ${isActive(item.path)
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          }
+                        `}
+                      >
+                        <span className="mr-3 text-lg">{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </nav>
 

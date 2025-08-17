@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNotifications } from '../../hooks/useNotifications';
 import { EventType, type EventTypeEnum } from '../../types';
-import NotificationDetailModal from '../../components/notifications/NotificationDetailModal';
 
 const NotificationListPage: React.FC = () => {
   const { notifications, loading, error, fetchNotifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
@@ -9,7 +8,6 @@ const NotificationListPage: React.FC = () => {
   const [isRead, setIsRead] = useState<string>('');
   const [page, setPage] = useState<number>(0);
   const [size, setSize] = useState<number>(20);
-  const [selected, setSelected] = useState<number | null>(null);
 
   useEffect(() => {
     fetchNotifications({ page, size });
@@ -90,9 +88,6 @@ const NotificationListPage: React.FC = () => {
               <div className="text-xs text-gray-500">{new Date(n.createdAt).toLocaleString()}</div>
             </div>
             <div className="flex gap-2">
-              <button className="px-2 py-1 text-xs border rounded" onClick={() => setSelected(n.id)}>
-                View
-              </button>
               {!n.isRead && (
                 <button className="px-2 py-1 text-xs border rounded" onClick={() => markAsRead(n.id)}>
                   Mark read
@@ -124,14 +119,6 @@ const NotificationListPage: React.FC = () => {
           Next
         </button>
       </div>
-
-      <NotificationDetailModal
-        isOpen={selected !== null}
-        notification={notifications.find(n => n.id === selected) || null}
-        onClose={() => setSelected(null)}
-        onMarkRead={async (id) => { await markAsRead(id); }}
-        onDismiss={async (id) => { await deleteNotification(id); setSelected(null); }}
-      />
     </div>
   );
 };

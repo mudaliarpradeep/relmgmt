@@ -5,6 +5,7 @@ import com.polycoder.relmgmt.dto.ResourceResponse;
 import com.polycoder.relmgmt.dto.ResourceImportResponse;
 import com.polycoder.relmgmt.entity.StatusEnum;
 import com.polycoder.relmgmt.entity.SkillFunctionEnum;
+import com.polycoder.relmgmt.entity.SkillSubFunctionEnum;
 import com.polycoder.relmgmt.service.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -49,6 +50,7 @@ public class ResourceController {
     public ResponseEntity<Page<ResourceResponse>> getAllResources(
             @Parameter(description = "Filter by status") @RequestParam(required = false) StatusEnum status,
             @Parameter(description = "Filter by skill function") @RequestParam(required = false) SkillFunctionEnum skillFunction,
+            @Parameter(description = "Filter by skill sub-function") @RequestParam(required = false) SkillSubFunctionEnum skillSubFunction,
             @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort field and direction (e.g., name,asc)") @RequestParam(defaultValue = "name,asc") String sort) {
@@ -60,7 +62,7 @@ public class ResourceController {
             ? Sort.Direction.DESC : Sort.Direction.ASC;
         
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-        Page<ResourceResponse> resources = resourceService.getAllResources(status, skillFunction, pageable);
+        Page<ResourceResponse> resources = resourceService.getAllResources(status, skillFunction, skillSubFunction, pageable);
         return ResponseEntity.ok(resources);
     }
 

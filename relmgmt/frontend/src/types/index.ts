@@ -118,6 +118,27 @@ export const getSkillFunctionEnumName = (displayName: string): string => {
   }
 };
 
+export const getSkillSubFunctionEnumName = (displayName: string): string => {
+  switch (displayName) {
+    case SkillSubFunction.TALEND:
+      return 'TALEND';
+    case SkillSubFunction.FORGEROCK_IDM:
+      return 'FORGEROCK_IDM';
+    case SkillSubFunction.FORGEROCK_IG:
+      return 'FORGEROCK_IG';
+    case SkillSubFunction.SAILPOINT:
+      return 'SAILPOINT';
+    case SkillSubFunction.FORGEROCK_UI:
+      return 'FORGEROCK_UI';
+    case SkillSubFunction.AUTOMATED:
+      return 'AUTOMATED';
+    case SkillSubFunction.MANUAL:
+      return 'MANUAL';
+    default:
+      return displayName;
+  }
+};
+
 // Resource types
 export interface Resource {
   id: number;
@@ -149,6 +170,7 @@ export interface ResourceRequest {
 export interface ResourceFilters {
   status?: StatusEnum;
   skillFunction?: SkillFunctionEnum;
+  skillSubFunction?: SkillSubFunctionEnum;
   page?: number;
   size?: number;
   sort?: string;

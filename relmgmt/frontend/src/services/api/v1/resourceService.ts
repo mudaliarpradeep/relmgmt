@@ -6,7 +6,7 @@ import type {
   PaginatedResponse, 
   ResourceImportResponse 
 } from '../../../types';
-import { getStatusEnumName, getSkillFunctionEnumName } from '../../../types';
+import { getStatusEnumName, getSkillFunctionEnumName, getSkillSubFunctionEnumName } from '../../../types';
 
 /**
  * Resource service for handling resource CRUD operations, Excel import/export
@@ -22,6 +22,7 @@ class ResourceService {
       if (filters) {
         if (filters.status) params.append('status', getStatusEnumName(filters.status));
         if (filters.skillFunction) params.append('skillFunction', getSkillFunctionEnumName(filters.skillFunction));
+        if (filters.skillSubFunction) params.append('skillSubFunction', getSkillSubFunctionEnumName(filters.skillSubFunction));
         if (filters.page !== undefined) params.append('page', filters.page.toString());
         if (filters.size !== undefined) params.append('size', filters.size.toString());
         if (filters.sort) params.append('sort', filters.sort);

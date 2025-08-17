@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotifications } from '../../hooks/useNotifications';
 
@@ -10,7 +9,6 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
   const { unreadCount, notifications, markAsRead, markAllAsRead, loading: notifLoading, error: notifError } = useNotifications();
-  const [detailId, setDetailId] = useState<number | null>(null);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const handleLogout = () => {
@@ -61,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 <div className="py-1">
                   <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100 flex items-center justify-between">
                     <div className="font-medium">Notifications</div>
-                    <Link to="/notifications" className="text-blue-600 hover:underline text-xs">View all</Link>
+                    <a href="/notifications" className="text-blue-600 hover:underline text-xs">View all</a>
                   </div>
                   <div className="max-h-80 overflow-auto">
                     {notifLoading && (
@@ -90,18 +88,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                                   Mark read
                                 </button>
                               )}
-                              <button
-                                className="px-2 py-0.5 text-xs border rounded"
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDetailId(n.id); }}
-                              >
-                                View
-                              </button>
-                              <Link
-                                to={n.entityType && n.entityId ? `/${String(n.entityType).toLowerCase()}s/${n.entityId}` : '/notifications'}
+                              <a
+                                href={n.entityType && n.entityId ? `/${String(n.entityType).toLowerCase()}s/${n.entityId}` : '/notifications'}
                                 className="text-blue-600 hover:underline text-xs"
                               >
                                 Open
-                              </Link>
+                              </a>
                             </div>
                           </li>
                         ))}

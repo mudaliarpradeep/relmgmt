@@ -216,7 +216,7 @@ describe('ResourceListPage', () => {
         expect(mockedResourceService.getResources).toHaveBeenCalledWith(
           expect.objectContaining({
             page: 0,
-            size: 20
+            size: 15
           })
         );
       });

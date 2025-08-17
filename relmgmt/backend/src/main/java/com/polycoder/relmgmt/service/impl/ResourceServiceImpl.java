@@ -41,15 +41,23 @@ public class ResourceServiceImpl implements ResourceService {
     private AllocationRepository allocationRepository;
 
     @Override
-    public Page<ResourceResponse> getAllResources(StatusEnum status, SkillFunctionEnum skillFunction, Pageable pageable) {
+    public Page<ResourceResponse> getAllResources(StatusEnum status, SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction, Pageable pageable) {
         Page<Resource> resourcePage;
         
-        if (status != null && skillFunction != null) {
+        if (status != null && skillFunction != null && skillSubFunction != null) {
+            resourcePage = resourceRepository.findByStatusAndSkillFunctionAndSkillSubFunction(status, skillFunction, skillSubFunction, pageable);
+        } else if (status != null && skillFunction != null) {
             resourcePage = resourceRepository.findByStatusAndSkillFunction(status, skillFunction, pageable);
+        } else if (status != null && skillSubFunction != null) {
+            resourcePage = resourceRepository.findByStatusAndSkillSubFunction(status, skillSubFunction, pageable);
+        } else if (skillFunction != null && skillSubFunction != null) {
+            resourcePage = resourceRepository.findBySkillFunctionAndSkillSubFunction(skillFunction, skillSubFunction, pageable);
         } else if (status != null) {
             resourcePage = resourceRepository.findByStatus(status, pageable);
         } else if (skillFunction != null) {
             resourcePage = resourceRepository.findBySkillFunction(skillFunction, pageable);
+        } else if (skillSubFunction != null) {
+            resourcePage = resourceRepository.findBySkillSubFunction(skillSubFunction, pageable);
         } else {
             resourcePage = resourceRepository.findAll(pageable);
         }

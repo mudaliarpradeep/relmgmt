@@ -2,12 +2,61 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ResourceService from '../../services/api/v1/resourceService';
 import type { Resource, ResourceFilters, PaginatedResponse } from '../../types';
-import { Status, SkillFunction } from '../../types';
+import { Status, SkillFunction, SkillSubFunction, getApplicableSubFunctions } from '../../types';
 
 interface DeleteModalState {
   isOpen: boolean;
   resource: Resource | null;
 }
+
+interface SortState {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+// Sortable column header component
+const SortableHeader = ({ 
+  field, 
+  currentSort, 
+  onSort, 
+  children 
+}: { 
+  field: string;
+  currentSort: SortState | null;
+  onSort: (field: string) => void;
+  children: React.ReactNode;
+}) => {
+  const isActive = currentSort?.field === field;
+  const isAsc = isActive && currentSort?.direction === 'asc';
+  const isDesc = isActive && currentSort?.direction === 'desc';
+
+  return (
+    <th 
+      className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+      onClick={() => onSort(field)}
+    >
+      <div className="flex items-center space-x-1">
+        <span>{children}</span>
+        <div className="flex flex-col">
+          <svg 
+            className={`w-3 h-3 ${isAsc ? 'text-blue-600' : 'text-gray-400'}`} 
+            fill="currentColor" 
+            viewBox="0 0 20 20"
+          >
+            <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          <svg 
+            className={`w-3 h-3 ${isDesc ? 'text-blue-600' : 'text-gray-400'}`} 
+            fill="currentColor" 
+            viewBox="0 0 20 20"
+          >
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </div>
+      </div>
+    </th>
+  );
+};
 
 // Memoized table content component to prevent unnecessary re-renders
 const TableContent = React.memo(({ 
@@ -56,6 +105,11 @@ const TableContent = React.memo(({
           <td className="px-6 py-4 text-sm text-gray-500 min-w-[120px]">
             <div className="truncate" title={resource.skillFunction}>
               {resource.skillFunction}
+            </div>
+          </td>
+          <td className="px-6 py-4 text-sm text-gray-500 min-w-[120px]">
+            <div className="truncate" title={resource.skillSubFunction || 'N/A'}>
+              {resource.skillSubFunction || 'N/A'}
             </div>
           </td>
           <td className="px-6 py-4 text-sm font-medium min-w-[120px]">
@@ -117,12 +171,15 @@ const MobileCardContent = React.memo(({
               {resource.status}
             </span>
           </div>
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-500">
+          <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
+            <div>
               <span className="font-medium">ID:</span> {resource.employeeNumber}
             </div>
-            <div className="text-sm text-gray-500">
+            <div>
               <span className="font-medium">Function:</span> {resource.skillFunction}
+            </div>
+            <div>
+              <span className="font-medium">Sub-Function:</span> {resource.skillSubFunction || 'N/A'}
             </div>
           </div>
           <div className="flex justify-end space-x-2 mt-3 pt-3 border-t border-gray-100">
@@ -152,9 +209,10 @@ const ResourceListPage = () => {
   const [tableLoading, setTableLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [sort, setSort] = useState<SortState | null>(null);
   const [filters, setFilters] = useState<ResourceFilters>({
     page: 0,
-    size: 20
+    size: 15
   });
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
     isOpen: false,
@@ -171,8 +229,14 @@ const ResourceListPage = () => {
         setLoading(true);
       }
       setError(null);
+      
       const filtersToUse = newFilters || filters;
-      const response = await ResourceService.getResources(filtersToUse);
+      const filtersWithSort = {
+        ...filtersToUse,
+        sort: sort ? `${sort.field},${sort.direction}` : undefined
+      };
+      
+      const response = await ResourceService.getResources(filtersWithSort);
       setResources(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load resources');
@@ -189,6 +253,33 @@ const ResourceListPage = () => {
     loadResources();
   }, []);
 
+  // Handle sort changes
+  const handleSort = (field: string) => {
+    let newSort: SortState;
+    
+    if (sort?.field === field) {
+      // Toggle direction if same field
+      newSort = {
+        field,
+        direction: sort.direction === 'asc' ? 'desc' : 'asc'
+      };
+    } else {
+      // New field, default to ascending
+      newSort = {
+        field,
+        direction: 'asc'
+      };
+    }
+    
+    setSort(newSort);
+    setCurrentPage(0); // Reset to first page when sorting
+    
+    // Update filters and reload
+    const newFilters = { ...filters, page: 0 };
+    setFilters(newFilters);
+    loadResources(newFilters, true);
+  };
+
   // Handle filter changes
   const handleFilterChange = (field: keyof ResourceFilters, value: string | number | undefined) => {
     const newFilters = {
@@ -204,9 +295,10 @@ const ResourceListPage = () => {
 
   // Reset filters
   const resetFilters = () => {
-    const resetFilters: ResourceFilters = { page: 0, size: 20 };
+    const resetFilters: ResourceFilters = { page: 0, size: 15 };
     setFilters(resetFilters);
     setCurrentPage(0);
+    setSort(null); // Reset sort as well
     // Only update the table data, not the entire page
     loadResources(resetFilters, true);
   };
@@ -349,7 +441,7 @@ const ResourceListPage = () => {
             <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
           </div>
           <div className="px-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-2">
                   Status
@@ -374,12 +466,47 @@ const ResourceListPage = () => {
                 <select
                   id="skill-function-filter"
                   value={filters.skillFunction || ''}
-                  onChange={(e) => handleFilterChange('skillFunction', e.target.value || undefined)}
+                  onChange={(e) => {
+                    const value = e.target.value || undefined;
+                    handleFilterChange('skillFunction', value);
+                    // Reset skill sub-function when skill function changes
+                    if (value) {
+                      const applicableSubFunctions = getApplicableSubFunctions(value as any);
+                      if (applicableSubFunctions.length === 0) {
+                        handleFilterChange('skillSubFunction', undefined);
+                      }
+                    }
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors hover:border-gray-400"
                 >
                   <option value="">All Functions</option>
                   {Object.values(SkillFunction).map(func => (
                     <option key={func} value={func}>{func}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="skill-sub-function-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                  Skill Sub-Function
+                  {filters.skillFunction && getApplicableSubFunctions(filters.skillFunction as any).length === 0 && (
+                    <span className="text-gray-500 text-xs ml-1">(Not applicable)</span>
+                  )}
+                </label>
+                <select
+                  id="skill-sub-function-filter"
+                  value={filters.skillSubFunction || ''}
+                  onChange={(e) => handleFilterChange('skillSubFunction', e.target.value || undefined)}
+                  disabled={!filters.skillFunction || getApplicableSubFunctions(filters.skillFunction as any).length === 0}
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                    !filters.skillFunction || getApplicableSubFunctions(filters.skillFunction as any).length === 0
+                      ? 'bg-gray-100 cursor-not-allowed' 
+                      : 'hover:border-gray-400'
+                  }`}
+                >
+                  <option value="">All Sub-Functions</option>
+                  {filters.skillFunction && getApplicableSubFunctions(filters.skillFunction as any).map(subFunc => (
+                    <option key={subFunc} value={subFunc}>{subFunc}</option>
                   ))}
                 </select>
               </div>
@@ -441,8 +568,15 @@ const ResourceListPage = () => {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <SortableHeader 
+                  field="skillFunction" 
+                  currentSort={sort} 
+                  onSort={handleSort}
+                >
                   Skill Function
+                </SortableHeader>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Skill Sub-Function
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Actions

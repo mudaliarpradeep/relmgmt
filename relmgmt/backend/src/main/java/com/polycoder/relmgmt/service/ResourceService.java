@@ -6,6 +6,7 @@ import com.polycoder.relmgmt.dto.ResourceImportResponse;
 import com.polycoder.relmgmt.entity.Resource;
 import com.polycoder.relmgmt.entity.StatusEnum;
 import com.polycoder.relmgmt.entity.SkillFunctionEnum;
+import com.polycoder.relmgmt.entity.SkillSubFunctionEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,10 +19,11 @@ public interface ResourceService {
      * Get all resources with optional filtering
      * @param status optional status filter
      * @param skillFunction optional skill function filter
+     * @param skillSubFunction optional skill sub-function filter
      * @param pageable pagination information
      * @return page of resource responses
      */
-    Page<ResourceResponse> getAllResources(StatusEnum status, SkillFunctionEnum skillFunction, Pageable pageable);
+    Page<ResourceResponse> getAllResources(StatusEnum status, SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction, Pageable pageable);
 
     /**
      * Get a resource by ID
