@@ -21,8 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const menuItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/resources', label: 'Resource Management', icon: '👥' },
-    { path: '/releases', label: 'Release Management', icon: '🚀' },
-    { path: '/scope', label: 'Scope Management', icon: '📋' },
+    { path: '/releases', label: 'Release Management', icon: '��' },
     { path: '/allocations', label: 'Allocation Management', icon: '⚖️' },
     { path: '/notifications', label: 'Notifications', icon: '🔔' },
   ];

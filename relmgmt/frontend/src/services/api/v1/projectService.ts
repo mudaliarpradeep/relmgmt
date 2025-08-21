@@ -74,7 +74,14 @@ class ProjectService {
 
   async createProject(releaseId: number, data: ProjectRequest): Promise<Project> {
     try {
-      const response = await apiClient.post<Project>(`/v1/releases/${releaseId}/projects`, data);
+      // Transform frontend payload to backend DTO shape
+      const backendPayload = {
+        name: data.name,
+        description: data.description,
+        type: getProjectTypeEnumName(data.type)
+      };
+      
+      const response = await apiClient.post<Project>(`/v1/releases/${releaseId}/projects`, backendPayload);
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -84,7 +91,14 @@ class ProjectService {
 
   async updateProject(id: number, data: ProjectRequest): Promise<Project> {
     try {
-      const response = await apiClient.put<Project>(`/v1/projects/${id}`, data);
+      // Transform frontend payload to backend DTO shape
+      const backendPayload = {
+        name: data.name,
+        description: data.description,
+        type: getProjectTypeEnumName(data.type)
+      };
+      
+      const response = await apiClient.put<Project>(`/v1/projects/${id}`, backendPayload);
       return response.data;
     } catch (error) {
       this.handleError(error);

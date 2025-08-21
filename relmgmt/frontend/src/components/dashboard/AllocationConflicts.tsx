@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const conflicts = [
   {
@@ -43,12 +44,12 @@ const AllocationConflicts: React.FC = () => (
           </div>
         </div>
       ))}
-      <a href="#" className="link flex items-center justify-end">
+      <Link to="/reports/allocation-conflicts" className="link flex items-center justify-end">
         Resolve Conflicts
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-      </a>
+      </Link>
     </div>
   </section>
 );

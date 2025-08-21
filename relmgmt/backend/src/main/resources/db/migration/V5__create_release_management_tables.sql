@@ -39,4 +39,4 @@ CREATE INDEX idx_phases_phase_type ON phases(phase_type);
 CREATE INDEX idx_phases_dates ON phases(start_date, end_date);
 CREATE INDEX idx_blockers_release_id ON blockers(release_id);
 CREATE INDEX idx_blockers_status ON blockers(status);
-CREATE INDEX idx_releases_identifier ON releases(identifier); 
+CREATE INDEX idx_releases_identifier ON releases(identifier);

@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface AllocationRepository extends JpaRepository<Allocation, Long> {
 
-    List<Allocation> findByReleaseId(Long releaseId);
+    @Query("SELECT a FROM Allocation a WHERE a.release.id = :releaseId")
+    List<Allocation> findByReleaseId(@Param("releaseId") Long releaseId);
 
-    List<Allocation> findByResourceId(Long resourceId);
+    @Query("SELECT a FROM Allocation a WHERE a.resource.id = :resourceId")
+    List<Allocation> findByResourceId(@Param("resourceId") Long resourceId);
 
     @Query("select a from Allocation a where (:from is null or a.endDate >= :from) and (:to is null or a.startDate <= :to)")
     List<Allocation> findOverlapping(@Param("from") LocalDate from,

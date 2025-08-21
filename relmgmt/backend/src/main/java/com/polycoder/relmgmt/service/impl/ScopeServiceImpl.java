@@ -1,14 +1,11 @@
 package com.polycoder.relmgmt.service.impl;
 
-import com.polycoder.relmgmt.dto.EffortEstimateRequest;
-import com.polycoder.relmgmt.dto.EffortEstimateResponse;
-import com.polycoder.relmgmt.dto.ScopeItemRequest;
-import com.polycoder.relmgmt.dto.ScopeItemResponse;
+import com.polycoder.relmgmt.dto.*;
 import com.polycoder.relmgmt.entity.*;
 import com.polycoder.relmgmt.exception.ResourceNotFoundException;
 import com.polycoder.relmgmt.exception.ValidationException;
-import com.polycoder.relmgmt.repository.EffortEstimateRepository;
-import com.polycoder.relmgmt.repository.ProjectRepository;
+import com.polycoder.relmgmt.repository.ComponentRepository;
+import com.polycoder.relmgmt.repository.ReleaseRepository;
 import com.polycoder.relmgmt.repository.ScopeItemRepository;
 import com.polycoder.relmgmt.service.ScopeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,363 +27,299 @@ public class ScopeServiceImpl implements ScopeService {
     private ScopeItemRepository scopeItemRepository;
 
     @Autowired
-    private EffortEstimateRepository effortEstimateRepository;
+    private ComponentRepository componentRepository;
 
     @Autowired
-    private ProjectRepository projectRepository;
+    private ReleaseRepository releaseRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ScopeItemResponse> findByProjectId(Long projectId) {
-        List<ScopeItem> scopeItems = scopeItemRepository.findByProjectId(projectId);
-        return scopeItems.stream()
-                .map(ScopeItemResponse::new)
+    public List<ScopeItemResponse> findByReleaseId(Long releaseId) {
+        return scopeItemRepository.findByReleaseId(releaseId)
+                .stream()
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ScopeItemResponse> findByProjectId(Long projectId, Pageable pageable) {
-        Page<ScopeItem> scopeItems = scopeItemRepository.findByProjectId(projectId, pageable);
-        return scopeItems.map(ScopeItemResponse::new);
+    public Page<ScopeItemResponse> findByReleaseId(Long releaseId, Pageable pageable) {
+        return scopeItemRepository.findByReleaseId(releaseId, pageable)
+                .map(this::convertToResponse);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ScopeItemResponse findById(Long id) {
         ScopeItem scopeItem = scopeItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Scope item not found with id: " + id));
-        return new ScopeItemResponse(scopeItem);
+        return convertToResponse(scopeItem);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ScopeItemResponse> findByProjectIdAndNameContaining(Long projectId, String name) {
-        List<ScopeItem> scopeItems = scopeItemRepository.findByProjectIdAndNameContainingIgnoreCase(projectId, name);
-        return scopeItems.stream()
-                .map(ScopeItemResponse::new)
+    public List<ScopeItemResponse> findByReleaseIdAndNameContaining(Long releaseId, String name) {
+        return scopeItemRepository.findByReleaseIdAndNameContaining(releaseId, name)
+                .stream()
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ScopeItemResponse> findByProjectIdAndDescriptionContaining(Long projectId, String description) {
-        List<ScopeItem> scopeItems = scopeItemRepository.findByProjectIdAndDescriptionContainingIgnoreCase(projectId, description);
-        return scopeItems.stream()
-                .map(ScopeItemResponse::new)
+    public List<ScopeItemResponse> findByReleaseIdAndDescriptionContaining(Long releaseId, String description) {
+        return scopeItemRepository.findByReleaseIdAndDescriptionContaining(releaseId, description)
+                .stream()
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ScopeItemResponse create(Long projectId, ScopeItemRequest scopeItemRequest) {
-        // Validate project exists
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + projectId));
+    public ScopeItemResponse create(Long releaseId, ScopeItemRequest request) {
+        validateScopeItem(request, releaseId);
+        
+        Release release = releaseRepository.findById(releaseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Release not found with id: " + releaseId));
 
-        // Validate scope item data
-        validateScopeItem(scopeItemRequest, projectId);
-
-        // Check if scope item with same name already exists for this project
-        if (scopeItemRepository.existsByProjectIdAndName(projectId, scopeItemRequest.getName())) {
-            throw new ValidationException("Scope item with name '" + scopeItemRequest.getName() + "' already exists for this project");
-        }
-
-        // Create new scope item
         ScopeItem scopeItem = new ScopeItem();
-        scopeItem.setName(scopeItemRequest.getName());
-        scopeItem.setDescription(scopeItemRequest.getDescription());
-        scopeItem.setProject(project);
+        scopeItem.setName(request.getName());
+        scopeItem.setDescription(request.getDescription());
+        scopeItem.setFunctionalDesignDays(request.getFunctionalDesignDays());
+        scopeItem.setSitDays(request.getSitDays());
+        scopeItem.setUatDays(request.getUatDays());
+        scopeItem.setRelease(release);
 
         ScopeItem savedScopeItem = scopeItemRepository.save(scopeItem);
-        return new ScopeItemResponse(savedScopeItem);
+
+        // Create components if provided
+        if (request.getComponents() != null && !request.getComponents().isEmpty()) {
+            for (ComponentRequest componentRequest : request.getComponents()) {
+                Component component = new Component();
+                component.setName(componentRequest.getName());
+                component.setComponentType(componentRequest.getComponentType());
+                component.setTechnicalDesignDays(componentRequest.getTechnicalDesignDays());
+                component.setBuildDays(componentRequest.getBuildDays());
+                component.setScopeItem(savedScopeItem);
+                componentRepository.save(component);
+            }
+        }
+
+        return convertToResponse(savedScopeItem);
     }
 
     @Override
-    public ScopeItemResponse update(Long id, ScopeItemRequest scopeItemRequest) {
-        // Find existing scope item
+    public ScopeItemResponse update(Long id, ScopeItemRequest request) {
         ScopeItem scopeItem = scopeItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Scope item not found with id: " + id));
 
-        // Validate scope item data
-        validateScopeItem(scopeItemRequest, scopeItem.getProject().getId());
+        validateScopeItem(request, scopeItem.getRelease().getId());
 
-        // Check if scope item with same name already exists for this project (excluding current scope item)
-        if (!scopeItem.getName().equals(scopeItemRequest.getName()) &&
-                scopeItemRepository.existsByProjectIdAndName(scopeItem.getProject().getId(), scopeItemRequest.getName())) {
-            throw new ValidationException("Scope item with name '" + scopeItemRequest.getName() + "' already exists for this project");
-        }
+        scopeItem.setName(request.getName());
+        scopeItem.setDescription(request.getDescription());
+        scopeItem.setFunctionalDesignDays(request.getFunctionalDesignDays());
+        scopeItem.setSitDays(request.getSitDays());
+        scopeItem.setUatDays(request.getUatDays());
 
-        // Update scope item
-        scopeItem.setName(scopeItemRequest.getName());
-        scopeItem.setDescription(scopeItemRequest.getDescription());
-
-        ScopeItem savedScopeItem = scopeItemRepository.save(scopeItem);
-        return new ScopeItemResponse(savedScopeItem);
+        ScopeItem updatedScopeItem = scopeItemRepository.save(scopeItem);
+        return convertToResponse(updatedScopeItem);
     }
 
     @Override
     public void delete(Long id) {
-        // Check if scope item exists
+        if (!canDeleteScopeItem(id)) {
+            throw new ValidationException("Cannot delete scope item with existing components");
+        }
+        
         ScopeItem scopeItem = scopeItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Scope item not found with id: " + id));
-
-        // Check if scope item can be deleted (no effort estimates)
-        if (!canDeleteScopeItem(id)) {
-            throw new ValidationException("Cannot delete scope item. Scope item has effort estimates that must be removed first.");
-        }
-
+        
         scopeItemRepository.delete(scopeItem);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public boolean existsByProjectIdAndName(Long projectId, String name) {
-        return scopeItemRepository.existsByProjectIdAndName(projectId, name);
+    public boolean existsByReleaseIdAndName(Long releaseId, String name) {
+        return scopeItemRepository.existsByReleaseIdAndName(releaseId, name);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ScopeItemResponse findByProjectIdAndName(Long projectId, String name) {
-        ScopeItem scopeItem = scopeItemRepository.findByProjectIdAndName(projectId, name)
-                .orElseThrow(() -> new ResourceNotFoundException("Scope item not found with name: " + name + " for project: " + projectId));
-        return new ScopeItemResponse(scopeItem);
+    public ScopeItemResponse findByReleaseIdAndName(Long releaseId, String name) {
+        return scopeItemRepository.findByReleaseIdAndName(releaseId, name)
+                .map(this::convertToResponse)
+                .orElse(null);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public long countByProjectId(Long projectId) {
-        return scopeItemRepository.countByProjectId(projectId);
+    public long countByReleaseId(Long releaseId) {
+        return scopeItemRepository.countByReleaseId(releaseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ScopeItemResponse> findScopeItemsWithEffortEstimates(Long projectId) {
-        List<ScopeItem> scopeItems = scopeItemRepository.findScopeItemsWithEffortEstimates(projectId);
-        return scopeItems.stream()
-                .map(ScopeItemResponse::new)
+    public List<ScopeItemResponse> findScopeItemsWithComponents(Long releaseId) {
+        return scopeItemRepository.findScopeItemsWithComponents(releaseId)
+                .stream()
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ScopeItemResponse> findScopeItemsWithoutEffortEstimates(Long projectId) {
-        List<ScopeItem> scopeItems = scopeItemRepository.findScopeItemsWithoutEffortEstimates(projectId);
-        return scopeItems.stream()
-                .map(ScopeItemResponse::new)
+    public List<ScopeItemResponse> findScopeItemsWithoutComponents(Long releaseId) {
+        return scopeItemRepository.findScopeItemsWithoutComponents(releaseId)
+                .stream()
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Object[]> findScopeItemsWithEffortEstimatesCount(Long projectId) {
-        return scopeItemRepository.findScopeItemsWithEffortEstimatesCount(projectId);
+    public List<Object[]> findScopeItemsWithComponentsCount(Long releaseId) {
+        return scopeItemRepository.findScopeItemsWithComponentsCount(releaseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ScopeItemResponse> findByProjectReleaseId(Long releaseId) {
-        List<ScopeItem> scopeItems = scopeItemRepository.findByProjectReleaseId(releaseId);
-        return scopeItems.stream()
-                .map(ScopeItemResponse::new)
+    public List<ScopeItemWithComponentsResponse> findByReleaseIdWithComponents(Long releaseId) {
+        return scopeItemRepository.findByReleaseIdWithComponents(releaseId)
+                .stream()
+                .map(this::convertToResponseWithComponents)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<ScopeItemResponse> findByProjectReleaseId(Long releaseId, Pageable pageable) {
-        Page<ScopeItem> scopeItems = scopeItemRepository.findByProjectReleaseId(releaseId, pageable);
-        return scopeItems.map(ScopeItemResponse::new);
+    public boolean canDeleteScopeItem(Long id) {
+        return componentRepository.countByScopeItemId(id) == 0;
     }
 
     @Override
-    public List<EffortEstimateResponse> addEffortEstimates(Long scopeItemId, List<EffortEstimateRequest> effortEstimateRequests) {
-        // Validate scope item exists
-        ScopeItem scopeItem = scopeItemRepository.findById(scopeItemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Scope item not found with id: " + scopeItemId));
-
-        // Validate effort estimates
-        for (EffortEstimateRequest request : effortEstimateRequests) {
-            validateEffortEstimate(request);
+    public ReleaseEffortSummaryResponse getReleaseEffortSummary(Long releaseId) {
+        if (!releaseRepository.existsById(releaseId)) {
+            throw new ResourceNotFoundException("Release not found with id: " + releaseId);
         }
 
-        // Create effort estimates
-        List<EffortEstimate> effortEstimates = effortEstimateRequests.stream()
-                .map(request -> {
-                    EffortEstimate effortEstimate = new EffortEstimate();
-                    effortEstimate.setSkillFunction(request.getSkillFunction());
-                    effortEstimate.setSkillSubFunction(request.getSkillSubFunction());
-                    effortEstimate.setPhase(request.getPhase());
-                    effortEstimate.setEffortDays(request.getEffortDays());
-                    effortEstimate.setScopeItem(scopeItem);
-                    return effortEstimate;
-                })
-                .collect(Collectors.toList());
+        Double totalFunctionalDesignDays = calculateTotalFunctionalDesignDays(releaseId);
+        Double totalTechnicalDesignDays = calculateTotalTechnicalDesignDays(releaseId);
+        Double totalBuildDays = calculateTotalBuildDays(releaseId);
+        Double totalSitDays = calculateTotalSitDays(releaseId);
+        Double totalUatDays = calculateTotalUatDays(releaseId);
 
-        List<EffortEstimate> savedEffortEstimates = effortEstimateRepository.saveAll(effortEstimates);
-        return savedEffortEstimates.stream()
-                .map(EffortEstimateResponse::new)
-                .collect(Collectors.toList());
+        Release release = releaseRepository.findById(releaseId).orElse(null);
+        Double regressionTestingDays = release != null ? release.getRegressionTestingDays() : 0.0;
+        Double smokeTestingDays = release != null ? release.getSmokeTestingDays() : 0.0;
+        Double goLiveDays = release != null ? release.getGoLiveDays() : 0.0;
+
+        return new ReleaseEffortSummaryResponse(
+                releaseId,
+                totalFunctionalDesignDays,
+                totalTechnicalDesignDays,
+                totalBuildDays,
+                totalSitDays,
+                totalUatDays,
+                regressionTestingDays,
+                smokeTestingDays,
+                goLiveDays
+        );
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<EffortEstimateResponse> findEffortEstimatesByScopeItemId(Long scopeItemId) {
-        List<EffortEstimate> effortEstimates = effortEstimateRepository.findByScopeItemId(scopeItemId);
-        return effortEstimates.stream()
-                .map(EffortEstimateResponse::new)
-                .collect(Collectors.toList());
+    public Double calculateTotalFunctionalDesignDays(Long releaseId) {
+        return scopeItemRepository.sumFunctionalDesignDaysByReleaseId(releaseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<EffortEstimateResponse> findEffortEstimatesByScopeItemId(Long scopeItemId, Pageable pageable) {
-        Page<EffortEstimate> effortEstimates = effortEstimateRepository.findByScopeItemId(scopeItemId, pageable);
-        return effortEstimates.map(EffortEstimateResponse::new);
+    public Double calculateTotalTechnicalDesignDays(Long releaseId) {
+        return componentRepository.sumTechnicalDesignDaysByReleaseId(releaseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<EffortEstimateResponse> findEffortEstimatesByProjectId(Long projectId) {
-        List<EffortEstimate> effortEstimates = effortEstimateRepository.findByProjectId(projectId);
-        return effortEstimates.stream()
-                .map(EffortEstimateResponse::new)
-                .collect(Collectors.toList());
+    public Double calculateTotalBuildDays(Long releaseId) {
+        return componentRepository.sumBuildDaysByReleaseId(releaseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<EffortEstimateResponse> findEffortEstimatesByProjectId(Long projectId, Pageable pageable) {
-        Page<EffortEstimate> effortEstimates = effortEstimateRepository.findByProjectId(projectId, pageable);
-        return effortEstimates.map(EffortEstimateResponse::new);
+    public Double calculateTotalSitDays(Long releaseId) {
+        return scopeItemRepository.sumSitDaysByReleaseId(releaseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<EffortEstimateResponse> findEffortEstimatesByReleaseId(Long releaseId) {
-        List<EffortEstimate> effortEstimates = effortEstimateRepository.findByReleaseId(releaseId);
-        return effortEstimates.stream()
-                .map(EffortEstimateResponse::new)
-                .collect(Collectors.toList());
+    public Double calculateTotalUatDays(Long releaseId) {
+        return scopeItemRepository.sumUatDaysByReleaseId(releaseId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<EffortEstimateResponse> findEffortEstimatesByReleaseId(Long releaseId, Pageable pageable) {
-        Page<EffortEstimate> effortEstimates = effortEstimateRepository.findByReleaseId(releaseId, pageable);
-        return effortEstimates.map(EffortEstimateResponse::new);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Double sumEffortDaysByScopeItemIdAndSkillFunction(Long scopeItemId, String skillFunction) {
-        SkillFunctionEnum skillFunctionEnum = SkillFunctionEnum.valueOf(skillFunction);
-        return effortEstimateRepository.sumEffortDaysByScopeItemIdAndSkillFunction(scopeItemId, skillFunctionEnum);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Double sumEffortDaysByScopeItemIdAndSkillFunctionAndPhase(Long scopeItemId, String skillFunction, String phase) {
-        SkillFunctionEnum skillFunctionEnum = SkillFunctionEnum.valueOf(skillFunction);
-        PhaseTypeEnum phaseEnum = PhaseTypeEnum.valueOf(phase);
-        return effortEstimateRepository.sumEffortDaysByScopeItemIdAndSkillFunctionAndPhase(scopeItemId, skillFunctionEnum, phaseEnum);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Double sumEffortDaysByScopeItemIdAndSkillFunctionAndSkillSubFunction(Long scopeItemId, String skillFunction, String skillSubFunction) {
-        SkillFunctionEnum skillFunctionEnum = SkillFunctionEnum.valueOf(skillFunction);
-        SkillSubFunctionEnum skillSubFunctionEnum = SkillSubFunctionEnum.valueOf(skillSubFunction);
-        return effortEstimateRepository.sumEffortDaysByScopeItemIdAndSkillFunctionAndSkillSubFunction(scopeItemId, skillFunctionEnum, skillSubFunctionEnum);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Double sumEffortDaysByReleaseIdAndSkillFunction(Long releaseId, String skillFunction) {
-        SkillFunctionEnum skillFunctionEnum = SkillFunctionEnum.valueOf(skillFunction);
-        return effortEstimateRepository.sumEffortDaysByReleaseIdAndSkillFunction(releaseId, skillFunctionEnum);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Double sumEffortDaysByReleaseIdAndSkillFunctionAndPhase(Long releaseId, String skillFunction, String phase) {
-        SkillFunctionEnum skillFunctionEnum = SkillFunctionEnum.valueOf(skillFunction);
-        PhaseTypeEnum phaseEnum = PhaseTypeEnum.valueOf(phase);
-        return effortEstimateRepository.sumEffortDaysByReleaseIdAndSkillFunctionAndPhase(releaseId, skillFunctionEnum, phaseEnum);
-    }
-
-    @Override
-    public void validateScopeItem(ScopeItemRequest scopeItemRequest, Long projectId) {
-        if (scopeItemRequest.getName() == null || scopeItemRequest.getName().trim().isEmpty()) {
+    public void validateScopeItem(ScopeItemRequest request, Long releaseId) {
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
             throw new ValidationException("Scope item name is required");
         }
 
-        if (scopeItemRequest.getName().length() > 100) {
+        if (request.getName().length() > 100) {
             throw new ValidationException("Scope item name must not exceed 100 characters");
         }
 
-        if (scopeItemRequest.getDescription() != null && scopeItemRequest.getDescription().length() > 500) {
+        if (request.getDescription() != null && request.getDescription().length() > 500) {
             throw new ValidationException("Scope item description must not exceed 500 characters");
         }
 
-        // Validate that project exists
-        if (!projectRepository.existsById(projectId)) {
-            throw new ResourceNotFoundException("Project not found with id: " + projectId);
-        }
-    }
-
-    @Override
-    public void validateEffortEstimate(EffortEstimateRequest effortEstimateRequest) {
-        if (effortEstimateRequest.getSkillFunction() == null) {
-            throw new ValidationException("Skill function is required");
+        // Check for duplicate names within the same release
+        if (scopeItemRepository.existsByReleaseIdAndName(releaseId, request.getName())) {
+            throw new ValidationException("Scope item with this name already exists in the release");
         }
 
-        if (effortEstimateRequest.getPhase() == null) {
-            throw new ValidationException("Phase is required");
-        }
-
-        if (effortEstimateRequest.getEffortDays() == null || effortEstimateRequest.getEffortDays() <= 0) {
-            throw new ValidationException("Effort days must be positive");
-        }
-
-        // Validate skill sub-function based on skill function
-        if (effortEstimateRequest.getSkillSubFunction() != null) {
-            SkillFunctionEnum skillFunction = effortEstimateRequest.getSkillFunction();
-            SkillSubFunctionEnum skillSubFunction = effortEstimateRequest.getSkillSubFunction();
-
-            boolean isValid = false;
-            switch (skillFunction) {
-                case TECHNICAL_DESIGN:
-                case BUILD:
-                    isValid = skillSubFunction == SkillSubFunctionEnum.TALEND ||
-                            skillSubFunction == SkillSubFunctionEnum.FORGEROCK_IDM ||
-                            skillSubFunction == SkillSubFunctionEnum.FORGEROCK_IG ||
-                            skillSubFunction == SkillSubFunctionEnum.SAILPOINT ||
-                            skillSubFunction == SkillSubFunctionEnum.FORGEROCK_UI;
-                    break;
-                case TEST:
-                    isValid = skillSubFunction == SkillSubFunctionEnum.AUTOMATED ||
-                            skillSubFunction == SkillSubFunctionEnum.MANUAL;
-                    break;
-                case FUNCTIONAL_DESIGN:
-                case PLATFORM:
-                case GOVERNANCE:
-                    isValid = skillSubFunction == null;
-                    break;
+        // Validate effort estimates are within bounds
+        if (request.getFunctionalDesignDays() != null) {
+            if (request.getFunctionalDesignDays() < 1.0 || 
+                    request.getFunctionalDesignDays() > 1000.0) {
+                throw new ValidationException("Functional design days must be between 1 and 1000");
             }
+        }
 
-            if (!isValid) {
-                throw new ValidationException("Invalid skill sub-function for the selected skill function");
+        if (request.getSitDays() != null) {
+            if (request.getSitDays() < 1.0 || 
+                    request.getSitDays() > 1000.0) {
+                throw new ValidationException("SIT days must be between 1 and 1000");
+            }
+        }
+
+        if (request.getUatDays() != null) {
+            if (request.getUatDays() < 1.0 || 
+                    request.getUatDays() > 1000.0) {
+                throw new ValidationException("UAT days must be between 1 and 1000");
+            }
+        }
+
+        // Validate components if provided
+        if (request.getComponents() != null) {
+            for (var componentRequest : request.getComponents()) {
+                if (componentRequest.getTechnicalDesignDays() != null) {
+                    if (componentRequest.getTechnicalDesignDays() < 1.0 || 
+                            componentRequest.getTechnicalDesignDays() > 1000.0) {
+                        throw new ValidationException("Technical design days must be between 1 and 1000");
+                    }
+                }
+
+                if (componentRequest.getBuildDays() != null) {
+                    if (componentRequest.getBuildDays() < 1.0 || 
+                            componentRequest.getBuildDays() > 1000.0) {
+                        throw new ValidationException("Build days must be between 1 and 1000");
+                    }
+                }
             }
         }
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean canDeleteScopeItem(Long scopeItemId) {
-        // Check if scope item has any effort estimates
-        return scopeItemRepository.findById(scopeItemId)
-                .map(scopeItem -> scopeItem.getEffortEstimates().isEmpty())
-                .orElse(false);
+    private ScopeItemResponse convertToResponse(ScopeItem scopeItem) {
+        return new ScopeItemResponse(scopeItem);
+    }
+
+    private ScopeItemWithComponentsResponse convertToResponseWithComponents(ScopeItem scopeItem) {
+        List<ComponentResponse> components = componentRepository.findByScopeItemId(scopeItem.getId())
+                .stream()
+                .map(component -> new ComponentResponse(component))
+                .collect(Collectors.toList());
+
+        return new ScopeItemWithComponentsResponse(
+                scopeItem.getId(),
+                scopeItem.getName(),
+                scopeItem.getDescription(),
+                scopeItem.getRelease().getId(),
+                scopeItem.getFunctionalDesignDays(),
+                scopeItem.getSitDays(),
+                scopeItem.getUatDays(),
+                components,
+                scopeItem.getCreatedAt(),
+                scopeItem.getUpdatedAt()
+        );
     }
 }
 

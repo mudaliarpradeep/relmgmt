@@ -54,11 +54,14 @@ export type SkillFunctionEnum = typeof SkillFunction[keyof typeof SkillFunction]
 
 // Skill Sub-function constants
 export const SkillSubFunction = {
+  ETL: 'ETL',
   TALEND: 'Talend',
+  FORGEROCK_IGA: 'ForgeRock IGA',
   FORGEROCK_IDM: 'ForgeRock IDM',
   FORGEROCK_IG: 'ForgeRock IG',
   SAILPOINT: 'SailPoint',
   FORGEROCK_UI: 'ForgeRock UI',
+  FUNCTIONAL_TEST: 'Functional Test',
   AUTOMATED: 'Automated',
   MANUAL: 'Manual'
 } as const;
@@ -70,16 +73,27 @@ export const getApplicableSubFunctions = (skillFunction: SkillFunctionEnum): Ski
   switch (skillFunction) {
     case SkillFunction.TEST:
       return [SkillSubFunction.AUTOMATED, SkillSubFunction.MANUAL];
+    case SkillFunction.FUNCTIONAL_DESIGN:
+      return [
+        SkillSubFunction.ETL,
+        SkillSubFunction.FORGEROCK_IGA,
+        SkillSubFunction.FORGEROCK_IG,
+        SkillSubFunction.SAILPOINT,
+        SkillSubFunction.FORGEROCK_UI,
+        SkillSubFunction.FUNCTIONAL_TEST
+      ];
     case SkillFunction.TECHNICAL_DESIGN:
     case SkillFunction.BUILD:
       return [
+        SkillSubFunction.ETL,
         SkillSubFunction.TALEND,
+        SkillSubFunction.FORGEROCK_IGA,
         SkillSubFunction.FORGEROCK_IDM,
         SkillSubFunction.FORGEROCK_IG,
         SkillSubFunction.SAILPOINT,
-        SkillSubFunction.FORGEROCK_UI
+        SkillSubFunction.FORGEROCK_UI,
+        SkillSubFunction.FUNCTIONAL_TEST
       ];
-    case SkillFunction.FUNCTIONAL_DESIGN:
     case SkillFunction.PLATFORM:
     case SkillFunction.GOVERNANCE:
     default:
@@ -120,8 +134,12 @@ export const getSkillFunctionEnumName = (displayName: string): string => {
 
 export const getSkillSubFunctionEnumName = (displayName: string): string => {
   switch (displayName) {
+    case SkillSubFunction.ETL:
+      return 'ETL';
     case SkillSubFunction.TALEND:
       return 'TALEND';
+    case SkillSubFunction.FORGEROCK_IGA:
+      return 'FORGEROCK_IGA';
     case SkillSubFunction.FORGEROCK_IDM:
       return 'FORGEROCK_IDM';
     case SkillSubFunction.FORGEROCK_IG:
@@ -130,6 +148,8 @@ export const getSkillSubFunctionEnumName = (displayName: string): string => {
       return 'SAILPOINT';
     case SkillSubFunction.FORGEROCK_UI:
       return 'FORGEROCK_UI';
+    case SkillSubFunction.FUNCTIONAL_TEST:
+      return 'FUNCTIONAL_TEST';
     case SkillSubFunction.AUTOMATED:
       return 'AUTOMATED';
     case SkillSubFunction.MANUAL:
@@ -231,10 +251,10 @@ export interface Release {
 export interface ReleasePhase {
   id: number;
   releaseId: number;
-  name: ReleasePhaseEnum;
+  phaseType: string;
+  phaseTypeDisplayName: string;
   startDate: string;
   endDate: string;
-  status: PhaseStatusEnum;
   createdAt: string;
   updatedAt: string;
 }
@@ -278,6 +298,8 @@ export const ReleasePhase = {
   BUILD: 'Build',
   SIT: 'System Integration Test',
   UAT: 'User Acceptance Test',
+  REGRESSION_TESTING: 'Regression Testing',
+  DATA_COMPARISON: 'Data Comparison',
   SMOKE_TESTING: 'Smoke Testing',
   PRODUCTION_GO_LIVE: 'Production Go-Live'
 } as const;
@@ -344,24 +366,127 @@ export const getProjectTypeEnumName = (displayName: string): string => {
   }
 };
 
-// Scope types
-export interface ScopeItem {
+// Build sub-skills for scope items (subset of SkillSubFunction)
+export const BUILD_SUB_SKILLS = [
+  SkillSubFunction.ETL,
+  SkillSubFunction.FORGEROCK_IGA,
+  SkillSubFunction.FORGEROCK_IG,
+  SkillSubFunction.FORGEROCK_UI,
+  SkillSubFunction.SAILPOINT,
+  SkillSubFunction.FUNCTIONAL_TEST
+] as const;
+
+export type BuildSubSkill = typeof BUILD_SUB_SKILLS[number];
+
+// Component types
+export const ComponentType = {
+  ETL: 'ETL',
+  FORGEROCK_IGA: 'ForgeRock IGA',
+  FORGEROCK_UI: 'ForgeRock UI',
+  FORGEROCK_IG: 'ForgeRock IG',
+  FORGEROCK_IDM: 'ForgeRock IDM',
+  SAILPOINT: 'SailPoint',
+  FUNCTIONAL_TEST: 'Functional Test'
+} as const;
+
+export type ComponentTypeEnum = typeof ComponentType[keyof typeof ComponentType];
+
+export const getComponentTypeEnumName = (displayName: string): string => {
+  switch (displayName) {
+    case ComponentType.ETL:
+      return 'ETL';
+    case ComponentType.FORGEROCK_IGA:
+      return 'FORGEROCK_IGA';
+    case ComponentType.FORGEROCK_UI:
+      return 'FORGEROCK_UI';
+    case ComponentType.FORGEROCK_IG:
+      return 'FORGEROCK_IG';
+    case ComponentType.FORGEROCK_IDM:
+      return 'FORGEROCK_IDM';
+    case ComponentType.SAILPOINT:
+      return 'SAILPOINT';
+    case ComponentType.FUNCTIONAL_TEST:
+      return 'FUNCTIONAL_TEST';
+    default:
+      return displayName;
+  }
+};
+
+export interface Component {
   id: number;
-  projectId: number;
   name: string;
-  description?: string;
+  componentType: ComponentTypeEnum;
+  technicalDesignDays: number;
+  buildDays: number;
+  scopeItemId: number;
+  effortEstimates?: EffortEstimate[];
   createdAt: string;
   updatedAt: string;
 }
 
+export interface ComponentRequest {
+  name: string;
+  componentType: ComponentTypeEnum;
+  technicalDesignDays: number;
+  buildDays: number;
+}
+
+export interface ComponentResponse extends Component {
+  totalEffortDays: number;
+}
+
+// Updated Scope Item types for new data model
+export interface ScopeItem {
+  id: number;
+  releaseId: number; // Changed from projectId to releaseId
+  name: string;
+  description?: string;
+  functionalDesignDays: number; // Added scope item level effort
+  sitDays: number; // Added scope item level effort
+  uatDays: number; // Added scope item level effort
+  components: Component[]; // Changed from effortEstimates to components
+  componentsCount: number; // Added for display purposes
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Enhanced scope item with components for display
+export interface ScopeItemWithComponents extends ScopeItem {
+  components: Component[];
+  primaryComponent?: string; // Main component display name
+  totalEffortDays: number;
+}
+
+// Scope item request for new data model
 export interface ScopeItemRequest {
   name: string;
   description?: string;
+  functionalDesignDays: number;
+  sitDays: number;
+  uatDays: number;
+  components: ComponentRequest[];
 }
 
+// Release effort summary types
+export interface ReleaseEffortSummary {
+  releaseId: number;
+  functionalDesignDays: number;
+  technicalDesignDays: number;
+  buildDays: number;
+  sitDays: number;
+  uatDays: number;
+  regressionTestingDays?: number;
+  smokeTestingDays?: number;
+  goLiveDays?: number;
+  totalCalculatedEffortDays: number;
+  totalManualEffortDays: number;
+  totalEffortDays: number;
+}
+
+// Updated EffortEstimate to link to Component instead of ScopeItem
 export interface EffortEstimate {
   id: number;
-  scopeItemId: number;
+  componentId: number; // Changed from scopeItemId to componentId
   skillFunction: SkillFunctionEnum;
   skillSubFunction?: SkillSubFunctionEnum;
   phase: ReleasePhaseEnum;
@@ -377,6 +502,17 @@ export interface EffortEstimateRequest {
   effortDays: number;
 }
 
+export interface EffortEstimateResponse {
+  id: number;
+  skillFunction: SkillFunctionEnum;
+  skillSubFunction?: SkillSubFunctionEnum;
+  phase: ReleasePhaseEnum;
+  effortDays: number;
+  componentId: number; // Changed from scopeItemId to componentId
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const getPhaseEnumName = (displayName: string): string => {
   switch (displayName) {
     case ReleasePhase.FUNCTIONAL_DESIGN:
@@ -386,15 +522,44 @@ export const getPhaseEnumName = (displayName: string): string => {
     case ReleasePhase.BUILD:
       return 'BUILD';
     case ReleasePhase.SIT:
-      return 'SIT';
+      return 'SYSTEM_INTEGRATION_TEST';
     case ReleasePhase.UAT:
-      return 'UAT';
+      return 'USER_ACCEPTANCE_TEST';
+    case ReleasePhase.REGRESSION_TESTING:
+      return 'REGRESSION_TESTING';
+    case ReleasePhase.DATA_COMPARISON:
+      return 'DATA_COMPARISON';
     case ReleasePhase.SMOKE_TESTING:
       return 'SMOKE_TESTING';
     case ReleasePhase.PRODUCTION_GO_LIVE:
       return 'PRODUCTION_GO_LIVE';
     default:
       return displayName;
+  }
+};
+
+export const getPhaseDisplayName = (enumName: string): string => {
+  switch (enumName) {
+    case 'FUNCTIONAL_DESIGN':
+      return ReleasePhase.FUNCTIONAL_DESIGN;
+    case 'TECHNICAL_DESIGN':
+      return ReleasePhase.TECHNICAL_DESIGN;
+    case 'BUILD':
+      return ReleasePhase.BUILD;
+    case 'SYSTEM_INTEGRATION_TEST':
+      return ReleasePhase.SIT;
+    case 'USER_ACCEPTANCE_TEST':
+      return ReleasePhase.UAT;
+    case 'REGRESSION_TESTING':
+      return ReleasePhase.REGRESSION_TESTING;
+    case 'DATA_COMPARISON':
+      return ReleasePhase.DATA_COMPARISON;
+    case 'SMOKE_TESTING':
+      return ReleasePhase.SMOKE_TESTING;
+    case 'PRODUCTION_GO_LIVE':
+      return ReleasePhase.PRODUCTION_GO_LIVE;
+    default:
+      return enumName;
   }
 };
 
@@ -484,3 +649,49 @@ export interface NotificationFilters {
   size?: number;
   sort?: string;
 }
+
+// Utility functions for effort breakdown formatting
+export const formatPhaseBreakdown = (effortByPhase: Record<string, number>): string => {
+  if (!effortByPhase || Object.keys(effortByPhase).length === 0) {
+    return 'No estimates';
+  }
+
+  const phaseAbbreviations: Record<string, string> = {
+    'Functional Design': 'FD',
+    'Technical Design': 'TD',
+    'Build': 'Build',
+    'System Integration Test (SIT)': 'SIT',
+    'User Acceptance Test (UAT)': 'UAT',
+    'Regression Testing': 'RT',
+    'Data Comparison': 'DC',
+    'Smoke Testing': 'ST',
+    'Production Go-Live': 'PGL'
+  };
+
+  return Object.entries(effortByPhase)
+    .map(([phase, days]) => {
+      const abbreviation = phaseAbbreviations[phase] || phase;
+      return `${abbreviation}: ${days}`;
+    })
+    .join(', ');
+};
+
+export const formatTotalEffort = (totalDays: number): string => {
+  if (totalDays === 0) return '0 days';
+  return `${totalDays} day${totalDays === 1 ? '' : 's'}`;
+};
+
+export const getComponentBadgeColor = (component?: string): string => {
+  if (!component) return 'bg-gray-100 text-gray-800';
+  
+  const colorMap: Record<string, string> = {
+    'ETL': 'bg-blue-100 text-blue-800',
+    'ForgeRock IGA': 'bg-purple-100 text-purple-800',
+    'ForgeRock IG': 'bg-indigo-100 text-indigo-800',
+    'ForgeRock UI': 'bg-cyan-100 text-cyan-800',
+    'SailPoint': 'bg-green-100 text-green-800',
+    'Functional Test': 'bg-orange-100 text-orange-800'
+  };
+  
+  return colorMap[component] || 'bg-gray-100 text-gray-800';
+};

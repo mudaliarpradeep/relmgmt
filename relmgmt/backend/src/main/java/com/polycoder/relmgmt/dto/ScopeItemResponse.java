@@ -9,12 +9,13 @@ public class ScopeItemResponse {
     private Long id;
     private String name;
     private String description;
-    private Long projectId;
-    private String projectName;
     private Long releaseId;
     private String releaseName;
     private String releaseIdentifier;
-    private int effortEstimatesCount;
+    private Double functionalDesignDays;
+    private Double sitDays;
+    private Double uatDays;
+    private int componentsCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -26,27 +27,31 @@ public class ScopeItemResponse {
         this.id = scopeItem.getId();
         this.name = scopeItem.getName();
         this.description = scopeItem.getDescription();
-        this.projectId = scopeItem.getProject() != null ? scopeItem.getProject().getId() : null;
-        this.projectName = scopeItem.getProject() != null ? scopeItem.getProject().getName() : null;
-        this.releaseId = scopeItem.getProject() != null && scopeItem.getProject().getRelease() != null ? scopeItem.getProject().getRelease().getId() : null;
-        this.releaseName = scopeItem.getProject() != null && scopeItem.getProject().getRelease() != null ? scopeItem.getProject().getRelease().getName() : null;
-        this.releaseIdentifier = scopeItem.getProject() != null && scopeItem.getProject().getRelease() != null ? scopeItem.getProject().getRelease().getIdentifier() : null;
-        this.effortEstimatesCount = scopeItem.getEffortEstimates() != null ? scopeItem.getEffortEstimates().size() : 0;
+        this.releaseId = scopeItem.getRelease() != null ? scopeItem.getRelease().getId() : null;
+        this.releaseName = scopeItem.getRelease() != null ? scopeItem.getRelease().getName() : null;
+        this.releaseIdentifier = scopeItem.getRelease() != null ? scopeItem.getRelease().getIdentifier() : null;
+        this.functionalDesignDays = scopeItem.getFunctionalDesignDays();
+        this.sitDays = scopeItem.getSitDays();
+        this.uatDays = scopeItem.getUatDays();
+        this.componentsCount = scopeItem.getComponents() != null ? scopeItem.getComponents().size() : 0;
         this.createdAt = scopeItem.getCreatedAt();
         this.updatedAt = scopeItem.getUpdatedAt();
     }
 
     // Constructor with all fields
-    public ScopeItemResponse(Long id, String name, String description, Long projectId, String projectName, Long releaseId, String releaseName, String releaseIdentifier, int effortEstimatesCount, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ScopeItemResponse(Long id, String name, String description, Long releaseId, String releaseName, String releaseIdentifier, 
+                           Double functionalDesignDays, Double sitDays, Double uatDays, int componentsCount, 
+                           LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.projectId = projectId;
-        this.projectName = projectName;
         this.releaseId = releaseId;
         this.releaseName = releaseName;
         this.releaseIdentifier = releaseIdentifier;
-        this.effortEstimatesCount = effortEstimatesCount;
+        this.functionalDesignDays = functionalDesignDays;
+        this.sitDays = sitDays;
+        this.uatDays = uatDays;
+        this.componentsCount = componentsCount;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -76,22 +81,6 @@ public class ScopeItemResponse {
         this.description = description;
     }
 
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
     public Long getReleaseId() {
         return releaseId;
     }
@@ -116,12 +105,36 @@ public class ScopeItemResponse {
         this.releaseIdentifier = releaseIdentifier;
     }
 
-    public int getEffortEstimatesCount() {
-        return effortEstimatesCount;
+    public Double getFunctionalDesignDays() {
+        return functionalDesignDays;
     }
 
-    public void setEffortEstimatesCount(int effortEstimatesCount) {
-        this.effortEstimatesCount = effortEstimatesCount;
+    public void setFunctionalDesignDays(Double functionalDesignDays) {
+        this.functionalDesignDays = functionalDesignDays;
+    }
+
+    public Double getSitDays() {
+        return sitDays;
+    }
+
+    public void setSitDays(Double sitDays) {
+        this.sitDays = sitDays;
+    }
+
+    public Double getUatDays() {
+        return uatDays;
+    }
+
+    public void setUatDays(Double uatDays) {
+        this.uatDays = uatDays;
+    }
+
+    public int getComponentsCount() {
+        return componentsCount;
+    }
+
+    public void setComponentsCount(int componentsCount) {
+        this.componentsCount = componentsCount;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -146,12 +159,13 @@ public class ScopeItemResponse {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", projectId=" + projectId +
-                ", projectName='" + projectName + '\'' +
                 ", releaseId=" + releaseId +
                 ", releaseName='" + releaseName + '\'' +
                 ", releaseIdentifier='" + releaseIdentifier + '\'' +
-                ", effortEstimatesCount=" + effortEstimatesCount +
+                ", functionalDesignDays=" + functionalDesignDays +
+                ", sitDays=" + sitDays +
+                ", uatDays=" + uatDays +
+                ", componentsCount=" + componentsCount +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

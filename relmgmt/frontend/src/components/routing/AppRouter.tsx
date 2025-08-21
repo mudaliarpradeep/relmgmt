@@ -10,13 +10,9 @@ import ResourceDetailPage from '../../pages/resources/ResourceDetailPage';
 import ReleaseListPage from '../../pages/releases/ReleaseListPage';
 import ReleaseForm from '../../pages/releases/ReleaseForm';
 import ReleaseDetailPage from '../../pages/releases/ReleaseDetailPage';
-import ProjectListPage from '../../pages/projects/ProjectListPage';
 import ScopeListPage from '../../pages/scope/ScopeListPage';
-import ProjectForm from '../../pages/projects/ProjectForm';
-import ProjectDetailPage from '../../pages/projects/ProjectDetailPage';
 import ScopeItemForm from '../../pages/scope/ScopeItemForm';
 import ScopeItemDetailPage from '../../pages/scope/ScopeItemDetailPage';
-import EffortEstimationForm from '../../pages/scope/EffortEstimationForm';
 import AllocationListPage from '../../pages/allocations/AllocationListPage';
 import AllocationDetailPage from '../../pages/allocations/AllocationDetailPage';
 import AllocationConflictsReportPage from '../../pages/reports/AllocationConflictsReportPage';
@@ -33,6 +29,7 @@ const AppRouter: React.FC = () => {
       {/* Protected routes */}
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         
         {/* Resource Management */}
         <Route path="resources" element={<ResourceListPage />} />
@@ -45,16 +42,12 @@ const AppRouter: React.FC = () => {
         <Route path="releases/new" element={<ReleaseForm />} />
         <Route path="releases/:id" element={<ReleaseDetailPage />} />
         <Route path="releases/:id/edit" element={<ReleaseForm />} />
-        {/* Project & Scope Management */}
-        <Route path="releases/:id/projects" element={<ProjectListPage />} />
-        <Route path="releases/:releaseId/projects/new" element={<ProjectForm />} />
-        <Route path="projects/:id" element={<ProjectDetailPage />} />
-        <Route path="projects/:id/edit" element={<ProjectForm />} />
-        <Route path="projects/:id/scope" element={<ScopeListPage />} />
-        <Route path="projects/:projectId/scope/new" element={<ScopeItemForm />} />
-        <Route path="scope/:id" element={<ScopeItemDetailPage />} />
-        <Route path="scope/:id/edit" element={<ScopeItemForm />} />
-        <Route path="scope/:id/estimates/new" element={<EffortEstimationForm />} />
+        
+        {/* Scope Item Management */}
+        <Route path="releases/:releaseId/scope-items" element={<ScopeListPage />} />
+        <Route path="releases/:releaseId/scope-items/new" element={<ScopeItemForm />} />
+        <Route path="scope-items/:id" element={<ScopeItemDetailPage />} />
+        <Route path="scope-items/:id/edit" element={<ScopeItemForm />} />
         
         {/* Allocation Management */}
         <Route path="allocations" element={<AllocationListPage />} />

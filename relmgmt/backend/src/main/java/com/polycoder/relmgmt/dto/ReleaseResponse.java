@@ -8,6 +8,7 @@ public class ReleaseResponse {
     private Long id;
     private String name;
     private String identifier;
+    private String status;
     private List<PhaseResponse> phases;
     private List<BlockerResponse> blockers;
     private LocalDateTime createdAt;
@@ -24,12 +25,13 @@ public class ReleaseResponse {
     }
 
     // Constructor with all fields
-    public ReleaseResponse(Long id, String name, String identifier, 
-                          List<PhaseResponse> phases, List<BlockerResponse> blockers,
-                          LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ReleaseResponse(Long id, String name, String identifier, String status,
+                           List<PhaseResponse> phases, List<BlockerResponse> blockers,
+                           LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.identifier = identifier;
+        this.status = status;
         this.phases = phases;
         this.blockers = blockers;
         this.createdAt = createdAt;
@@ -59,6 +61,14 @@ public class ReleaseResponse {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<PhaseResponse> getPhases() {

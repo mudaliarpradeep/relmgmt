@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const timeline = [
   { name: 'R2024.1', label: 'Release 2024.1', start: 0, span: 1, color: 'blue' },
@@ -40,12 +41,12 @@ const ReleaseTimeline: React.FC = () => (
       </div>
     </div>
     <div className="mt-4">
-      <a href="#" className="link flex items-center justify-end">
+      <Link to="/releases" className="link flex items-center justify-end">
         View Full Gantt Chart
         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-      </a>
+      </Link>
     </div>
   </section>
 );

@@ -28,12 +28,13 @@ The Release Management System will be a standalone web application that helps te
 1. Resource roster management
 2. Release creation and planning
 3. Scope management with effort estimation
-4. Automated resource allocation
-5. Visual representations (Gantt charts, capacity views)
-6. Multi-release planning and visualization
-7. Comprehensive audit logging and transaction history
-8. Export functionality for reports and allocation data
-9. Basic notification system for critical events
+4. Component management with phase-specific effort estimates
+5. Automated resource allocation
+6. Visual representations (Gantt charts, capacity views)
+7. Multi-release planning and visualization
+8. Comprehensive audit logging and transaction history
+9. Export functionality for reports and allocation data
+10. Basic notification system for critical events
 
 ### 2.3 User Classes and Characteristics
 Users are expected to be professionals familiar with software delivery processes. They will have varying levels of technical expertise but will understand the concepts of resource allocation, project phases, and capacity planning.
@@ -104,22 +105,45 @@ Each resource in the roster shall have the following attributes:
   - Build
   - System Integration Test (SIT)
   - User Acceptance Test (UAT)
+  - Regression Testing
   - Smoke Testing
-  - Production Go-Live
+  - Go-Live
 - Users shall be able to set start and end dates for each phase.
 - Users shall be able to add blockers to releases.
 
-#### 4.2.2 Project and Scope Management
-- Users shall be able to add projects to a release.
-- Users shall be able to categorize projects as either "Day 1" or "Day 2" type.
-- Users shall be able to add scope items to projects.
-- Users shall be able to provide effort estimates for each scope item.
-- Effort estimates shall be broken down by:
-  - Skill function
-  - Skill sub-function
-  - SDLC phase
+#### 4.2.2 Scope Item Management
+- Users shall be able to add scope items directly to a release (eliminating the Project entity).
+- Each scope item shall have:
+  - Name
+  - Description (optional)
+  - One or more components
+  - Scope item-level effort estimates for:
+    - Functional Design (person-days)
+    - System Integration Test (SIT) (person-days)
+    - User Acceptance Test (UAT) (person-days)
 
-#### 4.2.3 Release Planning Rules
+#### 4.2.3 Component Management
+- Each scope item shall support one or more components.
+- Components shall be first-class entities with the following attributes:
+  - Name/Type (e.g., ETL, ForgeRock IGA, ForgeRock UI, ForgeRock IG, ForgeRock IDM, SailPoint, Functional Test)
+  - Technical Design effort estimate (person-days)
+  - Build effort estimate (person-days)
+- Components shall not be shared across multiple scope items (one-to-many relationship).
+- Users shall be able to add, edit, and remove components within a scope item using inline component management.
+
+#### 4.2.4 Effort Estimation and Derivation Rules
+- **Component-Level Efforts**: Each component shall have separate Technical Design and Build effort estimates.
+- **Scope Item-Level Efforts**: Each scope item shall have single values for Functional Design, SIT, and UAT efforts.
+- **Release-Level Effort Derivation**:
+  - Functional Design, Technical Design, Build, SIT, and UAT effort values shall be automatically calculated as summations of the corresponding efforts from all scope items assigned to the release.
+  - Regression Testing, Smoke Testing, and Go-Live efforts shall be manually assigned at the release level.
+- **Validation Rules**:
+  - Minimum effort value: 1 person-day
+  - Maximum effort value: 1000 person-days
+  - All required phases must have effort estimates
+  - Effort units must be person-days (whole numbers or decimals allowed)
+
+#### 4.2.5 Release Planning Rules
 - The system shall enforce a rule that generally prevents more than one production go-live in a calendar month.
 - The system shall support multiple parallel releases.
 - For the MVP, there are no dependencies between releases. Pre-requisites for releases will be managed outside the scope of this application.
@@ -140,13 +164,16 @@ The system shall allocate resources to releases based on the following rules:
 
 3. **Phase-specific Allocation**:
    - **Functional Design**: Load resources with skill function "Functional Design" based on scope estimates and available capacity.
-   - **Technical Design**: Load resources with skill function "Technical Design" and matching skill sub-function based on scope estimates and available capacity.
-   - **Build**: Load resources with skill function "Build" and matching skill sub-function based on scope estimates and available capacity.
+   - **Technical Design**: Load resources with skill function "Technical Design" and matching skill sub-function based on component estimates and available capacity.
+   - **Build**: Load resources with skill function "Build" and matching skill sub-function based on component estimates and available capacity.
    - **SIT**: Load resources with skill function "Test" and sub-function "Manual" based on scope estimates and available capacity.
    - **UAT**: 
      - Test resources: 30% of SIT phase effort for all loaded Test resources.
      - Build resources: 30% of Build phase effort for all loaded Build resources.
-   - **Smoke Testing** (standard 1-week window following UAT):
+   - **Regression Testing** (follows UAT):
+     - Test resources: 20% of SIT phase effort for all loaded Test resources.
+     - Build resources: 15% of Build phase effort for all loaded Build resources.
+   - **Smoke Testing** (standard 1-week window following regression):
      - Test resources: 10% of SIT phase effort for all loaded Test resources.
      - Build resources: 10% of Build phase effort for all loaded Build resources.
 
@@ -296,9 +323,9 @@ The system shall allocate resources to releases based on the following rules:
 - User (simplified for MVP)
 - Resource
 - Release
-- Project
 - Phase
 - Scope Item
+- Component
 - Allocation
 - Skill Function
 - Skill Sub-function
@@ -307,10 +334,10 @@ The system shall allocate resources to releases based on the following rules:
 
 ### 6.2 Data Relationships
 - A Release consists of multiple Phases
-- A Release includes multiple Projects
-- A Project includes multiple Scope Items
+- A Release includes multiple Scope Items (direct relationship, no Project entity)
+- A Scope Item includes multiple Components (one-to-many relationship)
+- A Component belongs to exactly one Scope Item
 - A Resource can be allocated to multiple Releases
-- A Scope Item has effort estimates by Skill Function, Sub-function, and Phase
 - Every entity change generates Transaction Log entries
 
 ### 6.3 Data Retention
@@ -348,13 +375,20 @@ The system shall allocate resources to releases based on the following rules:
    - Release creation/editing form with name field
    - Phase timeline definition
 
-4. **Project Management**
-   - Project list per release
-   - Project creation/editing form
+4. **Scope Item Management**
+   - Scope item list per release (replacing Project Management)
+   - Scope item creation/editing form with inline component management
+   - Effort estimation forms for scope item-level phases
 
-5. **Scope Management**
-   - Scope item list per project
-   - Effort estimation forms
+5. **Component Management (Inline)**
+   - Components displayed as rows in a table within the scope item form
+   - Each component row shows:
+     - Component name/type (dropdown selection)
+     - Technical Design effort input (person-days)
+     - Build effort input (person-days)
+     - Add/remove buttons ("+" and "×")
+   - Component types: ETL, ForgeRock IGA, ForgeRock UI, ForgeRock IG, ForgeRock IDM, SailPoint, Functional Test
+   - Validation: Minimum 1 PD, Maximum 1000 PD per effort field
 
 6. **Resource Allocation**
    - Allocation grid/matrix
@@ -382,6 +416,17 @@ The system shall allocate resources to releases based on the following rules:
     - Read/unread status indicators
     - Notification filtering options
 
+### 7.3 Component Management UI Details
+- **Inline Component Table**: Components shall be displayed as rows in a table within the scope item form
+- **Component Row Structure**:
+  - Component Type dropdown (ETL, ForgeRock IGA, ForgeRock UI, ForgeRock IG, ForgeRock IDM, SailPoint, Functional Test)
+  - Technical Design effort input field (number, min 1, max 1000)
+  - Build effort input field (number, min 1, max 1000)
+  - Remove button ("×") for each component
+- **Add Component**: "+" button to add new component rows
+- **Validation**: Real-time validation of effort values and required fields
+- **Auto-calculation**: Release-level efforts shall be automatically calculated and displayed based on scope item summations
+
 ## 8. System Interfaces
 
 ### 8.1 External Interfaces
@@ -400,6 +445,7 @@ The system shall allocate resources to releases based on the following rules:
 - The system must use the specified technical stack.
 - The system must follow the defined SDLC phases for release planning.
 - The transaction logging system must be compliant with organizational audit requirements.
+- Components cannot be shared across multiple scope items.
 
 ### 9.2 Assumptions
 - Users have basic familiarity with project management concepts.
@@ -408,6 +454,7 @@ The system shall allocate resources to releases based on the following rules:
 - The database system supports transaction logging and auditing capabilities.
 - For the MVP, there is a single user with all permissions.
 - No dependencies between releases are managed within the system for the MVP.
+- Existing project data will be cleaned up during the transition to the new data model.
 
 ## 10. Development Approach
 
@@ -435,9 +482,9 @@ The development process will follow Agile methodologies:
 ### 11.1 Glossary
 - **Resource**: An individual team member assigned to work on releases
 - **Release**: A complete cycle of software delivery
-- **Project**: A grouping of related scope items within a release
 - **Phase**: A distinct stage in the software delivery lifecycle
-- **Scope Item**: A specific feature or component to be delivered in a project
+- **Scope Item**: A specific feature or component to be delivered in a release (replaces Project entity)
+- **Component**: A specific technology or tool (e.g., ETL, ForgeRock IGA) within a scope item with its own effort estimates
 - **Allocation**: Assignment of a resource to work on a specific release for a given period
 - **Person-day**: A unit representing one day of work by one person
 - **Transaction Log**: A record of data modifications for auditing purposes

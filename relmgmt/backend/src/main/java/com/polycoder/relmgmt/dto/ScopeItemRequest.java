@@ -1,7 +1,8 @@
 package com.polycoder.relmgmt.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ScopeItemRequest {
 
@@ -12,6 +13,23 @@ public class ScopeItemRequest {
     @Size(max = 500, message = "Scope item description must not exceed 500 characters")
     private String description;
 
+    @NotNull(message = "Functional design days is required")
+    @Min(value = 1, message = "Functional design days must be at least 1")
+    @Max(value = 1000, message = "Functional design days cannot exceed 1000")
+    private Double functionalDesignDays;
+
+    @NotNull(message = "SIT days is required")
+    @Min(value = 1, message = "SIT days must be at least 1")
+    @Max(value = 1000, message = "SIT days cannot exceed 1000")
+    private Double sitDays;
+
+    @NotNull(message = "UAT days is required")
+    @Min(value = 1, message = "UAT days must be at least 1")
+    @Max(value = 1000, message = "UAT days cannot exceed 1000")
+    private Double uatDays;
+
+    private List<ComponentRequest> components = new ArrayList<>();
+
     // Default constructor
     public ScopeItemRequest() {}
 
@@ -21,9 +39,13 @@ public class ScopeItemRequest {
     }
 
     // Constructor with all fields
-    public ScopeItemRequest(String name, String description) {
+    public ScopeItemRequest(String name, String description, Double functionalDesignDays, Double sitDays, Double uatDays, List<ComponentRequest> components) {
         this.name = name;
         this.description = description;
+        this.functionalDesignDays = functionalDesignDays;
+        this.sitDays = sitDays;
+        this.uatDays = uatDays;
+        this.components = components;
     }
 
     // Getters and Setters
@@ -43,11 +65,47 @@ public class ScopeItemRequest {
         this.description = description;
     }
 
+    public Double getFunctionalDesignDays() {
+        return functionalDesignDays;
+    }
+
+    public void setFunctionalDesignDays(Double functionalDesignDays) {
+        this.functionalDesignDays = functionalDesignDays;
+    }
+
+    public Double getSitDays() {
+        return sitDays;
+    }
+
+    public void setSitDays(Double sitDays) {
+        this.sitDays = sitDays;
+    }
+
+    public Double getUatDays() {
+        return uatDays;
+    }
+
+    public void setUatDays(Double uatDays) {
+        this.uatDays = uatDays;
+    }
+
+    public List<ComponentRequest> getComponents() {
+        return components;
+    }
+
+    public void setComponents(List<ComponentRequest> components) {
+        this.components = components;
+    }
+
     @Override
     public String toString() {
         return "ScopeItemRequest{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", functionalDesignDays=" + functionalDesignDays +
+                ", sitDays=" + sitDays +
+                ", uatDays=" + uatDays +
+                ", componentsCount=" + (components != null ? components.size() : 0) +
                 '}';
     }
 }

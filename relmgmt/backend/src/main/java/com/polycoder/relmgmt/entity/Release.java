@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,21 @@ public class Release extends BaseEntity {
     private List<Blocker> blockers = new ArrayList<>();
 
     @OneToMany(mappedBy = "release", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Project> projects = new ArrayList<>();
+    private List<ScopeItem> scopeItems = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private ReleaseStatusEnum status = ReleaseStatusEnum.PLANNING;
+
+    // Manual effort estimates for release-level phases
+    @Column(name = "regression_testing_days")
+    private Double regressionTestingDays = 0.0;
+
+    @Column(name = "smoke_testing_days")
+    private Double smokeTestingDays = 0.0;
+
+    @Column(name = "go_live_days")
+    private Double goLiveDays = 0.0;
 
     // Default constructor
     public Release() {}
@@ -74,12 +89,44 @@ public class Release extends BaseEntity {
         this.blockers = blockers;
     }
 
-    public List<Project> getProjects() {
-        return projects;
+    public List<ScopeItem> getScopeItems() {
+        return scopeItems;
     }
 
-    public void setProjects(List<Project> projects) {
-        this.projects = projects;
+    public void setScopeItems(List<ScopeItem> scopeItems) {
+        this.scopeItems = scopeItems;
+    }
+
+    public ReleaseStatusEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReleaseStatusEnum status) {
+        this.status = status;
+    }
+
+    public Double getRegressionTestingDays() {
+        return regressionTestingDays;
+    }
+
+    public void setRegressionTestingDays(Double regressionTestingDays) {
+        this.regressionTestingDays = regressionTestingDays;
+    }
+
+    public Double getSmokeTestingDays() {
+        return smokeTestingDays;
+    }
+
+    public void setSmokeTestingDays(Double smokeTestingDays) {
+        this.smokeTestingDays = smokeTestingDays;
+    }
+
+    public Double getGoLiveDays() {
+        return goLiveDays;
+    }
+
+    public void setGoLiveDays(Double goLiveDays) {
+        this.goLiveDays = goLiveDays;
     }
 
     // Helper methods for managing relationships
@@ -103,14 +150,14 @@ public class Release extends BaseEntity {
         blocker.setRelease(null);
     }
 
-    public void addProject(Project project) {
-        projects.add(project);
-        project.setRelease(this);
+    public void addScopeItem(ScopeItem scopeItem) {
+        scopeItems.add(scopeItem);
+        scopeItem.setRelease(this);
     }
 
-    public void removeProject(Project project) {
-        projects.remove(project);
-        project.setRelease(null);
+    public void removeScopeItem(ScopeItem scopeItem) {
+        scopeItems.remove(scopeItem);
+        scopeItem.setRelease(null);
     }
 
     @Override
@@ -119,9 +166,13 @@ public class Release extends BaseEntity {
                 "id=" + getId() +
                 ", name='" + name + '\'' +
                 ", identifier='" + identifier + '\'' +
+                ", status=" + status +
                 ", phases=" + phases.size() +
                 ", blockers=" + blockers.size() +
-                ", projects=" + projects.size() +
+                ", scopeItems=" + scopeItems.size() +
+                ", regressionTestingDays=" + regressionTestingDays +
+                ", smokeTestingDays=" + smokeTestingDays +
+                ", goLiveDays=" + goLiveDays +
                 ", createdAt=" + getCreatedAt() +
                 ", updatedAt=" + getUpdatedAt() +
                 '}';

@@ -34,13 +34,13 @@ public class EffortEstimateResponse {
         this.skillSubFunction = effortEstimate.getSkillSubFunction();
         this.phase = effortEstimate.getPhase();
         this.effortDays = effortEstimate.getEffortDays();
-        this.scopeItemId = effortEstimate.getScopeItem() != null ? effortEstimate.getScopeItem().getId() : null;
-        this.scopeItemName = effortEstimate.getScopeItem() != null ? effortEstimate.getScopeItem().getName() : null;
-        this.projectId = effortEstimate.getScopeItem() != null && effortEstimate.getScopeItem().getProject() != null ? effortEstimate.getScopeItem().getProject().getId() : null;
-        this.projectName = effortEstimate.getScopeItem() != null && effortEstimate.getScopeItem().getProject() != null ? effortEstimate.getScopeItem().getProject().getName() : null;
-        this.releaseId = effortEstimate.getScopeItem() != null && effortEstimate.getScopeItem().getProject() != null && effortEstimate.getScopeItem().getProject().getRelease() != null ? effortEstimate.getScopeItem().getProject().getRelease().getId() : null;
-        this.releaseName = effortEstimate.getScopeItem() != null && effortEstimate.getScopeItem().getProject() != null && effortEstimate.getScopeItem().getProject().getRelease() != null ? effortEstimate.getScopeItem().getProject().getRelease().getName() : null;
-        this.releaseIdentifier = effortEstimate.getScopeItem() != null && effortEstimate.getScopeItem().getProject() != null && effortEstimate.getScopeItem().getProject().getRelease() != null ? effortEstimate.getScopeItem().getProject().getRelease().getIdentifier() : null;
+        this.scopeItemId = effortEstimate.getComponent() != null && effortEstimate.getComponent().getScopeItem() != null ? effortEstimate.getComponent().getScopeItem().getId() : null;
+        this.scopeItemName = effortEstimate.getComponent() != null && effortEstimate.getComponent().getScopeItem() != null ? effortEstimate.getComponent().getScopeItem().getName() : null;
+        this.projectId = null; // No longer applicable in new model
+        this.projectName = null; // No longer applicable in new model
+        this.releaseId = effortEstimate.getComponent() != null && effortEstimate.getComponent().getScopeItem() != null && effortEstimate.getComponent().getScopeItem().getRelease() != null ? effortEstimate.getComponent().getScopeItem().getRelease().getId() : null;
+        this.releaseName = effortEstimate.getComponent() != null && effortEstimate.getComponent().getScopeItem() != null && effortEstimate.getComponent().getScopeItem().getRelease() != null ? effortEstimate.getComponent().getScopeItem().getRelease().getName() : null;
+        this.releaseIdentifier = effortEstimate.getComponent() != null && effortEstimate.getComponent().getScopeItem() != null && effortEstimate.getComponent().getScopeItem().getRelease() != null ? effortEstimate.getComponent().getScopeItem().getRelease().getIdentifier() : null;
         this.createdAt = effortEstimate.getCreatedAt();
         this.updatedAt = effortEstimate.getUpdatedAt();
     }

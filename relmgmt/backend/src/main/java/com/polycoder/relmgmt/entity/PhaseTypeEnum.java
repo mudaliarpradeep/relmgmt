@@ -6,6 +6,8 @@ public enum PhaseTypeEnum {
     BUILD("Build"),
     SYSTEM_INTEGRATION_TEST("System Integration Test (SIT)"),
     USER_ACCEPTANCE_TEST("User Acceptance Test (UAT)"),
+    REGRESSION_TESTING("Regression Testing"),
+    DATA_COMPARISON("Data Comparison"),
     SMOKE_TESTING("Smoke Testing"),
     PRODUCTION_GO_LIVE("Production Go-Live");
 

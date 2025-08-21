@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.polycoder.relmgmt.entity.ReleaseStatusEnum;
 
 @Service
 @Transactional
@@ -83,6 +84,14 @@ public class ReleaseServiceImpl implements ReleaseService {
         Release release = new Release();
         release.setName(releaseRequest.getName());
         release.setIdentifier(identifier);
+        // Map status if provided
+        if (releaseRequest.getStatus() != null && !releaseRequest.getStatus().trim().isEmpty()) {
+            try {
+                release.setStatus(ReleaseStatusEnum.valueOf(releaseRequest.getStatus()));
+            } catch (IllegalArgumentException ex) {
+                throw new ValidationException("Invalid release status: " + releaseRequest.getStatus());
+            }
+        }
 
         Release savedRelease = releaseRepository.save(release);
 
@@ -118,8 +127,74 @@ public class ReleaseServiceImpl implements ReleaseService {
 
         release.setName(releaseRequest.getName());
         release.setIdentifier(releaseRequest.getIdentifier());
+        if (releaseRequest.getStatus() != null && !releaseRequest.getStatus().trim().isEmpty()) {
+            try {
+                release.setStatus(ReleaseStatusEnum.valueOf(releaseRequest.getStatus()));
+            } catch (IllegalArgumentException ex) {
+                throw new ValidationException("Invalid release status: " + releaseRequest.getStatus());
+            }
+        }
 
+        // Persist basic release fields first
         Release savedRelease = releaseRepository.save(release);
+
+        // Reconcile phases with incoming request
+        if (releaseRequest.getPhases() != null) {
+            // Ensure no duplicate phase types in the incoming payload
+            java.util.Set<String> incomingTypesSet = new java.util.HashSet<>();
+            for (PhaseRequest pr : releaseRequest.getPhases()) {
+                String type = pr.getPhaseType();
+                if (!incomingTypesSet.add(type)) {
+                    throw new ValidationException("Duplicate phase type '" + type + "' in request");
+                }
+            }
+
+            // Load existing phases for this release
+            java.util.List<Phase> existingPhases = phaseRepository.findByReleaseId(savedRelease.getId());
+
+            // Build lookup maps by type
+            java.util.Map<PhaseTypeEnum, Phase> existingByType = new java.util.HashMap<>();
+            for (Phase p : existingPhases) {
+                existingByType.put(p.getPhaseType(), p);
+            }
+
+            java.util.Map<PhaseTypeEnum, PhaseRequest> incomingByType = new java.util.HashMap<>();
+            for (PhaseRequest pr : releaseRequest.getPhases()) {
+                PhaseTypeEnum typeEnum = PhaseTypeEnum.valueOf(pr.getPhaseType());
+                incomingByType.put(typeEnum, pr);
+            }
+
+            // Delete phases that are no longer present
+            for (PhaseTypeEnum existingType : existingByType.keySet()) {
+                if (!incomingByType.containsKey(existingType)) {
+                    Phase toDelete = existingByType.get(existingType);
+                    phaseRepository.delete(toDelete);
+                }
+            }
+
+            // Add new phases or update existing ones
+            for (java.util.Map.Entry<PhaseTypeEnum, PhaseRequest> entry : incomingByType.entrySet()) {
+                PhaseTypeEnum type = entry.getKey();
+                PhaseRequest pr = entry.getValue();
+
+                Phase existing = existingByType.get(type);
+                if (existing == null) {
+                    // Add new phase
+                    Phase newPhase = new Phase();
+                    newPhase.setPhaseType(type);
+                    newPhase.setStartDate(pr.getStartDate());
+                    newPhase.setEndDate(pr.getEndDate());
+                    newPhase.setRelease(savedRelease);
+                    phaseRepository.save(newPhase);
+                } else {
+                    // Update dates of existing phase
+                    existing.setStartDate(pr.getStartDate());
+                    existing.setEndDate(pr.getEndDate());
+                    phaseRepository.save(existing);
+                }
+            }
+        }
+
         return convertToReleaseResponse(savedRelease);
     }
 
@@ -358,6 +433,7 @@ public class ReleaseServiceImpl implements ReleaseService {
                 release.getId(),
                 release.getName(),
                 release.getIdentifier(),
+                release.getStatus() != null ? release.getStatus().name() : null,
                 phases,
                 blockers,
                 release.getCreatedAt(),

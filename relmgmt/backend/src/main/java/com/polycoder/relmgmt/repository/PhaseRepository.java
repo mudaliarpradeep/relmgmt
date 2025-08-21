@@ -18,7 +18,8 @@ public interface PhaseRepository extends JpaRepository<Phase, Long> {
      * @param releaseId the release ID
      * @return List of phases for the release
      */
-    List<Phase> findByReleaseId(Long releaseId);
+    @Query("SELECT p FROM Phase p WHERE p.release.id = :releaseId")
+    List<Phase> findByReleaseId(@Param("releaseId") Long releaseId);
 
     /**
      * Find phases by release ID and phase type
@@ -26,7 +27,8 @@ public interface PhaseRepository extends JpaRepository<Phase, Long> {
      * @param phaseType the phase type
      * @return List of phases matching the criteria
      */
-    List<Phase> findByReleaseIdAndPhaseType(Long releaseId, PhaseTypeEnum phaseType);
+    @Query("SELECT p FROM Phase p WHERE p.release.id = :releaseId AND p.phaseType = :phaseType")
+    List<Phase> findByReleaseIdAndPhaseType(@Param("releaseId") Long releaseId, @Param("phaseType") PhaseTypeEnum phaseType);
 
     /**
      * Find phases by phase type across all releases
@@ -79,5 +81,6 @@ public interface PhaseRepository extends JpaRepository<Phase, Long> {
      * @param phaseType the phase type
      * @return true if the release has the phase type, false otherwise
      */
-    boolean existsByReleaseIdAndPhaseType(Long releaseId, PhaseTypeEnum phaseType);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Phase p WHERE p.release.id = :releaseId AND p.phaseType = :phaseType")
+    boolean existsByReleaseIdAndPhaseType(@Param("releaseId") Long releaseId, @Param("phaseType") PhaseTypeEnum phaseType);
 } 

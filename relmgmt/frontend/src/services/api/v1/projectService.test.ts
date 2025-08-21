@@ -38,7 +38,11 @@ describe('ProjectService', () => {
     mockedApi.post.mockResolvedValueOnce({ data: { ...mockProject(3), ...req } });
     const project = await ProjectService.createProject(10, req);
     expect(project.id).toBe(3);
-    expect(mockedApi.post).toHaveBeenCalledWith('/v1/releases/10/projects', req);
+    expect(mockedApi.post).toHaveBeenCalledWith('/v1/releases/10/projects', {
+      name: 'New Project',
+      description: 'desc',
+      type: 'DAY_1'
+    });
   });
 
   it('updateProject should PUT and return project', async () => {
@@ -47,7 +51,11 @@ describe('ProjectService', () => {
     const project = await ProjectService.updateProject(1, req);
     expect(project.name).toBe('Updated');
     expect(project.type).toBe('Day 2');
-    expect(mockedApi.put).toHaveBeenCalledWith('/v1/projects/1', req);
+    expect(mockedApi.put).toHaveBeenCalledWith('/v1/projects/1', {
+      name: 'Updated',
+      description: 'desc',
+      type: 'DAY_2'
+    });
   });
 
   it('deleteProject should DELETE', async () => {

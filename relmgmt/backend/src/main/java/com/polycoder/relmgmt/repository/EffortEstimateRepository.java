@@ -17,102 +17,102 @@ import java.util.List;
 public interface EffortEstimateRepository extends JpaRepository<EffortEstimate, Long> {
 
     /**
-     * Find all effort estimates for a specific scope item
+     * Find all effort estimates for a specific component
      */
-    List<EffortEstimate> findByScopeItemId(Long scopeItemId);
+    List<EffortEstimate> findByComponentId(Long componentId);
 
     /**
-     * Find all effort estimates for a specific scope item with pagination
+     * Find all effort estimates for a specific component with pagination
      */
-    Page<EffortEstimate> findByScopeItemId(Long scopeItemId, Pageable pageable);
+    Page<EffortEstimate> findByComponentId(Long componentId, Pageable pageable);
 
     /**
-     * Find effort estimates by skill function for a specific scope item
+     * Find effort estimates by skill function for a specific component
      */
-    List<EffortEstimate> findByScopeItemIdAndSkillFunction(Long scopeItemId, SkillFunctionEnum skillFunction);
+    List<EffortEstimate> findByComponentIdAndSkillFunction(Long componentId, SkillFunctionEnum skillFunction);
 
     /**
-     * Find effort estimates by skill sub-function for a specific scope item
+     * Find effort estimates by skill sub-function for a specific component
      */
-    List<EffortEstimate> findByScopeItemIdAndSkillSubFunction(Long scopeItemId, SkillSubFunctionEnum skillSubFunction);
+    List<EffortEstimate> findByComponentIdAndSkillSubFunction(Long componentId, SkillSubFunctionEnum skillSubFunction);
 
     /**
-     * Find effort estimates by phase for a specific scope item
+     * Find effort estimates by phase for a specific component
      */
-    List<EffortEstimate> findByScopeItemIdAndPhase(Long scopeItemId, PhaseTypeEnum phase);
+    List<EffortEstimate> findByComponentIdAndPhase(Long componentId, PhaseTypeEnum phase);
 
     /**
-     * Find effort estimates by skill function and phase for a specific scope item
+     * Find effort estimates by skill function and phase for a specific component
      */
-    List<EffortEstimate> findByScopeItemIdAndSkillFunctionAndPhase(Long scopeItemId, SkillFunctionEnum skillFunction, PhaseTypeEnum phase);
+    List<EffortEstimate> findByComponentIdAndSkillFunctionAndPhase(Long componentId, SkillFunctionEnum skillFunction, PhaseTypeEnum phase);
 
     /**
-     * Find effort estimates by skill function and skill sub-function for a specific scope item
+     * Find effort estimates by skill function and skill sub-function for a specific component
      */
-    List<EffortEstimate> findByScopeItemIdAndSkillFunctionAndSkillSubFunction(Long scopeItemId, SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction);
+    List<EffortEstimate> findByComponentIdAndSkillFunctionAndSkillSubFunction(Long componentId, SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction);
 
     /**
-     * Find effort estimates by skill function, skill sub-function, and phase for a specific scope item
+     * Find effort estimates by skill function, skill sub-function, and phase for a specific component
      */
-    List<EffortEstimate> findByScopeItemIdAndSkillFunctionAndSkillSubFunctionAndPhase(Long scopeItemId, SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction, PhaseTypeEnum phase);
+    List<EffortEstimate> findByComponentIdAndSkillFunctionAndSkillSubFunctionAndPhase(Long componentId, SkillFunctionEnum skillFunction, SkillSubFunctionEnum skillSubFunction, PhaseTypeEnum phase);
 
     /**
-     * Count effort estimates for a specific scope item
+     * Count effort estimates for a specific component
      */
-    long countByScopeItemId(Long scopeItemId);
+    long countByComponentId(Long componentId);
 
     /**
-     * Sum effort days by skill function for a specific scope item
+     * Sum effort days by skill function for a specific component
      */
-    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.scopeItem.id = :scopeItemId AND e.skillFunction = :skillFunction")
-    Double sumEffortDaysByScopeItemIdAndSkillFunction(@Param("scopeItemId") Long scopeItemId, @Param("skillFunction") SkillFunctionEnum skillFunction);
+    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.component.id = :componentId AND e.skillFunction = :skillFunction")
+    Double sumEffortDaysByComponentIdAndSkillFunction(@Param("componentId") Long componentId, @Param("skillFunction") SkillFunctionEnum skillFunction);
 
     /**
-     * Sum effort days by skill function and phase for a specific scope item
+     * Sum effort days by skill function and phase for a specific component
      */
-    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.scopeItem.id = :scopeItemId AND e.skillFunction = :skillFunction AND e.phase = :phase")
-    Double sumEffortDaysByScopeItemIdAndSkillFunctionAndPhase(@Param("scopeItemId") Long scopeItemId, @Param("skillFunction") SkillFunctionEnum skillFunction, @Param("phase") PhaseTypeEnum phase);
+    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.component.id = :componentId AND e.skillFunction = :skillFunction AND e.phase = :phase")
+    Double sumEffortDaysByComponentIdAndSkillFunctionAndPhase(@Param("componentId") Long componentId, @Param("skillFunction") SkillFunctionEnum skillFunction, @Param("phase") PhaseTypeEnum phase);
 
     /**
-     * Sum effort days by skill function and skill sub-function for a specific scope item
+     * Sum effort days by skill function and skill sub-function for a specific component
      */
-    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.scopeItem.id = :scopeItemId AND e.skillFunction = :skillFunction AND e.skillSubFunction = :skillSubFunction")
-    Double sumEffortDaysByScopeItemIdAndSkillFunctionAndSkillSubFunction(@Param("scopeItemId") Long scopeItemId, @Param("skillFunction") SkillFunctionEnum skillFunction, @Param("skillSubFunction") SkillSubFunctionEnum skillSubFunction);
+    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.component.id = :componentId AND e.skillFunction = :skillFunction AND e.skillSubFunction = :skillSubFunction")
+    Double sumEffortDaysByComponentIdAndSkillFunctionAndSkillSubFunction(@Param("componentId") Long componentId, @Param("skillFunction") SkillFunctionEnum skillFunction, @Param("skillSubFunction") SkillSubFunctionEnum skillSubFunction);
 
     /**
-     * Find effort estimates by project ID
+     * Find effort estimates by scope item ID (through component)
      */
-    @Query("SELECT e FROM EffortEstimate e WHERE e.scopeItem.project.id = :projectId")
-    List<EffortEstimate> findByProjectId(@Param("projectId") Long projectId);
+    @Query("SELECT e FROM EffortEstimate e WHERE e.component.scopeItem.id = :scopeItemId")
+    List<EffortEstimate> findByScopeItemId(@Param("scopeItemId") Long scopeItemId);
 
     /**
-     * Find effort estimates by project ID with pagination
+     * Find effort estimates by scope item ID with pagination (through component)
      */
-    @Query("SELECT e FROM EffortEstimate e WHERE e.scopeItem.project.id = :projectId")
-    Page<EffortEstimate> findByProjectId(@Param("projectId") Long projectId, Pageable pageable);
+    @Query("SELECT e FROM EffortEstimate e WHERE e.component.scopeItem.id = :scopeItemId")
+    Page<EffortEstimate> findByScopeItemId(@Param("scopeItemId") Long scopeItemId, Pageable pageable);
 
     /**
-     * Find effort estimates by release ID
+     * Find effort estimates by release ID (through component -> scope item -> release)
      */
-    @Query("SELECT e FROM EffortEstimate e WHERE e.scopeItem.project.release.id = :releaseId")
+    @Query("SELECT e FROM EffortEstimate e WHERE e.component.scopeItem.release.id = :releaseId")
     List<EffortEstimate> findByReleaseId(@Param("releaseId") Long releaseId);
 
     /**
-     * Find effort estimates by release ID with pagination
+     * Find effort estimates by release ID with pagination (through component -> scope item -> release)
      */
-    @Query("SELECT e FROM EffortEstimate e WHERE e.scopeItem.project.release.id = :releaseId")
+    @Query("SELECT e FROM EffortEstimate e WHERE e.component.scopeItem.release.id = :releaseId")
     Page<EffortEstimate> findByReleaseId(@Param("releaseId") Long releaseId, Pageable pageable);
 
     /**
      * Sum effort days by skill function for a specific release
      */
-    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.scopeItem.project.release.id = :releaseId AND e.skillFunction = :skillFunction")
+    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.component.scopeItem.release.id = :releaseId AND e.skillFunction = :skillFunction")
     Double sumEffortDaysByReleaseIdAndSkillFunction(@Param("releaseId") Long releaseId, @Param("skillFunction") SkillFunctionEnum skillFunction);
 
     /**
      * Sum effort days by skill function and phase for a specific release
      */
-    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.scopeItem.project.release.id = :releaseId AND e.skillFunction = :skillFunction AND e.phase = :phase")
+    @Query("SELECT SUM(e.effortDays) FROM EffortEstimate e WHERE e.component.scopeItem.release.id = :releaseId AND e.skillFunction = :skillFunction AND e.phase = :phase")
     Double sumEffortDaysByReleaseIdAndSkillFunctionAndPhase(@Param("releaseId") Long releaseId, @Param("skillFunction") SkillFunctionEnum skillFunction, @Param("phase") PhaseTypeEnum phase);
 }
 

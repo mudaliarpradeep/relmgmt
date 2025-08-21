@@ -49,10 +49,12 @@ class ReleaseService {
       const backendPayload: {
         name: string;
         identifier?: string;
+        status?: string;
         phases: Array<{ phaseType: string; startDate: string; endDate: string }>;
       } = {
         name: releaseData.name,
         identifier: releaseData.identifier || undefined,
+        status: this.getStatusEnumName?.(releaseData.status) ?? undefined,
         phases: (releaseData.phases || []).map((phase) => ({
           phaseType: getPhaseEnumName(phase.name),
           startDate: phase.startDate,
@@ -68,6 +70,24 @@ class ReleaseService {
     }
   }
 
+  // Helper to map display status to enum name expected by backend
+  private getStatusEnumName(display: string): string | undefined {
+    switch (display) {
+      case 'Planning':
+        return 'PLANNING';
+      case 'In Progress':
+        return 'IN_PROGRESS';
+      case 'Completed':
+        return 'COMPLETED';
+      case 'On Hold':
+        return 'ON_HOLD';
+      case 'Cancelled':
+        return 'CANCELLED';
+      default:
+        return undefined;
+    }
+  }
+
   /**
    * Update existing release
    */
@@ -77,10 +97,12 @@ class ReleaseService {
       const backendPayload: {
         name: string;
         identifier?: string;
+        status?: string;
         phases: Array<{ phaseType: string; startDate: string; endDate: string }>;
       } = {
         name: releaseData.name,
         identifier: releaseData.identifier || undefined,
+        status: this.getStatusEnumName?.(releaseData.status) ?? undefined,
         phases: (releaseData.phases || []).map((phase) => ({
           phaseType: getPhaseEnumName(phase.name),
           startDate: phase.startDate,

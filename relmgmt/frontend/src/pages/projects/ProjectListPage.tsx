@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ProjectService from '../../services/api/v1/projectService';
-import type { Project } from '../../types';
+import ReleaseService from '../../services/api/v1/releaseService';
+import type { Project, Release } from '../../types';
 
 const ProjectListPage: React.FC = () => {
   const { id: releaseIdParam } = useParams();
   const releaseId = Number(releaseIdParam);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [release, setRelease] = useState<Release | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,10 +18,17 @@ const ProjectListPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await ProjectService.getAllProjects(releaseId);
-        setProjects(data);
+        
+        // Load release details and projects in parallel
+        const [releaseData, projectsData] = await Promise.all([
+          ReleaseService.getRelease(releaseId),
+          ProjectService.getAllProjects(releaseId)
+        ]);
+        
+        setRelease(releaseData);
+        setProjects(projectsData);
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load projects');
+        setError(e instanceof Error ? e.message : 'Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -37,10 +46,35 @@ const ProjectListPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb Navigation */}
+        <nav className="mb-6 text-sm breadcrumbs">
+          <ol className="flex items-center space-x-2 text-gray-500">
+            <li>
+              <Link to="/releases" className="hover:text-blue-600">Releases</Link>
+            </li>
+            <li className="flex items-center">
+              <svg className="mx-2 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              <Link to={`/releases/${releaseId}`} className="hover:text-blue-600">
+                {release ? release.name : `Release #${releaseId}`}
+              </Link>
+            </li>
+            <li className="flex items-center">
+              <svg className="mx-2 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              <span className="text-gray-900 font-medium">Projects</span>
+            </li>
+          </ol>
+        </nav>
+
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Projects</h1>
-            <p className="text-gray-600">Projects for release #{releaseId}</p>
+            <p className="text-gray-600">
+              {release ? `Projects for release "${release.name}" (${release.identifier})` : `Projects for release #${releaseId}`}
+            </p>
           </div>
           <Link
             to={`/releases/${releaseId}/projects/new`}

@@ -15,6 +15,8 @@ public class ReleaseRequest {
     @Size(max = 50, message = "Release identifier must not exceed 50 characters")
     private String identifier;
 
+    private String status; // enum name from client
+
     @NotEmpty(message = "At least one phase is required")
     @Valid
     private List<PhaseRequest> phases;
@@ -55,6 +57,14 @@ public class ReleaseRequest {
     public void setPhases(List<PhaseRequest> phases) {
         this.phases = phases;
     }
+
+     public String getStatus() {
+         return status;
+     }
+
+     public void setStatus(String status) {
+         this.status = status;
+     }
 
     public List<BlockerRequest> getBlockers() {
         return blockers;

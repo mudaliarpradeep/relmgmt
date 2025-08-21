@@ -3,6 +3,8 @@ package com.polycoder.relmgmt.repository;
 import com.polycoder.relmgmt.entity.Blocker;
 import com.polycoder.relmgmt.entity.BlockerStatusEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,7 +17,8 @@ public interface BlockerRepository extends JpaRepository<Blocker, Long> {
      * @param releaseId the release ID
      * @return List of blockers for the release
      */
-    List<Blocker> findByReleaseId(Long releaseId);
+    @Query("SELECT b FROM Blocker b WHERE b.release.id = :releaseId")
+    List<Blocker> findByReleaseId(@Param("releaseId") Long releaseId);
 
     /**
      * Find blockers by release ID and status
@@ -23,7 +26,8 @@ public interface BlockerRepository extends JpaRepository<Blocker, Long> {
      * @param status the blocker status
      * @return List of blockers matching the criteria
      */
-    List<Blocker> findByReleaseIdAndStatus(Long releaseId, BlockerStatusEnum status);
+    @Query("SELECT b FROM Blocker b WHERE b.release.id = :releaseId AND b.status = :status")
+    List<Blocker> findByReleaseIdAndStatus(@Param("releaseId") Long releaseId, @Param("status") BlockerStatusEnum status);
 
     /**
      * Find blockers by status across all releases
@@ -44,12 +48,14 @@ public interface BlockerRepository extends JpaRepository<Blocker, Long> {
      * @param status the blocker status
      * @return count of blockers matching the criteria
      */
-    long countByReleaseIdAndStatus(Long releaseId, BlockerStatusEnum status);
+    @Query("SELECT COUNT(b) FROM Blocker b WHERE b.release.id = :releaseId AND b.status = :status")
+    long countByReleaseIdAndStatus(@Param("releaseId") Long releaseId, @Param("status") BlockerStatusEnum status);
 
     /**
      * Check if a release has any open blockers
      * @param releaseId the release ID
      * @return true if the release has open blockers, false otherwise
      */
-    boolean existsByReleaseIdAndStatusIn(Long releaseId, List<BlockerStatusEnum> statuses);
+    @Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END FROM Blocker b WHERE b.release.id = :releaseId AND b.status IN :statuses")
+    boolean existsByReleaseIdAndStatusIn(@Param("releaseId") Long releaseId, @Param("statuses") List<BlockerStatusEnum> statuses);
 } 

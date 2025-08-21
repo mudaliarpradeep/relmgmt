@@ -1,25 +1,28 @@
 package com.polycoder.relmgmt.service;
 
-import com.polycoder.relmgmt.dto.EffortEstimateRequest;
-import com.polycoder.relmgmt.dto.EffortEstimateResponse;
 import com.polycoder.relmgmt.dto.ScopeItemRequest;
 import com.polycoder.relmgmt.dto.ScopeItemResponse;
+import com.polycoder.relmgmt.dto.ScopeItemWithComponentsResponse;
+import com.polycoder.relmgmt.dto.ReleaseEffortSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
+/**
+ * Service interface for Scope Item business logic operations.
+ */
 public interface ScopeService {
 
     /**
-     * Find all scope items for a specific project
+     * Find all scope items for a specific release
      */
-    List<ScopeItemResponse> findByProjectId(Long projectId);
+    List<ScopeItemResponse> findByReleaseId(Long releaseId);
 
     /**
-     * Find all scope items for a specific project with pagination
+     * Find all scope items for a specific release with pagination
      */
-    Page<ScopeItemResponse> findByProjectId(Long projectId, Pageable pageable);
+    Page<ScopeItemResponse> findByReleaseId(Long releaseId, Pageable pageable);
 
     /**
      * Find scope item by ID
@@ -27,19 +30,19 @@ public interface ScopeService {
     ScopeItemResponse findById(Long id);
 
     /**
-     * Find scope items by name containing the given text for a specific project
+     * Find scope items by name containing the given text for a specific release
      */
-    List<ScopeItemResponse> findByProjectIdAndNameContaining(Long projectId, String name);
+    List<ScopeItemResponse> findByReleaseIdAndNameContaining(Long releaseId, String name);
 
     /**
-     * Find scope items by description containing the given text for a specific project
+     * Find scope items by description containing the given text for a specific release
      */
-    List<ScopeItemResponse> findByProjectIdAndDescriptionContaining(Long projectId, String description);
+    List<ScopeItemResponse> findByReleaseIdAndDescriptionContaining(Long releaseId, String description);
 
     /**
-     * Create a new scope item for a project
+     * Create a new scope item for a release
      */
-    ScopeItemResponse create(Long projectId, ScopeItemRequest scopeItemRequest);
+    ScopeItemResponse create(Long releaseId, ScopeItemRequest scopeItemRequest);
 
     /**
      * Update an existing scope item
@@ -52,119 +55,79 @@ public interface ScopeService {
     void delete(Long id);
 
     /**
-     * Check if a scope item exists by name for a specific project
+     * Check if a scope item exists by name for a specific release
      */
-    boolean existsByProjectIdAndName(Long projectId, String name);
+    boolean existsByReleaseIdAndName(Long releaseId, String name);
 
     /**
-     * Find scope item by name for a specific project
+     * Find scope item by name for a specific release
      */
-    ScopeItemResponse findByProjectIdAndName(Long projectId, String name);
+    ScopeItemResponse findByReleaseIdAndName(Long releaseId, String name);
 
     /**
-     * Count scope items for a specific project
+     * Count scope items for a specific release
      */
-    long countByProjectId(Long projectId);
+    long countByReleaseId(Long releaseId);
 
     /**
-     * Find scope items with effort estimates for a specific project
+     * Find scope items with components for a specific release
      */
-    List<ScopeItemResponse> findScopeItemsWithEffortEstimates(Long projectId);
+    List<ScopeItemResponse> findScopeItemsWithComponents(Long releaseId);
 
     /**
-     * Find scope items without effort estimates for a specific project
+     * Find scope items without components for a specific release
      */
-    List<ScopeItemResponse> findScopeItemsWithoutEffortEstimates(Long projectId);
+    List<ScopeItemResponse> findScopeItemsWithoutComponents(Long releaseId);
 
     /**
-     * Find scope items with effort estimates count for a specific project
+     * Find scope items with components count for a specific release
      */
-    List<Object[]> findScopeItemsWithEffortEstimatesCount(Long projectId);
+    List<Object[]> findScopeItemsWithComponentsCount(Long releaseId);
 
     /**
-     * Find scope items by project release ID
+     * Find scope items with components by release ID
      */
-    List<ScopeItemResponse> findByProjectReleaseId(Long releaseId);
-
-    /**
-     * Find scope items by project release ID with pagination
-     */
-    Page<ScopeItemResponse> findByProjectReleaseId(Long releaseId, Pageable pageable);
-
-    /**
-     * Add effort estimates to a scope item
-     */
-    List<EffortEstimateResponse> addEffortEstimates(Long scopeItemId, List<EffortEstimateRequest> effortEstimateRequests);
-
-    /**
-     * Find effort estimates for a scope item
-     */
-    List<EffortEstimateResponse> findEffortEstimatesByScopeItemId(Long scopeItemId);
-
-    /**
-     * Find effort estimates for a scope item with pagination
-     */
-    Page<EffortEstimateResponse> findEffortEstimatesByScopeItemId(Long scopeItemId, Pageable pageable);
-
-    /**
-     * Find effort estimates by project ID
-     */
-    List<EffortEstimateResponse> findEffortEstimatesByProjectId(Long projectId);
-
-    /**
-     * Find effort estimates by project ID with pagination
-     */
-    Page<EffortEstimateResponse> findEffortEstimatesByProjectId(Long projectId, Pageable pageable);
-
-    /**
-     * Find effort estimates by release ID
-     */
-    List<EffortEstimateResponse> findEffortEstimatesByReleaseId(Long releaseId);
-
-    /**
-     * Find effort estimates by release ID with pagination
-     */
-    Page<EffortEstimateResponse> findEffortEstimatesByReleaseId(Long releaseId, Pageable pageable);
-
-    /**
-     * Sum effort days by skill function for a specific scope item
-     */
-    Double sumEffortDaysByScopeItemIdAndSkillFunction(Long scopeItemId, String skillFunction);
-
-    /**
-     * Sum effort days by skill function and phase for a specific scope item
-     */
-    Double sumEffortDaysByScopeItemIdAndSkillFunctionAndPhase(Long scopeItemId, String skillFunction, String phase);
-
-    /**
-     * Sum effort days by skill function and skill sub-function for a specific scope item
-     */
-    Double sumEffortDaysByScopeItemIdAndSkillFunctionAndSkillSubFunction(Long scopeItemId, String skillFunction, String skillSubFunction);
-
-    /**
-     * Sum effort days by skill function for a specific release
-     */
-    Double sumEffortDaysByReleaseIdAndSkillFunction(Long releaseId, String skillFunction);
-
-    /**
-     * Sum effort days by skill function and phase for a specific release
-     */
-    Double sumEffortDaysByReleaseIdAndSkillFunctionAndPhase(Long releaseId, String skillFunction, String phase);
+    List<ScopeItemWithComponentsResponse> findByReleaseIdWithComponents(Long releaseId);
 
     /**
      * Validate scope item data
      */
-    void validateScopeItem(ScopeItemRequest scopeItemRequest, Long projectId);
+    void validateScopeItem(ScopeItemRequest scopeItemRequest, Long releaseId);
 
     /**
-     * Validate effort estimate data
-     */
-    void validateEffortEstimate(EffortEstimateRequest effortEstimateRequest);
-
-    /**
-     * Check if scope item can be deleted (no effort estimates)
+     * Check if scope item can be deleted (no components)
      */
     boolean canDeleteScopeItem(Long scopeItemId);
+
+    /**
+     * Get release effort summary (calculated from scope items)
+     */
+    ReleaseEffortSummaryResponse getReleaseEffortSummary(Long releaseId);
+
+    /**
+     * Calculate total functional design days for a release
+     */
+    Double calculateTotalFunctionalDesignDays(Long releaseId);
+
+    /**
+     * Calculate total technical design days for a release
+     */
+    Double calculateTotalTechnicalDesignDays(Long releaseId);
+
+    /**
+     * Calculate total build days for a release
+     */
+    Double calculateTotalBuildDays(Long releaseId);
+
+    /**
+     * Calculate total SIT days for a release
+     */
+    Double calculateTotalSitDays(Long releaseId);
+
+    /**
+     * Calculate total UAT days for a release
+     */
+    Double calculateTotalUatDays(Long releaseId);
 }
 
 

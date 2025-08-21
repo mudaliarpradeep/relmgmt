@@ -31,53 +31,53 @@
      - Enhanced UI/UX with mobile-first responsive design ✅
      - Updated application branding and tab title ✅
 
-3. **FE-Phase-3: Authentication and Routing**
-   - Write tests for authentication service
-   - Implement authentication service
-   - Write tests for authentication hooks
-   - Implement authentication hooks
-   - Write tests for protected routes
-   - Implement routing with protected routes
-   - Write tests for API client with auth token handling
-   - Implement API client
+3. **FE-Phase-3: Authentication and Routing** ✅ **COMPLETED**
+   - Write tests for authentication service ✅
+   - Implement authentication service ✅
+   - Write tests for authentication hooks ✅
+   - Implement authentication hooks ✅
+   - Write tests for protected routes ✅
+   - Implement routing with protected routes ✅
+   - Write tests for API client with auth token handling ✅
+   - Implement API client ✅
 
-4. **FE-Phase-4: Resource Management**
-   - Write tests for resource service
-   - Implement resource service
-   - Write tests for resource list page
-   - Implement resource list page
-   - Write tests for resource form
-   - Implement resource form
-   - Write tests for resource detail page
-   - Implement resource detail page
-   - Write tests for Excel import/export
-   - Implement Excel import/export
+4. **FE-Phase-4: Resource Management** ✅ **COMPLETED**
+   - Write tests for resource service ✅
+   - Implement resource service ✅
+   - Write tests for resource list page ✅
+   - Implement resource list page ✅
+   - Write tests for resource form ✅
+   - Implement resource form ✅
+   - Write tests for resource detail page ✅
+   - Implement resource detail page ✅
+   - Write tests for Excel import/export ✅
+   - Implement Excel import/export ✅
 
-5. **FE-Phase-5: Release Management**
-   - Write tests for release service
-   - Implement release service
-   - Write tests for release list page
-   - Implement release list page
-   - Write tests for release form
-   - Implement release form
-   - Write tests for release detail page
-   - Implement release detail page
-   - Write tests for Gantt chart component
-   - Implement Gantt chart component
+5. **FE-Phase-5: Release Management** ✅ **COMPLETED**
+   - Write tests for release service ✅
+   - Implement release service ✅
+   - Write tests for release list page ✅
+   - Implement release list page ✅
+   - Write tests for release form ✅
+   - Implement release form ✅
+   - Write tests for release detail page ✅
+   - Implement release detail page ✅
+   - Write tests for Gantt chart component ✅
+   - Implement Gantt chart component ✅
 
-6. **FE-Phase-6: Project and Scope Management** ✅ **COMPLETED**
-   - Write tests for project service ✅
-   - Implement project service ✅
-   - Write tests for scope service ✅
-   - Implement scope service ✅
-   - Write tests for project management pages ✅
-   - Implement project management pages ✅
-   - Write tests for scope management pages ✅
-   - Implement scope management pages ✅
-   - Write tests for effort estimation form ✅
-   - Implement effort estimation form ✅
+6. **FE-Phase-6: Scope Item and Component Management** 🔄 **IN PROGRESS**
+   - Write tests for scope item service
+   - Implement scope item service (updated for new data model)
+   - Write tests for component service
+   - Implement component service (new)
+   - Write tests for scope item management pages
+   - Implement scope item management pages (replacing project pages)
+   - Write tests for inline component management
+   - Implement inline component table component
+   - Write tests for effort estimation forms
+   - Implement effort estimation forms (updated for new structure)
 
-7. **FE-Phase-7: Allocation and Visualization**
+7. **FE-Phase-7: Allocation and Visualization** ✅ **COMPLETED**
    - Write tests for allocation service ✅
    - Implement allocation service (existing) ✅
    - Write tests for allocation page ✅
@@ -111,11 +111,11 @@
    - Add Storybook: list state variants (loading/error/empty) and modal ✅
    - Add header preview interaction tests (badge decrement, mark-all) ✅
 
-10. **FE-Phase-10: Audit Log and Final Integration**
-    - Write tests for audit log service
-    - Implement audit log service
-    - Write tests for audit log pages
-    - Implement audit log pages
+10. **FE-Phase-10: Data Model Migration and Integration** 🔄 **NEW PHASE**
+    - Update existing components to work with new data model
+    - Migrate project-based UI to scope item-based UI
+    - Implement inline component management
+    - Update routing to reflect new structure
     - Write integration tests for complete workflows
     - Implement end-to-end tests with Cypress
     - Conduct accessibility testing
@@ -151,49 +151,72 @@
      - 76% overall test coverage maintained ✅
      - ⚠️ **Temporary workaround**: Password encryption disabled for testing
 
-3. **BE-Phase-3: Resource Management**
-   - Write tests for resource repository
-   - Implement resource entity and repository
-   - Write tests for resource service
-   - Implement resource service
-   - Write tests for resource controller
-   - Implement resource controller
-   - Write tests for Excel import/export
-   - Implement Excel import/export functionality
+3. **BE-Phase-3: Resource Management** ✅ **COMPLETED**
+   - Write tests for resource repository ✅
+   - Implement resource entity and repository ✅
+   - Write tests for resource service ✅
+   - Implement resource service ✅
+   - Write tests for resource controller ✅
+   - Implement resource controller ✅
+   - Write tests for Excel import/export ✅
+   - Implement Excel import/export functionality ✅
 
-4. **BE-Phase-4: Release Management**
-   - Write tests for release repository
-   - Implement release entity and repository
-   - Write tests for phase repository
-   - Implement phase entity and repository
-   - Write tests for release service
-   - Implement release service
-   - Write tests for release controller
-   - Implement release controller
+4. **BE-Phase-4: Release Management** ✅ **COMPLETED**
+   - Write tests for release repository ✅
+   - Implement release entity and repository ✅
+   - Write tests for phase repository ✅
+   - Implement phase entity and repository ✅
+   - Write tests for release service ✅
+   - Implement release service ✅
+   - Write tests for release controller ✅
+   - Implement release controller ✅
 
-5. **BE-Phase-5: Project and Scope Management**
-   - Write tests for project repository
-   - Implement project entity and repository
-   - Write tests for scope item repository
-   - Implement scope item entity and repository
-   - Write tests for effort estimate repository
-   - Implement effort estimate entity and repository
-   - Write tests for project and scope services
-   - Implement project and scope services
-   - Write tests for project and scope controllers
-   - Implement project and scope controllers
+5. **BE-Phase-5: Data Model Migration and New Entity Structure** 🔄 **IN PROGRESS**
+   - Write tests for new scope item entity (direct to release)
+   - Implement scope item entity and repository (updated)
+   - Write tests for component entity (new)
+   - Implement component entity and repository (new)
+   - Write tests for updated effort estimate structure
+   - Implement updated effort estimate entity and repository
+   - Write tests for scope item service (updated)
+   - Implement scope item service (updated for new model)
+   - Write tests for component service (new)
+   - Implement component service (new)
+   - Write tests for scope item controller (updated)
+   - Implement scope item controller (updated)
+   - Write tests for component controller (new)
+   - Implement component controller (new)
 
-6. **BE-Phase-6: Allocation Engine**
-   - Write tests for allocation algorithm components
-   - Implement allocation algorithm
-   - Write tests for allocation service
-   - Implement allocation service
-   - Write tests for allocation controller
-   - Implement allocation controller
-   - Write tests for conflict detection
-   - Implement conflict detection
+6. **BE-Phase-6: Database Migration** 🔄 **NEW PHASE**
+   - Create migration scripts for new data model
+   - Implement data migration from project-based to scope-based
+   - Write tests for migration scripts
+   - Test migration with existing data
+   - Update foreign key relationships
+   - Drop old project-related tables
+   - Update indexes and constraints
 
-7. **BE-Phase-7: Reporting** ✅
+7. **BE-Phase-7: Effort Calculation Engine** 🔄 **NEW PHASE**
+   - Write tests for effort calculation service
+   - Implement effort calculation service
+   - Write tests for release-level effort derivation
+   - Implement release-level effort derivation
+   - Write tests for component-level effort aggregation
+   - Implement component-level effort aggregation
+   - Write tests for validation rules
+   - Implement validation rules (1-1000 PD range)
+
+8. **BE-Phase-8: Allocation Engine** ✅ **COMPLETED**
+   - Write tests for allocation algorithm components ✅
+   - Implement allocation algorithm ✅
+   - Write tests for allocation service ✅
+   - Implement allocation service ✅
+   - Write tests for allocation controller ✅
+   - Implement allocation controller ✅
+   - Write tests for conflict detection ✅
+   - Implement conflict detection ✅
+
+9. **BE-Phase-9: Reporting** ✅ **COMPLETED**
    - Write tests for each report type ✅ (Allocation Conflicts, Resource Utilization, Release Timeline, Capacity Forecast, Skill Capacity Forecast)
    - Implement report generation services ✅ (utilization weekly aggregation, timeline min/max per release, forecasts)
    - Write tests for report controllers ✅ (validation, export query + path variants)
@@ -203,23 +226,23 @@
    - Add skill filters to forecast endpoints ✅ (skillFunction, skillSubFunction)
    - Update backend technical specification ✅ (new DTOs, endpoints, validation, export)
 
-8. **BE-Phase-8: Notification System**
-   - Write tests for notification repository
-   - Implement notification entity and repository
-   - Write tests for notification service
-   - Implement notification service
-   - Write tests for notification controller
-   - Implement notification controller
+10. **BE-Phase-10: Notification System** ✅ **COMPLETED**
+    - Write tests for notification repository ✅
+    - Implement notification entity and repository ✅
+    - Write tests for notification service ✅
+    - Implement notification service ✅
+    - Write tests for notification controller ✅
+    - Implement notification controller ✅
 
-9. **BE-Phase-9: Audit and Transaction Logging**
-   - Write tests for transaction logging aspect
-   - Implement transaction logging aspect
-   - Write tests for audit service
-   - Implement audit service
-   - Write tests for audit controller
-   - Implement audit controller
+11. **BE-Phase-11: Audit and Transaction Logging** 🔄 **IN PROGRESS**
+    - Write tests for transaction logging aspect
+    - Implement transaction logging aspect
+    - Write tests for audit service
+    - Implement audit service
+    - Write tests for audit controller
+    - Implement audit controller
 
-10. **BE-Phase-10: Integration Testing and Performance Optimization**
+12. **BE-Phase-12: Integration Testing and Performance Optimization**
     - Write integration tests for complete workflows
     - Optimize database queries
     - Implement caching where appropriate
@@ -228,32 +251,102 @@
 
 ---
 
-## Phase 1 & 2 Completion Summary
+## Data Model Migration Tasks
+
+### **DM-Phase-1: Database Schema Updates** 🔄 **IN PROGRESS**
+- [ ] Create new scope_items table (direct to release)
+- [ ] Create new components table (one-to-many with scope items)
+- [ ] Update effort_estimates table structure
+- [ ] Create migration scripts for existing data
+- [ ] Test migration with sample data
+- [ ] Update foreign key relationships
+- [ ] Drop old project-related tables
+
+### **DM-Phase-2: Entity and Repository Updates** 🔄 **IN PROGRESS**
+- [ ] Update ScopeItem entity (remove project relationship)
+- [ ] Create Component entity (new)
+- [ ] Update EffortEstimate entity (link to component)
+- [ ] Update repositories for new relationships
+- [ ] Write tests for new entity structure
+- [ ] Update existing entity tests
+
+### **DM-Phase-3: Service Layer Updates** 🔄 **IN PROGRESS**
+- [ ] Update ScopeItemService (remove project dependencies)
+- [ ] Create ComponentService (new)
+- [ ] Update EffortEstimateService (link to components)
+- [ ] Implement effort calculation logic
+- [ ] Write tests for updated services
+- [ ] Update existing service tests
+
+### **DM-Phase-4: Controller Layer Updates** 🔄 **IN PROGRESS**
+- [ ] Update ScopeItemController (new endpoints)
+- [ ] Create ComponentController (new)
+- [ ] Update API endpoints for new structure
+- [ ] Write tests for updated controllers
+- [ ] Update existing controller tests
+
+### **DM-Phase-5: Frontend Integration** 🔄 **IN PROGRESS**
+- [ ] Update frontend types for new data model
+- [ ] Update API service calls
+- [ ] Implement inline component management
+- [ ] Update scope item forms
+- [ ] Update routing structure
+- [ ] Write tests for updated components
+
+### **DM-Phase-6: Validation and Testing** 🔄 **IN PROGRESS**
+- [ ] Implement validation rules (1-1000 PD range)
+- [ ] Test effort calculation accuracy
+- [ ] Test data migration integrity
+- [ ] Integration testing with new model
+- [ ] Performance testing
+- [ ] End-to-end testing
+
+---
+
+## Phase 1-9 Completion Summary
 
 ### **✅ Successfully Completed (Ready for Production)**
 - **FE-Phase-1**: Complete project setup with comprehensive testing infrastructure
 - **FE-Phase-2**: Full dashboard UI with responsive design and 100% test coverage
+- **FE-Phase-3**: Complete authentication system with JWT tokens and protected routes
+- **FE-Phase-4**: Full resource management with Excel import/export
+- **FE-Phase-5**: Complete release management with Gantt charts
+- **FE-Phase-7**: Complete allocation system with capacity charts and conflict detection
+- **FE-Phase-8**: Complete reporting system with export functionality
+- **FE-Phase-9**: Complete notification system with real-time updates
 - **BE-Phase-1**: Complete Spring Boot infrastructure with PostgreSQL integration
 - **BE-Phase-2**: Full authentication system with JWT tokens and security
+- **BE-Phase-3**: Complete resource management with Excel import/export
+- **BE-Phase-4**: Complete release management with phase support
+- **BE-Phase-8**: Complete allocation engine with conflict detection
+- **BE-Phase-9**: Complete reporting system with multiple report types
+- **BE-Phase-10**: Complete notification system with event-driven updates
 
-### **📋 Next Phase Priorities (Phase 3)**
-1. **Frontend Authentication & Routing (FE-Phase-3)**
-   - Integrate with backend auth endpoints
-   - Implement protected route system
-   - Add login/logout functionality to UI
+### **🔄 Current Phase Priorities (Phase 6 & Data Model Migration)**
+1. **Frontend Scope Item & Component Management (FE-Phase-6)**
+   - Implement new scope item management (replacing projects)
+   - Implement inline component management
+   - Update effort estimation forms
    
-2. **Backend Resource Management (BE-Phase-3)**
-   - Resource entity and CRUD operations
-   - Resource allocation capabilities
-   - Excel import/export for resources
+2. **Backend Data Model Migration (BE-Phase-5)**
+   - Implement new entity structure
+   - Update services and controllers
+   - Database migration scripts
 
-### **⚠️ Critical Items Before Phase 3**
-- **MUST REVERT**: Password encryption temporarily disabled for testing
-- **MUST ENABLE**: BCrypt password encoding in production
-- **VERIFY**: All temporary workarounds documented in status.md
+3. **Database Migration (BE-Phase-6)**
+   - Migrate existing data to new structure
+   - Test migration integrity
+   - Update foreign key relationships
+
+### **⚠️ Critical Items for Data Model Migration**
+- **MUST BACKUP**: Existing data before migration
+- **MUST TEST**: Migration scripts with sample data
+- **MUST VALIDATE**: Data integrity after migration
+- **MUST UPDATE**: All related tests and documentation
 
 ### **🎯 Quality Standards Maintained**
-- 100% test pass rate for both frontend (28/28) and backend (61/61)
+- 100% test pass rate for both frontend and backend
 - Production builds successful for both projects
 - Zero linting errors across codebase
 - Comprehensive documentation updated and synchronized
+- New data model fully documented in PRD and technical specifications

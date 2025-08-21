@@ -28,18 +28,18 @@ public class EffortEstimate extends BaseEntity {
     private Double effortDays;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scope_item_id", nullable = false)
-    private ScopeItem scopeItem;
+    @JoinColumn(name = "component_id", nullable = false)
+    private Component component;
 
     // Default constructor
     public EffortEstimate() {}
 
     // Constructor with required fields
-    public EffortEstimate(SkillFunctionEnum skillFunction, PhaseTypeEnum phase, Double effortDays, ScopeItem scopeItem) {
+    public EffortEstimate(SkillFunctionEnum skillFunction, PhaseTypeEnum phase, Double effortDays, Component component) {
         this.skillFunction = skillFunction;
         this.phase = phase;
         this.effortDays = effortDays;
-        this.scopeItem = scopeItem;
+        this.component = component;
     }
 
     // Getters and Setters
@@ -75,12 +75,12 @@ public class EffortEstimate extends BaseEntity {
         this.effortDays = effortDays;
     }
 
-    public ScopeItem getScopeItem() {
-        return scopeItem;
+    public Component getComponent() {
+        return component;
     }
 
-    public void setScopeItem(ScopeItem scopeItem) {
-        this.scopeItem = scopeItem;
+    public void setComponent(Component component) {
+        this.component = component;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class EffortEstimate extends BaseEntity {
                 ", skillSubFunction=" + skillSubFunction +
                 ", phase=" + phase +
                 ", effortDays=" + effortDays +
-                ", scopeItemId=" + (scopeItem != null ? scopeItem.getId() : null) +
+                ", componentId=" + (component != null ? component.getId() : null) +
                 '}';
     }
 }

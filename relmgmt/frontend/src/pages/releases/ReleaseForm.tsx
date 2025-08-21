@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
 import type { Release, ReleaseRequest, ReleasePhaseRequest, ReleaseStatusEnum, ReleasePhaseEnum } from '../../types';
-import { ReleaseStatus, ReleasePhase } from '../../types';
+import { ReleaseStatus, ReleasePhase, getPhaseDisplayName } from '../../types';
 
 interface FormData {
   name: string;
@@ -56,7 +56,7 @@ const ReleaseForm: React.FC = () => {
         description: release.description || '',
         status: release.status,
         phases: release.phases?.map(phase => ({
-          name: phase.name,
+          name: getPhaseDisplayName(phase.phaseType) as ReleasePhaseEnum,
           startDate: phase.startDate,
           endDate: phase.endDate
         })) || []
@@ -96,21 +96,33 @@ const ReleaseForm: React.FC = () => {
     if (formData.phases.length === 0) {
       newErrors.phases = 'At least one phase is required';
     } else {
-      // Check for overlapping dates
-      for (let i = 0; i < formData.phases.length; i++) {
-        for (let j = i + 1; j < formData.phases.length; j++) {
-          const phase1 = formData.phases[i];
-          const phase2 = formData.phases[j];
-          
-          if (phase1.startDate && phase1.endDate && phase2.startDate && phase2.endDate) {
-            const start1 = new Date(phase1.startDate);
-            const end1 = new Date(phase1.endDate);
-            const start2 = new Date(phase2.startDate);
-            const end2 = new Date(phase2.endDate);
+      // Check for duplicate phase types
+      const phaseTypes = formData.phases.map(phase => phase.name);
+      const uniquePhaseTypes = new Set(phaseTypes);
+      if (phaseTypes.length !== uniquePhaseTypes.size) {
+        newErrors.phases = 'Each phase type can only be used once';
+      } else {
+        // Check for overlapping dates - only Production Go-live cannot overlap with other phases
+        for (let i = 0; i < formData.phases.length; i++) {
+          for (let j = i + 1; j < formData.phases.length; j++) {
+            const phase1 = formData.phases[i];
+            const phase2 = formData.phases[j];
             
-            if (start1 < end2 && start2 < end1) {
-              newErrors.phases = 'Phases cannot overlap in time';
-              break;
+            // Only check overlaps if one of the phases is Production Go-live
+            const isPhase1ProductionGoLive = phase1.name === ReleasePhase.PRODUCTION_GO_LIVE;
+            const isPhase2ProductionGoLive = phase2.name === ReleasePhase.PRODUCTION_GO_LIVE;
+            
+            if ((isPhase1ProductionGoLive || isPhase2ProductionGoLive) && 
+                phase1.startDate && phase1.endDate && phase2.startDate && phase2.endDate) {
+              const start1 = new Date(phase1.startDate);
+              const end1 = new Date(phase1.endDate);
+              const start2 = new Date(phase2.startDate);
+              const end2 = new Date(phase2.endDate);
+              
+              if (start1 < end2 && start2 < end1) {
+                newErrors.phases = 'Production Go-live phase cannot overlap with other phases';
+                break;
+              }
             }
           }
         }
@@ -140,14 +152,31 @@ const ReleaseForm: React.FC = () => {
   };
 
   const addPhase = () => {
-    setFormData(prev => ({
-      ...prev,
-      phases: [...prev.phases, {
-        name: ReleasePhase.FUNCTIONAL_DESIGN,
-        startDate: '',
-        endDate: ''
-      }]
-    }));
+    setFormData(prev => {
+      // Find the next available phase type
+      const usedPhaseTypes = new Set(prev.phases.map(phase => phase.name));
+      const allPhaseTypes = [
+        ReleasePhase.FUNCTIONAL_DESIGN,
+        ReleasePhase.TECHNICAL_DESIGN,
+        ReleasePhase.BUILD,
+        ReleasePhase.SIT,
+        ReleasePhase.UAT,
+        ReleasePhase.REGRESSION_TESTING,
+        ReleasePhase.DATA_COMPARISON,
+        ReleasePhase.SMOKE_TESTING,
+        ReleasePhase.PRODUCTION_GO_LIVE
+      ];
+      const nextAvailablePhase = allPhaseTypes.find(phaseType => !usedPhaseTypes.has(phaseType)) || ReleasePhase.FUNCTIONAL_DESIGN;
+      
+      return {
+        ...prev,
+        phases: [...prev.phases, {
+          name: nextAvailablePhase,
+          startDate: '',
+          endDate: ''
+        }]
+      };
+    });
   };
 
   const removePhase = (index: number) => {
@@ -325,7 +354,7 @@ const ReleaseForm: React.FC = () => {
                 {formData.phases.map((phase, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-md font-medium text-gray-900">Phase {index + 1}</h4>
+                      <h4 className="text-md font-medium text-gray-900">Phase {index + 1}: {phase.name}</h4>
                       <button
                         type="button"
                         onClick={() => removePhase(index)}

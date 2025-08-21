@@ -6,12 +6,12 @@ import ScopeService from '../../services/api/v1/scopeService';
 vi.mock('../../services/api/v1/scopeService');
 const mockedService = vi.mocked(ScopeService);
 
-// Mock useParams to provide projectId for create route
+// Mock useParams to provide releaseId for create route
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useParams: () => ({ projectId: '5' }),
+    useParams: () => ({ releaseId: '5' }),
   };
 });
 
@@ -19,9 +19,9 @@ describe('ScopeItemForm', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('validates required fields', async () => {
-    renderWithRouter(<ScopeItemForm />, { initialEntries: ['/projects/5/scope/new'] });
+    renderWithRouter(<ScopeItemForm />, { initialEntries: ['/releases/5/scope-items/new'] });
 
-    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create scope item/i }));
 
     expect(await screen.findByText(/name is required/i)).toBeInTheDocument();
   });
@@ -29,14 +29,42 @@ describe('ScopeItemForm', () => {
   it('submits create form with valid values', async () => {
     mockedService.createScopeItem.mockResolvedValueOnce({} as any);
 
-    renderWithRouter(<ScopeItemForm />, { initialEntries: ['/projects/5/scope/new'] });
+    renderWithRouter(<ScopeItemForm />, { initialEntries: ['/releases/5/scope-items/new'] });
 
-    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Scope A' } });
+    // Fill in the form fields
+    fireEvent.change(screen.getByLabelText(/scope item name/i), { target: { value: 'Scope A' } });
+    fireEvent.change(screen.getByLabelText(/functional design \(pd\)/i), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText(/sit \(pd\)/i), { target: { value: '3' } });
+    fireEvent.change(screen.getByLabelText(/uat \(pd\)/i), { target: { value: '2' } });
 
+    // Add a component first (required by validation)
+    fireEvent.click(screen.getByRole('button', { name: /add component/i }));
+
+    // Fill in component details
+    const componentNameInput = screen.getByPlaceholderText(/component name/i);
+    fireEvent.change(componentNameInput, { target: { value: 'Test Component' } });
+
+    // Save the component
     fireEvent.click(screen.getByRole('button', { name: /save/i }));
 
+    // Now submit the form
+    fireEvent.click(screen.getByRole('button', { name: /create scope item/i }));
+
     await waitFor(() => {
-      expect(mockedService.createScopeItem).toHaveBeenCalledWith(5, expect.objectContaining({ name: 'Scope A' }));
+      expect(mockedService.createScopeItem).toHaveBeenCalledWith(5, expect.objectContaining({ 
+        name: 'Scope A',
+        functionalDesignDays: 5,
+        sitDays: 3,
+        uatDays: 2,
+        components: expect.arrayContaining([
+          expect.objectContaining({
+            name: 'Test Component',
+            componentType: expect.any(String),
+            technicalDesignDays: 1,
+            buildDays: 1
+          })
+        ])
+      }));
     });
   });
 });
