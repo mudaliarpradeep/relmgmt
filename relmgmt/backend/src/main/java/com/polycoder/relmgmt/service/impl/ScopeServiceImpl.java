@@ -1,6 +1,7 @@
 package com.polycoder.relmgmt.service.impl;
 
 import com.polycoder.relmgmt.dto.*;
+import com.polycoder.relmgmt.dto.EffortPhase;
 import com.polycoder.relmgmt.entity.*;
 import com.polycoder.relmgmt.exception.ResourceNotFoundException;
 import com.polycoder.relmgmt.exception.ValidationException;
@@ -258,23 +259,23 @@ public class ScopeServiceImpl implements ScopeService {
 
         // Validate effort estimates are within bounds
         if (request.getFunctionalDesignDays() != null) {
-            if (request.getFunctionalDesignDays() < 1.0 || 
+            if (request.getFunctionalDesignDays() < 0.0 || 
                     request.getFunctionalDesignDays() > 1000.0) {
-                throw new ValidationException("Functional design days must be between 1 and 1000");
+                throw new ValidationException("Functional design days must be between 0 and 1000");
             }
         }
 
         if (request.getSitDays() != null) {
-            if (request.getSitDays() < 1.0 || 
+            if (request.getSitDays() < 0.0 || 
                     request.getSitDays() > 1000.0) {
-                throw new ValidationException("SIT days must be between 1 and 1000");
+                throw new ValidationException("SIT days must be between 0 and 1000");
             }
         }
 
         if (request.getUatDays() != null) {
-            if (request.getUatDays() < 1.0 || 
+            if (request.getUatDays() < 0.0 || 
                     request.getUatDays() > 1000.0) {
-                throw new ValidationException("UAT days must be between 1 and 1000");
+                throw new ValidationException("UAT days must be between 0 and 1000");
             }
         }
 
@@ -282,16 +283,16 @@ public class ScopeServiceImpl implements ScopeService {
         if (request.getComponents() != null) {
             for (var componentRequest : request.getComponents()) {
                 if (componentRequest.getTechnicalDesignDays() != null) {
-                    if (componentRequest.getTechnicalDesignDays() < 1.0 || 
+                    if (componentRequest.getTechnicalDesignDays() < 0.0 || 
                             componentRequest.getTechnicalDesignDays() > 1000.0) {
-                        throw new ValidationException("Technical design days must be between 1 and 1000");
+                        throw new ValidationException("Technical design days must be between 0 and 1000");
                     }
                 }
 
                 if (componentRequest.getBuildDays() != null) {
-                    if (componentRequest.getBuildDays() < 1.0 || 
+                    if (componentRequest.getBuildDays() < 0.0 || 
                             componentRequest.getBuildDays() > 1000.0) {
-                        throw new ValidationException("Build days must be between 1 and 1000");
+                        throw new ValidationException("Build days must be between 0 and 1000");
                     }
                 }
             }
@@ -320,6 +321,57 @@ public class ScopeServiceImpl implements ScopeService {
                 scopeItem.getCreatedAt(),
                 scopeItem.getUpdatedAt()
         );
+    }
+
+    @Override
+    public List<ReleaseEffortSummaryResponse> getReleaseEffortSummary(Long releaseId) {
+        List<ScopeItem> scopeItems = scopeItemRepository.findByReleaseId(releaseId);
+        List<ReleaseEffortSummaryResponse> summaries = new java.util.ArrayList<>();
+
+        // Create a map to aggregate efforts by component type and phase
+        java.util.Map<ComponentTypeEnum, java.util.Map<EffortPhase, Double>> effortMap = new java.util.HashMap<>();
+
+        // Process scope item level efforts (Functional Design, SIT, UAT)
+        for (ScopeItem scopeItem : scopeItems) {
+            // Functional Design - no specific component type, use a generic one
+            ComponentTypeEnum functionalDesignType = ComponentTypeEnum.ETL; // Default type for scope-level efforts
+            addToEffortMap(effortMap, functionalDesignType, EffortPhase.FUNCTIONAL_DESIGN, scopeItem.getFunctionalDesignDays());
+
+            // SIT - no specific component type
+            addToEffortMap(effortMap, functionalDesignType, EffortPhase.SIT, scopeItem.getSitDays());
+
+            // UAT - no specific component type
+            addToEffortMap(effortMap, functionalDesignType, EffortPhase.UAT, scopeItem.getUatDays());
+
+            // Process component-level efforts (Technical Design, Build)
+            List<Component> components = componentRepository.findByScopeItemId(scopeItem.getId());
+            for (Component component : components) {
+                addToEffortMap(effortMap, component.getComponentType(), EffortPhase.TECHNICAL_DESIGN, component.getTechnicalDesignDays());
+                addToEffortMap(effortMap, component.getComponentType(), EffortPhase.BUILD, component.getBuildDays());
+            }
+        }
+
+        // Convert the map to response objects
+        for (java.util.Map.Entry<ComponentTypeEnum, java.util.Map<EffortPhase, Double>> componentEntry : effortMap.entrySet()) {
+            ComponentTypeEnum componentType = componentEntry.getKey();
+            for (java.util.Map.Entry<EffortPhase, Double> phaseEntry : componentEntry.getValue().entrySet()) {
+                EffortPhase phase = phaseEntry.getKey();
+                Double totalEffort = phaseEntry.getValue();
+                summaries.add(new ReleaseEffortSummaryResponse(componentType, phase, totalEffort));
+            }
+        }
+
+        return summaries;
+    }
+
+    private void addToEffortMap(java.util.Map<ComponentTypeEnum, java.util.Map<EffortPhase, Double>> effortMap,
+                                ComponentTypeEnum componentType, EffortPhase phase, Double effort) {
+        if (effort == null || effort == 0.0) {
+            return; // Skip zero or null efforts
+        }
+
+        effortMap.computeIfAbsent(componentType, k -> new java.util.HashMap<>())
+                 .merge(phase, effort, Double::sum);
     }
 }
 

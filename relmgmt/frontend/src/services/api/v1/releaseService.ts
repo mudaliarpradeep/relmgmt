@@ -5,8 +5,8 @@ import type {
   ReleasePhase,
   ReleaseBlocker,
   PaginatedResponse
-} from '../../../types';
-import { getPhaseEnumName } from '../../../types';
+} from '../sharedTypes';
+import { getPhaseEnumName } from '../sharedTypes';
 
 /**
  * Release service for handling release CRUD operations

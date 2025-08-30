@@ -2,8 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ScopeService from '../../services/api/v1/scopeService';
 import ReleaseService from '../../services/api/v1/releaseService';
-import type { ScopeItem, Release, ScopeItemWithComponents } from '../../types';
-import { ComponentType } from '../../types';
+import type { ScopeItem, Release, ScopeItemWithComponents, ComponentTypeEnum } from '../../services/api/sharedTypes';
+import { ComponentType } from '../../services/api/sharedTypes';
+import { EffortSummaryTable } from '../../components/scope/EffortSummaryTable';
+
+// Helper function to convert enum to display label
+const getComponentTypeLabel = (componentType: ComponentTypeEnum): string => {
+  const labels: Record<ComponentTypeEnum, string> = {
+    ETL: 'ETL',
+    FORGEROCK_IGA: 'ForgeRock IGA',
+    FORGEROCK_UI: 'ForgeRock UI',
+    FORGEROCK_IG: 'ForgeRock IG',
+    FORGEROCK_IDM: 'ForgeRock IDM',
+    SAILPOINT: 'SailPoint',
+    FUNCTIONAL_TEST: 'Functional Test'
+  };
+  return labels[componentType] || componentType;
+};
 
 const ScopeListPage: React.FC = () => {
   const { releaseId: releaseIdParam } = useParams();
@@ -58,7 +73,22 @@ const ScopeListPage: React.FC = () => {
 
   const getPrimaryComponent = (item: ScopeItemWithComponents): string => {
     if (item.components.length === 0) return 'No components';
-    return ComponentType[item.components[0].componentType];
+
+    const firstComponent = item.components[0];
+    if (!firstComponent || !firstComponent.componentType) {
+      return 'Unknown Type';
+    }
+
+    // Convert enum value to display name
+    const componentTypeValue = firstComponent.componentType;
+    const componentTypeKey = Object.keys(ComponentType).find(
+      key => ComponentType[key as keyof typeof ComponentType] === componentTypeValue
+    );
+    if (componentTypeKey) {
+      // Get the display name by removing underscores and capitalizing
+      return componentTypeKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+    return componentTypeValue; // Fallback to the raw value
   };
 
   return (
@@ -178,12 +208,19 @@ const ScopeListPage: React.FC = () => {
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
                             <div className="flex items-center space-x-2">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {item.components.length} component{item.components.length !== 1 ? 's' : ''}
-                              </span>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {getPrimaryComponent(item)}
-                              </span>
+                              {item.components.map((component, index) => (
+                                <span 
+                                  key={component.id}
+                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                >
+                                  {getComponentTypeLabel(component.componentType)}
+                                </span>
+                              ))}
+                              {item.components.length === 0 && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  No components
+                                </span>
+                              )}
                             </div>
                             <div className="mt-1 text-sm text-gray-500">
                               Total: {calculateTotalEffort(item)} PD
@@ -282,6 +319,9 @@ const ScopeListPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Effort Summary Table */}
+        <EffortSummaryTable releaseId={releaseId} />
       </div>
     </div>
   );

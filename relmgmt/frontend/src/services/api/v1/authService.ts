@@ -1,5 +1,5 @@
 import apiClient from '../apiClient';
-import type { LoginRequest, LoginResponse, AuthUser } from '../../../types';
+import type { LoginRequest, LoginResponse, AuthUser } from '../sharedTypes';
 
 /**
  * Authentication service for handling user login, logout, and token management

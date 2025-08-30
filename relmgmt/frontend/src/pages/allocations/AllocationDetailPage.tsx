@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { allocationService } from '../../services/api/v1/allocationService';
 import type { Allocation } from '../../services/api/v1/allocationService';
 import releaseService from '../../services/api/v1/releaseService';
-import type { Release } from '../../types';
+import type { Release } from '../../services/api/sharedTypes';
 import CapacityChart from '../../components/charts/CapacityChart';
 import { computeMaxWeeklyAllocationPerResource, enumerateWeeks, computeWeeklyAllocationForWeek } from '../../lib/capacity';
 import AllocationGrid from '../../components/allocation/AllocationGrid';

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
-import type { Release, ReleaseStatusEnum } from '../../types';
-import { ReleaseStatus } from '../../types';
+import type { Release, ReleaseStatusEnum } from '../../services/api/sharedTypes';
+import { ReleaseStatus } from '../../services/api/sharedTypes';
 
 const ReleaseListPage: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);

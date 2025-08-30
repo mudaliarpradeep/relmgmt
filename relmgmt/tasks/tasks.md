@@ -204,7 +204,7 @@
    - Write tests for component-level effort aggregation
    - Implement component-level effort aggregation
    - Write tests for validation rules
-   - Implement validation rules (1-1000 PD range)
+   - Implement validation rules (0-1000 PD range)
 
 8. **BE-Phase-8: Allocation Engine** ✅ **COMPLETED**
    - Write tests for allocation algorithm components ✅
@@ -294,7 +294,7 @@
 - [ ] Write tests for updated components
 
 ### **DM-Phase-6: Validation and Testing** 🔄 **IN PROGRESS**
-- [ ] Implement validation rules (1-1000 PD range)
+- [ ] Implement validation rules (0-1000 PD range)
 - [ ] Test effort calculation accuracy
 - [ ] Test data migration integrity
 - [ ] Integration testing with new model

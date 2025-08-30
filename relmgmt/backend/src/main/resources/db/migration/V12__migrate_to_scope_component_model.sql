@@ -13,9 +13,9 @@ CREATE TABLE scope_items_new (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_scope_items_release FOREIGN KEY (release_id) REFERENCES releases(id) ON DELETE CASCADE,
-    CONSTRAINT chk_functional_design_days CHECK (functional_design_days >= 1 AND functional_design_days <= 1000),
-    CONSTRAINT chk_sit_days CHECK (sit_days >= 1 AND sit_days <= 1000),
-    CONSTRAINT chk_uat_days CHECK (uat_days >= 1 AND uat_days <= 1000)
+    CONSTRAINT chk_functional_design_days CHECK (functional_design_days >= 0 AND functional_design_days <= 1000),
+    CONSTRAINT chk_sit_days CHECK (sit_days >= 0 AND sit_days <= 1000),
+    CONSTRAINT chk_uat_days CHECK (uat_days >= 0 AND uat_days <= 1000)
 );
 
 -- Step 2: Create new components table
@@ -30,8 +30,8 @@ CREATE TABLE components_new (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_components_scope_item FOREIGN KEY (scope_item_id) REFERENCES scope_items_new(id) ON DELETE CASCADE,
     CONSTRAINT chk_component_type CHECK (component_type IN ('ETL', 'FORGEROCK_IGA', 'FORGEROCK_UI', 'FORGEROCK_IG', 'FORGEROCK_IDM', 'SAILPOINT', 'FUNCTIONAL_TEST')),
-    CONSTRAINT chk_technical_design_days CHECK (technical_design_days >= 1 AND technical_design_days <= 1000),
-    CONSTRAINT chk_build_days CHECK (build_days >= 1 AND build_days <= 1000)
+    CONSTRAINT chk_technical_design_days CHECK (technical_design_days >= 0 AND technical_design_days <= 1000),
+    CONSTRAINT chk_build_days CHECK (build_days >= 0 AND build_days <= 1000)
 );
 
 -- Step 3: Update effort_estimates table to link to components instead of scope_items
@@ -47,7 +47,7 @@ CREATE TABLE effort_estimates_new (
     CONSTRAINT fk_effort_estimates_component FOREIGN KEY (component_id) REFERENCES components_new(id) ON DELETE CASCADE,
     CONSTRAINT chk_effort_skill_function CHECK (skill_function IN ('FUNCTIONAL_DESIGN', 'TECHNICAL_DESIGN', 'BUILD', 'TEST', 'PLATFORM')),
     CONSTRAINT chk_effort_phase CHECK (phase IN ('FUNCTIONAL_DESIGN', 'TECHNICAL_DESIGN', 'BUILD', 'SIT', 'UAT', 'SMOKE_TESTING', 'GO_LIVE')),
-    CONSTRAINT chk_effort_days CHECK (effort_days >= 1 AND effort_days <= 1000)
+    CONSTRAINT chk_effort_days CHECK (effort_days >= 0 AND effort_days <= 1000)
 );
 
 -- Step 4: Create indexes for better performance

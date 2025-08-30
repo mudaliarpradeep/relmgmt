@@ -1,6 +1,6 @@
 import apiClient from '../apiClient';
-import type { Notification, NotificationFilters, PaginatedResponse } from '../../../types';
-import { getEventTypeEnumName } from '../../../types';
+import type { Notification, NotificationFilters, PaginatedResponse } from '../sharedTypes';
+import { getEventTypeEnumName } from '../sharedTypes';
 
 const buildQuery = (filters?: NotificationFilters): string => {
   const params = new URLSearchParams();

@@ -186,14 +186,14 @@ describe('LoginPage', () => {
       const submitButton = screen.getByRole('button', { name: /sign in/i });
 
       await user.type(usernameField, 'admin');
-      await user.type(passwordField, 'admin123');
+      await user.type(passwordField, 'Release2024!');
       await user.click(submitButton);
 
       // Assert
       await waitFor(() => {
         expect(mockLogin).toHaveBeenCalledWith({
           username: 'admin',
-          password: 'admin123'
+          password: 'Release2024!'
         });
       });
     });
@@ -215,7 +215,7 @@ describe('LoginPage', () => {
       const submitButton = screen.getByRole('button', { name: /sign in/i });
 
       await user.type(usernameField, 'admin');
-      await user.type(passwordField, 'admin123');
+      await user.type(passwordField, 'Release2024!');
       await user.click(submitButton);
 
       // Assert
@@ -245,7 +245,7 @@ describe('LoginPage', () => {
       const submitButton = screen.getByRole('button', { name: /sign in/i });
 
       await user.type(usernameField, 'admin');
-      await user.type(passwordField, 'admin123');
+      await user.type(passwordField, 'Release2024!');
       await user.click(submitButton);
 
       // Assert - should navigate to dashboard when no from state
@@ -271,7 +271,7 @@ describe('LoginPage', () => {
       const submitButton = screen.getByRole('button', { name: /sign in/i });
 
       await user.type(usernameField, 'admin');
-      await user.type(passwordField, 'admin123');
+      await user.type(passwordField, 'Release2024!');
       await user.click(submitButton);
 
       // Assert
@@ -350,7 +350,7 @@ describe('LoginPage', () => {
       const submitButton = screen.getByRole('button', { name: /sign in/i });
 
       await user.type(usernameField, 'admin');
-      await user.type(passwordField, 'admin123');
+      await user.type(passwordField, 'Release2024!');
       await user.click(submitButton);
 
       // Assert - Form should handle the error gracefully

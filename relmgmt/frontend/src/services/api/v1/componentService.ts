@@ -1,19 +1,21 @@
 import { apiClient } from '../apiClient';
-import { 
-  Component, 
-  ComponentRequest, 
-  ComponentResponse, 
-  ComponentTypeEnum,
-  ComponentType,
-  PaginatedResponse 
-} from '../../../types';
+import {
+  ComponentType
+} from '../sharedTypes';
+import type {
+  PaginatedResponse,
+  Component,
+  ComponentRequest,
+  ComponentResponse,
+  ComponentTypeEnum
+} from '../sharedTypes';
 
 /**
  * Service for managing components within scope items
  */
 export class ComponentService {
-  private static readonly BASE_URL = '/components';
-  private static readonly SCOPE_ITEMS_URL = '/scope-items';
+  private static readonly BASE_URL = '/v1/components';
+  private static readonly SCOPE_ITEMS_URL = '/v1/scope-items';
 
   /**
    * Get all components for a scope item

@@ -1,11 +1,37 @@
 import React, { useState } from 'react';
-import { 
-  Component, 
-  ComponentRequest, 
-  ComponentTypeEnum,
-  ComponentType 
-} from '../../types';
 import { ComponentService } from '../../services/api/v1/componentService';
+
+// Local type definitions to avoid import issues
+const ComponentType = {
+  ETL: 'ETL',
+  FORGEROCK_IGA: 'FORGEROCK_IGA',
+  FORGEROCK_UI: 'FORGEROCK_UI',
+  FORGEROCK_IG: 'FORGEROCK_IG',
+  FORGEROCK_IDM: 'FORGEROCK_IDM',
+  SAILPOINT: 'SAILPOINT',
+  FUNCTIONAL_TEST: 'FUNCTIONAL_TEST'
+} as const;
+
+type ComponentTypeEnum = typeof ComponentType[keyof typeof ComponentType];
+
+interface Component {
+  id: number;
+  name: string;
+  componentType: ComponentTypeEnum;
+  technicalDesignDays: number;
+  buildDays: number;
+  scopeItemId: number;
+  effortEstimates?: any[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ComponentRequest {
+  name: string;
+  componentType: ComponentTypeEnum;
+  technicalDesignDays: number;
+  buildDays: number;
+}
 
 interface ComponentTableProps {
   components: Component[];
@@ -47,6 +73,11 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
 
   const componentTypes = ComponentService.getComponentTypes();
 
+  const getComponentTypeLabel = (componentTypeValue: ComponentTypeEnum): string => {
+    const type = componentTypes.find(type => type.value === componentTypeValue);
+    return type ? type.label : componentTypeValue;
+  };
+
   const validateRow = (row: ComponentRowData, rowIndex: number): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -60,12 +91,12 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
       newErrors[`type-${rowIndex}`] = 'Component type is required';
     }
 
-    if (row.technicalDesignDays < 1 || row.technicalDesignDays > 1000) {
-      newErrors[`techDesign-${rowIndex}`] = 'Must be between 1-1000 PD';
+    if (row.technicalDesignDays < 0 || row.technicalDesignDays > 1000) {
+      newErrors[`techDesign-${rowIndex}`] = 'Must be between 0-1000 PD';
     }
 
-    if (row.buildDays < 1 || row.buildDays > 1000) {
-      newErrors[`build-${rowIndex}`] = 'Must be between 1-1000 PD';
+    if (row.buildDays < 0 || row.buildDays > 1000) {
+      newErrors[`build-${rowIndex}`] = 'Must be between 0-1000 PD';
     }
 
     setErrors(newErrors);
@@ -76,8 +107,8 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
     const newRow: ComponentRowData = {
       name: '',
       componentType: ComponentType.ETL as ComponentTypeEnum,
-      technicalDesignDays: 1,
-      buildDays: 1,
+      technicalDesignDays: 0,
+      buildDays: 0,
       isNew: true,
       isEditing: true
     };
@@ -272,7 +303,7 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
                       )}
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-900">{ComponentType[row.componentType]}</span>
+                    <span className="text-sm text-gray-900">{getComponentTypeLabel(row.componentType)}</span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -280,7 +311,7 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
                     <div>
                       <input
                         type="number"
-                        min="1"
+                        min="0"
                         max="1000"
                         value={row.technicalDesignDays}
                         onChange={(e) => handleInputChange(index, 'technicalDesignDays', Number(e.target.value))}
@@ -302,7 +333,7 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
                     <div>
                       <input
                         type="number"
-                        min="1"
+                        min="0"
                         max="1000"
                         value={row.buildDays}
                         onChange={(e) => handleInputChange(index, 'buildDays', Number(e.target.value))}

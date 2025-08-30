@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import NotificationService from '../services/api/v1/notificationService';
-import type { Notification, NotificationFilters, PaginatedResponse } from '../types';
+import type { Notification, NotificationFilters, PaginatedResponse } from '../services/api/sharedTypes';
 
 interface NotificationsContextValue {
   notifications: Notification[];

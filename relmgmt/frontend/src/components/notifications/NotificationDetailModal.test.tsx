@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '../../test/test-utils';
 import NotificationDetailModal from './NotificationDetailModal';
-import { EventType, type Notification } from '../../types';
+import { EventType, type Notification } from '../../services/api/sharedTypes';
 
 const makeNotification = (overrides: Partial<Notification> = {}): Notification => ({
   id: overrides.id ?? 1,

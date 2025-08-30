@@ -1,18 +1,20 @@
 import { apiClient } from '../apiClient';
-import { 
-  ScopeItem, 
-  ScopeItemRequest, 
+import type {
+  PaginatedResponse,
+  Component,
+  ComponentRequest,
+  ScopeItem,
+  ScopeItemRequest,
   ScopeItemWithComponents,
-  ReleaseEffortSummary,
-  PaginatedResponse 
-} from '../../../types';
+  ReleaseEffortSummary
+} from '../sharedTypes';
 
 /**
  * Service for managing scope items within releases
  */
 export class ScopeService {
-  private static readonly BASE_URL = '/scope-items';
-  private static readonly RELEASES_URL = '/releases';
+  private static readonly BASE_URL = '/v1/scope-items';
+  private static readonly RELEASES_URL = '/v1/releases';
 
   /**
    * Get all scope items for a release with pagination
@@ -107,7 +109,7 @@ export class ScopeService {
    */
   static async getScopeItemsWithComponents(releaseId: number): Promise<ScopeItemWithComponents[]> {
     const response = await apiClient.get<ScopeItemWithComponents[]>(
-      `${this.RELEASES_URL}/${releaseId}/scope-items/with-components`
+      `${this.RELEASES_URL}/${releaseId}/scope-items/with-components-detail`
     );
     return response.data;
   }
@@ -268,7 +270,32 @@ export class ScopeService {
    * Get scope item by ID with components
    */
   static async getScopeItemWithComponents(id: number): Promise<ScopeItemWithComponents> {
-    const response = await apiClient.get<ScopeItemWithComponents>(`${this.BASE_URL}/${id}/with-components`);
+    // First get the basic scope item to find its release ID
+    const basicItem = await this.getScopeItem(id);
+
+    // Then get all scope items with components for that release
+    const response = await apiClient.get<ScopeItemWithComponents[]>(
+      `${this.RELEASES_URL}/${basicItem.releaseId}/scope-items/with-components-detail`
+    );
+
+    // Find the specific scope item
+    const scopeItem = response.data.find(item => item.id === id);
+    if (!scopeItem) {
+      throw new Error(`Scope item with id ${id} not found`);
+    }
+
+    return scopeItem;
+  }
+
+  /**
+   * Get release effort summary
+   * Retrieves aggregated effort data across all scope items for a release,
+   * broken down by component type and phase
+   */
+  static async getReleaseEffortSummary(releaseId: number): Promise<ReleaseEffortSummary[]> {
+    const response = await apiClient.get<ReleaseEffortSummary[]>(
+      `${this.RELEASES_URL}/${releaseId}/effort-summary`
+    );
     return response.data;
   }
 }

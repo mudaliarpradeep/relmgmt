@@ -101,8 +101,10 @@ public interface ScopeService {
 
     /**
      * Get release effort summary (calculated from scope items)
+     * Returns aggregated effort data across all scope items for a release,
+     * broken down by component type and phase.
      */
-    ReleaseEffortSummaryResponse getReleaseEffortSummary(Long releaseId);
+    List<ReleaseEffortSummaryResponse> getReleaseEffortSummary(Long releaseId);
 
     /**
      * Calculate total functional design days for a release

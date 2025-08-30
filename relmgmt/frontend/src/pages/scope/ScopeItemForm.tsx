@@ -20,15 +20,15 @@ const scopeItemSchema = z.object({
   description: z.string().max(500, 'Description must not exceed 500 characters').optional().or(z.literal('')),
   functionalDesignDays: z
     .number({ invalid_type_error: 'Functional design days must be a number' })
-    .min(1, 'Must be at least 1 PD')
+    .min(0, 'Must be at least 0 PD')
     .max(1000, 'Cannot exceed 1000 PD'),
   sitDays: z
     .number({ invalid_type_error: 'SIT days must be a number' })
-    .min(1, 'Must be at least 1 PD')
+    .min(0, 'Must be at least 0 PD')
     .max(1000, 'Cannot exceed 1000 PD'),
   uatDays: z
     .number({ invalid_type_error: 'UAT days must be a number' })
-    .min(1, 'Must be at least 1 PD')
+    .min(0, 'Must be at least 0 PD')
     .max(1000, 'Cannot exceed 1000 PD'),
 });
 
@@ -56,9 +56,9 @@ const ScopeItemForm: React.FC = () => {
     defaultValues: { 
       name: '', 
       description: '', 
-      functionalDesignDays: 1,
-      sitDays: 1,
-      uatDays: 1
+      functionalDesignDays: 0,
+      sitDays: 0,
+      uatDays: 0
     },
   });
 
@@ -266,7 +266,7 @@ const ScopeItemForm: React.FC = () => {
               <input
                 type="number"
                 id="functionalDesignDays"
-                min="1"
+                min="0"
                 max="1000"
                 {...register('functionalDesignDays', { valueAsNumber: true })}
                 className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
@@ -285,7 +285,7 @@ const ScopeItemForm: React.FC = () => {
               <input
                 type="number"
                 id="sitDays"
-                min="1"
+                min="0"
                 max="1000"
                 {...register('sitDays', { valueAsNumber: true })}
                 className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
@@ -304,7 +304,7 @@ const ScopeItemForm: React.FC = () => {
               <input
                 type="number"
                 id="uatDays"
-                min="1"
+                min="0"
                 max="1000"
                 {...register('uatDays', { valueAsNumber: true })}
                 className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${

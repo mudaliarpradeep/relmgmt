@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNotifications } from '../../hooks/useNotifications';
-import { EventType, type EventTypeEnum } from '../../types';
+import { EventType, type EventTypeEnum } from '../../services/api/sharedTypes';
 
 const NotificationListPage: React.FC = () => {
   const { notifications, loading, error, fetchNotifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();

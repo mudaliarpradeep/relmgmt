@@ -14,17 +14,17 @@ public class ScopeItemRequest {
     private String description;
 
     @NotNull(message = "Functional design days is required")
-    @Min(value = 1, message = "Functional design days must be at least 1")
+    @Min(value = 0, message = "Functional design days must be at least 0")
     @Max(value = 1000, message = "Functional design days cannot exceed 1000")
     private Double functionalDesignDays;
 
     @NotNull(message = "SIT days is required")
-    @Min(value = 1, message = "SIT days must be at least 1")
+    @Min(value = 0, message = "SIT days must be at least 0")
     @Max(value = 1000, message = "SIT days cannot exceed 1000")
     private Double sitDays;
 
     @NotNull(message = "UAT days is required")
-    @Min(value = 1, message = "UAT days must be at least 1")
+    @Min(value = 0, message = "UAT days must be at least 0")
     @Max(value = 1000, message = "UAT days cannot exceed 1000")
     private Double uatDays;
 

@@ -528,17 +528,17 @@ public class ScopeItemRequest {
     private String description;
     
     @NotNull(message = "Functional design days is required")
-    @Min(value = 1, message = "Functional design days must be at least 1")
+    @Min(value = 0, message = "Functional design days must be at least 0")
     @Max(value = 1000, message = "Functional design days cannot exceed 1000")
     private Double functionalDesignDays;
-    
+
     @NotNull(message = "SIT days is required")
-    @Min(value = 1, message = "SIT days must be at least 1")
+    @Min(value = 0, message = "SIT days must be at least 0")
     @Max(value = 1000, message = "SIT days cannot exceed 1000")
     private Double sitDays;
-    
+
     @NotNull(message = "UAT days is required")
-    @Min(value = 1, message = "UAT days must be at least 1")
+    @Min(value = 0, message = "UAT days must be at least 0")
     @Max(value = 1000, message = "UAT days cannot exceed 1000")
     private Double uatDays;
     
@@ -559,16 +559,67 @@ public class ComponentRequest {
     private ComponentTypeEnum componentType;
     
     @NotNull(message = "Technical design days is required")
-    @Min(value = 1, message = "Technical design days must be at least 1")
+    @Min(value = 0, message = "Technical design days must be at least 0")
     @Max(value = 1000, message = "Technical design days cannot exceed 1000")
     private Double technicalDesignDays;
-    
+
     @NotNull(message = "Build days is required")
-    @Min(value = 1, message = "Build days must be at least 1")
+    @Min(value = 0, message = "Build days must be at least 0")
     @Max(value = 1000, message = "Build days cannot exceed 1000")
     private Double buildDays;
-    
+
     // Getters and setters
+}
+```
+
+#### 4.4.3 ReleaseEffortSummaryResponse
+```java
+public class ReleaseEffortSummaryResponse {
+    private ComponentTypeEnum componentType;
+    private EffortPhase phase;
+    private Double totalEffort;
+
+    // Constructors
+    public ReleaseEffortSummaryResponse() {}
+
+    public ReleaseEffortSummaryResponse(ComponentTypeEnum componentType, EffortPhase phase, Double totalEffort) {
+        this.componentType = componentType;
+        this.phase = phase;
+        this.totalEffort = totalEffort;
+    }
+
+    // Getters and setters
+    public ComponentTypeEnum getComponentType() {
+        return componentType;
+    }
+
+    public void setComponentType(ComponentTypeEnum componentType) {
+        this.componentType = componentType;
+    }
+
+    public EffortPhase getPhase() {
+        return phase;
+    }
+
+    public void setPhase(EffortPhase phase) {
+        this.phase = phase;
+    }
+
+    public Double getTotalEffort() {
+        return totalEffort;
+    }
+
+    public void setTotalEffort(Double totalEffort) {
+        this.totalEffort = totalEffort;
+    }
+}
+
+public enum EffortPhase {
+    FUNCTIONAL_DESIGN,
+    TECHNICAL_DESIGN,
+    BUILD,
+    SIT,
+    UAT
 }
 ```
 
@@ -584,13 +635,16 @@ public interface ScopeItemService {
     ScopeItemResponse update(Long id, ScopeItemRequest request);
     void delete(Long id);
     boolean canDeleteScopeItem(Long id);
-    
+
     // Effort calculation methods
     Double calculateTotalFunctionalDesignDays(Long releaseId);
     Double calculateTotalTechnicalDesignDays(Long releaseId);
     Double calculateTotalBuildDays(Long releaseId);
     Double calculateTotalSitDays(Long releaseId);
     Double calculateTotalUatDays(Long releaseId);
+
+    // Effort summary method
+    List<ReleaseEffortSummaryResponse> getReleaseEffortSummary(Long releaseId);
 }
 ```
 
@@ -756,6 +810,9 @@ public class EffortCalculationService {
 - `PUT /api/v1/scope-items/{id}` - Update a scope item
 - `DELETE /api/v1/scope-items/{id}` - Delete a scope item
 - `GET /api/v1/releases/{releaseId}/effort-summary` - Get release effort summary
+  - **Response**: Array of effort summary objects containing component type, phase, and total effort
+  - **Purpose**: Provides aggregated effort data across all scope items for dashboard and planning
+  - **Data Source**: Aggregates both scope item level (Functional Design, SIT, UAT) and component level (Technical Design, Build) estimates
 
 #### 4.9.2 Component Management
 - `GET /api/v1/scope-items/{scopeItemId}/components` - Get all components for a scope item

@@ -16,12 +16,12 @@ public class ComponentRequest {
     private ComponentTypeEnum componentType;
     
     @NotNull(message = "Technical design days is required")
-    @Min(value = 1, message = "Technical design days must be at least 1")
+    @Min(value = 0, message = "Technical design days must be at least 0")
     @Max(value = 1000, message = "Technical design days cannot exceed 1000")
     private Double technicalDesignDays;
     
     @NotNull(message = "Build days is required")
-    @Min(value = 1, message = "Build days must be at least 1")
+    @Min(value = 0, message = "Build days must be at least 0")
     @Max(value = 1000, message = "Build days cannot exceed 1000")
     private Double buildDays;
     

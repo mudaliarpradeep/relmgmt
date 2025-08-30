@@ -43,6 +43,7 @@ frontend/
 │   │   ├── resources/        # Resource management pages
 │   │   ├── releases/         # Release management pages
 │   │   ├── scope/            # Scope item management pages
+│   │   │   ├── EffortSummaryTable.tsx # Effort summary table component
 │   │   ├── components/       # Component management pages
 │   │   ├── allocation/       # Allocation pages
 │   │   ├── reports/          # Report pages
@@ -195,6 +196,14 @@ frontend/
   - Scope item-level effort estimates (Functional Design, SIT, UAT)
   - Inline component table with component management
   - Real-time validation and effort calculation
+- **EffortSummaryTable**: Collapsible summary table for displaying aggregated effort estimates
+  - Displays total effort across all scope items for a release
+  - Shows both component types and phases dimensions in a matrix format
+  - Component types: ETL, ForgeRock UI, ForgeRock IGA, ForgeRock IG, ForgeRock IDM, SailPoint, Functional Test
+  - Phases: Functional Design, Technical Design, Build, SIT, UAT
+  - Aggregates data from both scope item level and component level estimates
+  - Positioned at bottom of scope items and release detail pages
+  - Collapsible/expandable interface with clear toggle controls
 
 #### 4.2.6 Component Management (Inline)
 
@@ -202,7 +211,7 @@ frontend/
   - Component rows with dropdown selection for component type
   - Technical Design and Build effort input fields
   - Add/remove buttons for component management
-  - Real-time validation (1-1000 PD range)
+  - Real-time validation (0-1000 PD range)
   - Component types: ETL, ForgeRock IGA, ForgeRock UI, ForgeRock IG, ForgeRock IDM, SailPoint, Functional Test
 
 #### 4.2.7 Allocation Management
@@ -343,6 +352,20 @@ interface ScopeItemRequest {
   uatDays: number;
   components: ComponentRequest[];
 }
+
+interface ReleaseEffortSummary {
+  componentType: ComponentTypeEnum;
+  phase: EffortPhase;
+  totalEffort: number;
+}
+
+enum EffortPhase {
+  FUNCTIONAL_DESIGN = 'FUNCTIONAL_DESIGN',
+  TECHNICAL_DESIGN = 'TECHNICAL_DESIGN',
+  BUILD = 'BUILD',
+  SIT = 'SIT',
+  UAT = 'UAT'
+}
 ```
 
 #### 6.3.2 Component Types
@@ -433,8 +456,8 @@ interface ComponentTableProps {
 
 #### 8.1.1 Component Table Structure
 - **Component Type Dropdown**: Selection of available component types
-- **Technical Design Input**: Number input for technical design effort (1-1000 PD)
-- **Build Input**: Number input for build effort (1-1000 PD)
+- **Technical Design Input**: Number input for technical design effort (0-1000 PD)
+- **Build Input**: Number input for build effort (0-1000 PD)
 - **Remove Button**: "×" button to remove component
 - **Add Button**: "+" button to add new component
 
@@ -448,11 +471,11 @@ interface ComponentTableProps {
 
 #### 8.2.1 Scope Item Level
 - Functional Design, SIT, and UAT efforts are manually entered
-- Validation ensures values are between 1-1000 PD
+- Validation ensures values are between 0-1000 PD
 
 #### 8.2.2 Component Level
 - Technical Design and Build efforts are entered per component
-- Validation ensures values are between 1-1000 PD
+- Validation ensures values are between 0-1000 PD
 
 #### 8.2.3 Release Level
 - Automatically calculated from scope items

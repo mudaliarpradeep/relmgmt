@@ -1,12 +1,12 @@
 import apiClient from '../apiClient';
-import type { 
-  Resource, 
-  ResourceRequest, 
-  ResourceFilters, 
-  PaginatedResponse, 
-  ResourceImportResponse 
-} from '../../../types';
-import { getStatusEnumName, getSkillFunctionEnumName, getSkillSubFunctionEnumName } from '../../../types';
+import type {
+  Resource,
+  ResourceRequest,
+  ResourceFilters,
+  PaginatedResponse,
+  ResourceImportResponse
+} from '../sharedTypes';
+import { getStatusEnumName, getSkillFunctionEnumName, getSkillSubFunctionEnumName } from '../sharedTypes';
 
 /**
  * Resource service for handling resource CRUD operations, Excel import/export

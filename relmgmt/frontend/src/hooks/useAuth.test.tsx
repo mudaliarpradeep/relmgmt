@@ -109,7 +109,7 @@ describe('useAuth Hook', () => {
       // Arrange
       const loginRequest: LoginRequest = {
         username: 'admin',
-        password: 'admin123'
+        password: 'Release2024!'
       };
 
       const mockLoginResponse: LoginResponse = {
@@ -178,7 +178,7 @@ describe('useAuth Hook', () => {
       // Arrange
       const loginRequest: LoginRequest = {
         username: 'admin',
-        password: 'admin123'
+        password: 'Release2024!'
       };
 
       const mockLoginResponse: LoginResponse = {

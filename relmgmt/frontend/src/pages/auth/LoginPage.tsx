@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import type { LoginRequest } from '../../types';
+import type { LoginRequest } from '../../services/api/sharedTypes';
 
 // Validation schema
 const loginSchema = z.object({
@@ -169,7 +169,7 @@ export function LoginPage() {
           {/* Test Credentials Info */}
           <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
             <p className="text-xs text-blue-700 text-center">
-              <strong>Test Credentials:</strong> admin / admin123
+              <strong>Test Credentials:</strong> admin / Release2024!
             </p>
           </div>
         </div>

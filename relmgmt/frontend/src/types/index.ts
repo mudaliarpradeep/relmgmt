@@ -695,3 +695,20 @@ export const getComponentBadgeColor = (component?: string): string => {
   
   return colorMap[component] || 'bg-gray-100 text-gray-800';
 };
+
+// Effort Summary Types
+export interface ReleaseEffortSummary {
+  componentType: string;
+  phase: string;
+  totalEffort: number;
+}
+
+export const EffortPhase = {
+  FUNCTIONAL_DESIGN: 'FUNCTIONAL_DESIGN',
+  TECHNICAL_DESIGN: 'TECHNICAL_DESIGN',
+  BUILD: 'BUILD',
+  SIT: 'SIT',
+  UAT: 'UAT'
+} as const;
+
+export type EffortPhaseEnum = typeof EffortPhase[keyof typeof EffortPhase];

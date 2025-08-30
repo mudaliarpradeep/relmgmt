@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ResourceService from '../../services/api/v1/resourceService';
-import type { Resource, ResourceFilters, PaginatedResponse } from '../../types';
-import { Status, SkillFunction, SkillSubFunction, getApplicableSubFunctions } from '../../types';
+import type { Resource, ResourceFilters, PaginatedResponse } from '../../services/api/sharedTypes';
+import { Status, SkillFunction, SkillSubFunction, getApplicableSubFunctions } from '../../services/api/sharedTypes';
 
 interface DeleteModalState {
   isOpen: boolean;

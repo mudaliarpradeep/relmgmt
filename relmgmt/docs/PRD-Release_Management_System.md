@@ -138,12 +138,23 @@ Each resource in the roster shall have the following attributes:
   - Functional Design, Technical Design, Build, SIT, and UAT effort values shall be automatically calculated as summations of the corresponding efforts from all scope items assigned to the release.
   - Regression Testing, Smoke Testing, and Go-Live efforts shall be manually assigned at the release level.
 - **Validation Rules**:
-  - Minimum effort value: 1 person-day
+  - Minimum effort value: 0 person-days
   - Maximum effort value: 1000 person-days
   - All required phases must have effort estimates
   - Effort units must be person-days (whole numbers or decimals allowed)
 
-#### 4.2.5 Release Planning Rules
+#### 4.2.5 Effort Summary Table
+- The system shall display an effort summary table on both the scope items page (`/releases/{id}/scope-items`) and the release detail page (`/releases/{id}`).
+- The summary table shall aggregate and display total effort estimates across all scope items for a particular release.
+- The table shall show both component types and phases dimensions:
+  - **Component Types**: ETL, ForgeRock UI, ForgeRock IGA, ForgeRock IG, ForgeRock IDM, SailPoint, Functional Test
+  - **Phases**: Functional Design, Technical Design, Build, SIT, UAT
+- The table shall display total effort (person-days) for each component type and phase combination.
+- The summary table shall be positioned at the bottom of the page and be collapsible/expandable.
+- Data shall be aggregated from both scope item level estimates and component level estimates.
+- The table shall provide a comprehensive view of effort distribution across all components and phases for the release.
+
+#### 4.2.6 Release Planning Rules
 - The system shall enforce a rule that generally prevents more than one production go-live in a calendar month.
 - The system shall support multiple parallel releases.
 - For the MVP, there are no dependencies between releases. Pre-requisites for releases will be managed outside the scope of this application.

@@ -3,10 +3,9 @@ import type {
   PaginatedResponse,
   Project,
   ProjectRequest,
-  ProjectTypeEnum,
-} from '../../../types';
-
-import { getProjectTypeEnumName } from '../../../types';
+  ProjectTypeEnum
+} from '../sharedTypes';
+import { getProjectTypeEnumName } from '../sharedTypes';
 
 class ProjectService {
   async getProjects(

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ResourceService from '../../services/api/v1/resourceService';
-import type { Resource } from '../../types';
-import { Status } from '../../types';
+import type { Resource } from '../../services/api/sharedTypes';
+import { Status } from '../../services/api/sharedTypes';
 
 const ResourceDetailPage = () => {
   const navigate = useNavigate();

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ProjectService from '../../services/api/v1/projectService';
 import ReleaseService from '../../services/api/v1/releaseService';
-import type { Project, Release } from '../../types';
+import type { Project, Release } from '../../services/api/sharedTypes';
 
 const ProjectListPage: React.FC = () => {
   const { id: releaseIdParam } = useParams();

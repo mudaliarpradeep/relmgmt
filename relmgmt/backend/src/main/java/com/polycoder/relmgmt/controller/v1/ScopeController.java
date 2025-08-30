@@ -292,21 +292,21 @@ public class ScopeController {
      * GET /api/v1/releases/{releaseId}/effort-summary : Get release effort summary.
      *
      * @param releaseId the release ID
-     * @return the ResponseEntity with status 200 (OK) and the release effort summary
+     * @return the ResponseEntity with status 200 (OK) and the list of effort summaries
      */
     @GetMapping("/releases/{releaseId}/effort-summary")
-    @Operation(summary = "Get release effort summary", description = "Retrieve effort summary for a release including calculated and manual effort estimates")
+    @Operation(summary = "Get release effort summary", description = "Retrieve aggregated effort data across all scope items for a release, broken down by component type and phase")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved effort summary",
                     content = @Content(schema = @Schema(implementation = ReleaseEffortSummaryResponse.class))),
             @ApiResponse(responseCode = "404", description = "Release not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<ReleaseEffortSummaryResponse> getReleaseEffortSummary(
+    public ResponseEntity<List<ReleaseEffortSummaryResponse>> getReleaseEffortSummary(
             @Parameter(description = "ID of the release") @PathVariable Long releaseId) {
 
-        ReleaseEffortSummaryResponse effortSummary = scopeService.getReleaseEffortSummary(releaseId);
-        return ResponseEntity.ok(effortSummary);
+        List<ReleaseEffortSummaryResponse> effortSummaries = scopeService.getReleaseEffortSummary(releaseId);
+        return ResponseEntity.ok(effortSummaries);
     }
 
     /**

@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useReducer, ReactNode } from 'react';
 import { authService } from '../services/api/v1/authService';
-import type { AuthState, LoginRequest, AuthUser } from '../types';
+import type { AuthState, LoginRequest, AuthUser } from '../services/api/sharedTypes';
 
 // Auth context actions
 type AuthAction =

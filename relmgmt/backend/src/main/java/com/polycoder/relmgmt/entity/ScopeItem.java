@@ -27,19 +27,19 @@ public class ScopeItem extends BaseEntity {
     private String description;
 
     @NotNull(message = "Functional design days is required")
-    @Min(value = 1, message = "Functional design days must be at least 1")
+    @Min(value = 0, message = "Functional design days must be at least 0")
     @Max(value = 1000, message = "Functional design days cannot exceed 1000")
     @Column(name = "functional_design_days", nullable = false)
     private Double functionalDesignDays = 0.0;
 
     @NotNull(message = "SIT days is required")
-    @Min(value = 1, message = "SIT days must be at least 1")
+    @Min(value = 0, message = "SIT days must be at least 0")
     @Max(value = 1000, message = "SIT days cannot exceed 1000")
     @Column(name = "sit_days", nullable = false)
     private Double sitDays = 0.0;
 
     @NotNull(message = "UAT days is required")
-    @Min(value = 1, message = "UAT days must be at least 1")
+    @Min(value = 0, message = "UAT days must be at least 0")
     @Max(value = 1000, message = "UAT days cannot exceed 1000")
     @Column(name = "uat_days", nullable = false)
     private Double uatDays = 0.0;

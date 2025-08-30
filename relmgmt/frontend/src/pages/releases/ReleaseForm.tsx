@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
-import type { Release, ReleaseRequest, ReleasePhaseRequest, ReleaseStatusEnum, ReleasePhaseEnum } from '../../types';
-import { ReleaseStatus, ReleasePhase, getPhaseDisplayName } from '../../types';
+import type { Release, ReleaseRequest, ReleasePhaseRequest, ReleaseStatusEnum, ReleasePhaseEnum } from '../../services/api/sharedTypes';
+import { ReleaseStatus, ReleasePhase, getPhaseDisplayName } from '../../services/api/sharedTypes';
 
 interface FormData {
   name: string;
