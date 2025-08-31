@@ -327,22 +327,45 @@ class ScopeServiceTest {
         when(releaseRepository.findById(1L)).thenReturn(Optional.of(release));
         when(scopeItemRepository.sumFunctionalDesignDaysByReleaseId(1L)).thenReturn(10.0);
         when(componentRepository.sumTechnicalDesignDaysByReleaseId(1L)).thenReturn(15.0);
-        when(componentRepository.sumBuildDaysByReleaseId(1L)).thenReturn(20.0);
-        when(scopeItemRepository.sumSitDaysByReleaseId(1L)).thenReturn(8.0);
-        when(scopeItemRepository.sumUatDaysByReleaseId(1L)).thenReturn(6.0);
+        // Mock scope items and components for the new implementation
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setFunctionalDesignDays(10.0);
+        scopeItem.setSitDays(8.0);
+        scopeItem.setUatDays(6.0);
+        
+        Component component = new Component();
+        component.setId(1L);
+        component.setComponentType(ComponentTypeEnum.ETL);
+        component.setTechnicalDesignDays(15.0);
+        component.setBuildDays(20.0);
+        component.setScopeItem(scopeItem);
+        
+        when(scopeItemRepository.findByReleaseId(1L)).thenReturn(Arrays.asList(scopeItem));
+        when(componentRepository.findByScopeItemId(1L)).thenReturn(Arrays.asList(component));
 
-        ReleaseEffortSummaryResponse response = scopeService.getReleaseEffortSummary(1L);
+        List<ReleaseEffortSummaryResponse> response = scopeService.getReleaseEffortSummary(1L);
 
         assertNotNull(response);
-        assertEquals(1L, response.getReleaseId());
-        assertEquals(10.0, response.getFunctionalDesignDays());
-        assertEquals(15.0, response.getTechnicalDesignDays());
-        assertEquals(20.0, response.getBuildDays());
-        assertEquals(8.0, response.getSitDays());
-        assertEquals(6.0, response.getUatDays());
-        assertEquals(5.0, response.getRegressionTestingDays());
-        assertEquals(2.0, response.getSmokeTestingDays());
-        assertEquals(1.0, response.getGoLiveDays());
+        assertFalse(response.isEmpty());
+        
+        // Check that we have entries for different phases
+        boolean hasFunctionalDesign = response.stream()
+            .anyMatch(r -> r.getPhase() == EffortPhase.FUNCTIONAL_DESIGN && r.getTotalEffort() == 10.0);
+        boolean hasTechnicalDesign = response.stream()
+            .anyMatch(r -> r.getPhase() == EffortPhase.TECHNICAL_DESIGN && r.getTotalEffort() == 15.0);
+        boolean hasBuild = response.stream()
+            .anyMatch(r -> r.getPhase() == EffortPhase.BUILD && r.getTotalEffort() == 20.0);
+        boolean hasSit = response.stream()
+            .anyMatch(r -> r.getPhase() == EffortPhase.SIT && r.getTotalEffort() == 8.0);
+        boolean hasUat = response.stream()
+            .anyMatch(r -> r.getPhase() == EffortPhase.UAT && r.getTotalEffort() == 6.0);
+            
+        assertTrue(hasFunctionalDesign);
+        assertTrue(hasTechnicalDesign);
+        assertTrue(hasBuild);
+        assertTrue(hasSit);
+        assertTrue(hasUat);
     }
 
     @Test

@@ -301,7 +301,21 @@ The frontend is configured to work with the backend CORS settings:
 - **Preflight Requests**: Handled automatically by browser and backend
 - **Error Handling**: 401 responses trigger automatic logout and redirect to login page
 
-### 6.2 Service Modules
+### 6.2 API Services
+
+#### 6.2.1 Service Architecture
+- **Base API Client**: Centralized HTTP client with authentication and error handling
+- **Versioned Services**: API services organized by version (v1, v2, etc.)
+- **Type Safety**: Full TypeScript integration with backend DTOs
+- **Error Handling**: Comprehensive error handling with user-friendly messages
+
+#### 6.2.2 Enum Conversion
+- **Status Enum Conversion**: Proper conversion between backend enum names and frontend display names
+- **Phase Enum Conversion**: Consistent phase name mapping across frontend and backend
+- **Validation**: Enum values validated before API calls
+- **Fallback Handling**: Graceful handling of unknown enum values
+
+#### 6.2.3 Service Modules
 
 #### 6.2.1 ScopeItemService
 ```typescript

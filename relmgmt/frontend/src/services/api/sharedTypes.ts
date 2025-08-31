@@ -95,18 +95,9 @@ export interface ScopeItemWithComponents extends ScopeItem {
 }
 
 export interface ReleaseEffortSummary {
-  releaseId: number;
-  functionalDesignDays: number;
-  technicalDesignDays: number;
-  buildDays: number;
-  sitDays: number;
-  uatDays: number;
-  regressionTestingDays?: number;
-  smokeTestingDays?: number;
-  goLiveDays?: number;
-  totalCalculatedEffortDays: number;
-  totalManualEffortDays: number;
-  totalEffortDays: number;
+  componentType: string;
+  phase: string;
+  totalEffort: number;
 }
 
 // Project types
@@ -246,8 +237,8 @@ export const getPhaseEnumName = (displayName: string): string => {
     'Functional Design': 'FUNCTIONAL_DESIGN',
     'Technical Design': 'TECHNICAL_DESIGN',
     'Build': 'BUILD',
-    'System Integration Test (SIT)': 'SYSTEM_INTEGRATION_TEST',
-    'User Acceptance Test (UAT)': 'USER_ACCEPTANCE_TEST',
+    'System Integration Test': 'SYSTEM_INTEGRATION_TEST',
+    'User Acceptance Test': 'USER_ACCEPTANCE_TEST',
     'Regression Testing': 'REGRESSION_TESTING',
     'Data Comparison': 'DATA_COMPARISON',
     'Smoke Testing': 'SMOKE_TESTING',
@@ -276,6 +267,23 @@ export const getPhaseDisplayName = (enumName: string): string => {
       return ReleasePhase.SMOKE_TESTING;
     case 'PRODUCTION_GO_LIVE':
       return ReleasePhase.PRODUCTION_GO_LIVE;
+    default:
+      return enumName;
+  }
+};
+
+export const getStatusDisplayName = (enumName: string): string => {
+  switch (enumName) {
+    case 'PLANNING':
+      return ReleaseStatus.PLANNING;
+    case 'IN_PROGRESS':
+      return ReleaseStatus.IN_PROGRESS;
+    case 'COMPLETED':
+      return ReleaseStatus.COMPLETED;
+    case 'ON_HOLD':
+      return ReleaseStatus.ON_HOLD;
+    case 'CANCELLED':
+      return ReleaseStatus.CANCELLED;
     default:
       return enumName;
   }

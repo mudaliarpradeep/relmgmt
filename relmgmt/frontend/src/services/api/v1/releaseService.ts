@@ -54,7 +54,7 @@ class ReleaseService {
       } = {
         name: releaseData.name,
         identifier: releaseData.identifier || undefined,
-        status: this.getStatusEnumName?.(releaseData.status) ?? undefined,
+        status: this.getStatusEnumName(releaseData.status),
         phases: (releaseData.phases || []).map((phase) => ({
           phaseType: getPhaseEnumName(phase.name),
           startDate: phase.startDate,
@@ -102,7 +102,7 @@ class ReleaseService {
       } = {
         name: releaseData.name,
         identifier: releaseData.identifier || undefined,
-        status: this.getStatusEnumName?.(releaseData.status) ?? undefined,
+        status: this.getStatusEnumName(releaseData.status),
         phases: (releaseData.phases || []).map((phase) => ({
           phaseType: getPhaseEnumName(phase.name),
           startDate: phase.startDate,

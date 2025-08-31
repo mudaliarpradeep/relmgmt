@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ScopeService } from '../../services/api/v1/scopeService';
-import { ReleaseEffortSummary, EffortPhase } from '../../types';
 import { getComponentBadgeColor } from '../../types';
+
+// Define the type locally to avoid import issues
+interface ReleaseEffortSummary {
+  componentType: string;
+  phase: string;
+  totalEffort: number;
+}
 
 // Local type definitions to avoid import issues
 type ComponentTypeKey = 'ETL' | 'FORGEROCK_IGA' | 'FORGEROCK_UI' | 'FORGEROCK_IG' | 'FORGEROCK_IDM' | 'SAILPOINT' | 'FUNCTIONAL_TEST';

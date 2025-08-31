@@ -40,8 +40,9 @@ describe('ScopeItemForm', () => {
     // Add a component first (required by validation)
     fireEvent.click(screen.getByRole('button', { name: /add component/i }));
 
-    // Fill in component details
-    const componentNameInput = screen.getByPlaceholderText(/component name/i);
+    // Fill in component details - the component should be added with default values of 1
+    // Find the component name input field that was just added (more specific selector)
+    const componentNameInput = screen.getByPlaceholderText('Component name');
     fireEvent.change(componentNameInput, { target: { value: 'Test Component' } });
 
     // Save the component

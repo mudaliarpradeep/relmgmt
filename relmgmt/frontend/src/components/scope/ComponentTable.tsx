@@ -107,8 +107,8 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
     const newRow: ComponentRowData = {
       name: '',
       componentType: ComponentType.ETL as ComponentTypeEnum,
-      technicalDesignDays: 0,
-      buildDays: 0,
+      technicalDesignDays: 1,
+      buildDays: 1,
       isNew: true,
       isEditing: true
     };

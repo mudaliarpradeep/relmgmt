@@ -152,15 +152,8 @@ export class ScopeService {
     return response.data;
   }
 
-  /**
-   * Get release effort summary
-   */
-  static async getReleaseEffortSummary(releaseId: number): Promise<ReleaseEffortSummary> {
-    const response = await apiClient.get<ReleaseEffortSummary>(
-      `${this.RELEASES_URL}/${releaseId}/effort-summary`
-    );
-    return response.data;
-  }
+  // This method was removed as it conflicted with the correct implementation below
+  // The correct method returns ReleaseEffortSummary[] (array) not ReleaseEffortSummary (single object)
 
   /**
    * Calculate total functional design days for a release

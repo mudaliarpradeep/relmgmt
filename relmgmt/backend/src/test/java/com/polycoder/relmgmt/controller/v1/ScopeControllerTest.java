@@ -5,6 +5,8 @@ import com.polycoder.relmgmt.dto.ScopeItemRequest;
 import com.polycoder.relmgmt.dto.ScopeItemResponse;
 import com.polycoder.relmgmt.dto.ScopeItemWithComponentsResponse;
 import com.polycoder.relmgmt.dto.ReleaseEffortSummaryResponse;
+import com.polycoder.relmgmt.dto.EffortPhase;
+import com.polycoder.relmgmt.entity.ComponentTypeEnum;
 import com.polycoder.relmgmt.service.ScopeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -95,16 +97,9 @@ class ScopeControllerTest {
 
         // Setup test release effort summary response
         testReleaseEffortSummaryResponse = new ReleaseEffortSummaryResponse();
-        testReleaseEffortSummaryResponse.setReleaseId(1L);
-
-        testReleaseEffortSummaryResponse.setFunctionalDesignDays(10.0);
-        testReleaseEffortSummaryResponse.setTechnicalDesignDays(15.0);
-        testReleaseEffortSummaryResponse.setBuildDays(20.0);
-        testReleaseEffortSummaryResponse.setSitDays(8.0);
-        testReleaseEffortSummaryResponse.setUatDays(6.0);
-        testReleaseEffortSummaryResponse.setRegressionTestingDays(5.0);
-        testReleaseEffortSummaryResponse.setSmokeTestingDays(2.0);
-        testReleaseEffortSummaryResponse.setGoLiveDays(1.0);
+        testReleaseEffortSummaryResponse.setComponentType(ComponentTypeEnum.ETL);
+        testReleaseEffortSummaryResponse.setPhase(EffortPhase.FUNCTIONAL_DESIGN);
+        testReleaseEffortSummaryResponse.setTotalEffort(10.0);
     }
 
     @Test
@@ -307,20 +302,15 @@ class ScopeControllerTest {
 
     @Test
     void testGetReleaseEffortSummary_Success() throws Exception {
-        when(scopeService.getReleaseEffortSummary(1L)).thenReturn(testReleaseEffortSummaryResponse);
+        List<ReleaseEffortSummaryResponse> summaryList = Arrays.asList(testReleaseEffortSummaryResponse);
+        when(scopeService.getReleaseEffortSummary(1L)).thenReturn(summaryList);
 
         mockMvc.perform(get("/api/v1/releases/1/effort-summary")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.releaseId").value(1))
-                .andExpect(jsonPath("$.functionalDesignDays").value(10.0))
-                .andExpect(jsonPath("$.technicalDesignDays").value(15.0))
-                .andExpect(jsonPath("$.buildDays").value(20.0))
-                .andExpect(jsonPath("$.sitDays").value(8.0))
-                .andExpect(jsonPath("$.uatDays").value(6.0))
-                .andExpect(jsonPath("$.regressionTestingDays").value(5.0))
-                .andExpect(jsonPath("$.smokeTestingDays").value(2.0))
-                .andExpect(jsonPath("$.goLiveDays").value(1.0));
+                .andExpect(jsonPath("$[0].componentType").value("ETL"))
+                .andExpect(jsonPath("$[0].phase").value("FUNCTIONAL_DESIGN"))
+                .andExpect(jsonPath("$[0].totalEffort").value(10.0));
 
         verify(scopeService).getReleaseEffortSummary(1L);
     }

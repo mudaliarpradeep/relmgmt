@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
 import type { Release, ReleaseRequest, ReleasePhaseRequest, ReleaseStatusEnum, ReleasePhaseEnum } from '../../services/api/sharedTypes';
-import { ReleaseStatus, ReleasePhase, getPhaseDisplayName } from '../../services/api/sharedTypes';
+import { ReleaseStatus, ReleasePhase, getPhaseDisplayName, getStatusDisplayName } from '../../services/api/sharedTypes';
 
 interface FormData {
   name: string;
@@ -54,7 +54,7 @@ const ReleaseForm: React.FC = () => {
         name: release.name,
         identifier: release.identifier,
         description: release.description || '',
-        status: release.status,
+        status: getStatusDisplayName(release.status),
         phases: release.phases?.map(phase => ({
           name: getPhaseDisplayName(phase.phaseType) as ReleasePhaseEnum,
           startDate: phase.startDate,

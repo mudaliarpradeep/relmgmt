@@ -802,9 +802,23 @@ public class EffortCalculationService {
 - Release-level efforts are automatically calculated from scope items
 - Manual effort assignment is only allowed for Regression Testing, Smoke Testing, and Go-Live at the release level
 
-### 4.9 API Endpoints
+### 7.3 API Endpoints
 
-#### 4.9.1 Scope Item Management
+#### 7.3.1 Release Management Endpoints
+- **GET /api/v1/releases**: List all releases with pagination and filtering
+- **POST /api/v1/releases**: Create a new release
+- **GET /api/v1/releases/{id}**: Get release details
+- **PUT /api/v1/releases/{id}**: Update release (including status changes)
+- **DELETE /api/v1/releases/{id}**: Delete release
+- **GET /api/v1/releases/next-identifier**: Get next available release identifier
+
+#### 7.3.2 Enum Validation and Conversion
+- **Status Enum Validation**: Proper validation of ReleaseStatus enum values
+- **Phase Enum Validation**: Consistent validation of ReleasePhase enum values
+- **Enum Conversion**: Proper handling of enum name conversions between frontend and backend
+- **Error Handling**: Clear error messages for invalid enum values
+
+#### 7.3.3 Scope Item Endpoints
 - `GET /api/v1/releases/{releaseId}/scope-items` - Get all scope items for a release
 - `POST /api/v1/releases/{releaseId}/scope-items` - Create a new scope item with components
 - `PUT /api/v1/scope-items/{id}` - Update a scope item

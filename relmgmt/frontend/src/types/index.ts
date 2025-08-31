@@ -467,8 +467,9 @@ export interface ScopeItemRequest {
   components: ComponentRequest[];
 }
 
-// Release effort summary types
-export interface ReleaseEffortSummary {
+// Release effort summary types - OLD STRUCTURE (deprecated)
+// This interface is kept for backward compatibility but should not be used
+export interface ReleaseEffortSummaryOld {
   releaseId: number;
   functionalDesignDays: number;
   technicalDesignDays: number;

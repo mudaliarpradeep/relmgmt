@@ -183,35 +183,9 @@ public class ScopeServiceImpl implements ScopeService {
         return componentRepository.countByScopeItemId(id) == 0;
     }
 
-    @Override
-    public ReleaseEffortSummaryResponse getReleaseEffortSummary(Long releaseId) {
-        if (!releaseRepository.existsById(releaseId)) {
-            throw new ResourceNotFoundException("Release not found with id: " + releaseId);
-        }
-
-        Double totalFunctionalDesignDays = calculateTotalFunctionalDesignDays(releaseId);
-        Double totalTechnicalDesignDays = calculateTotalTechnicalDesignDays(releaseId);
-        Double totalBuildDays = calculateTotalBuildDays(releaseId);
-        Double totalSitDays = calculateTotalSitDays(releaseId);
-        Double totalUatDays = calculateTotalUatDays(releaseId);
-
-        Release release = releaseRepository.findById(releaseId).orElse(null);
-        Double regressionTestingDays = release != null ? release.getRegressionTestingDays() : 0.0;
-        Double smokeTestingDays = release != null ? release.getSmokeTestingDays() : 0.0;
-        Double goLiveDays = release != null ? release.getGoLiveDays() : 0.0;
-
-        return new ReleaseEffortSummaryResponse(
-                releaseId,
-                totalFunctionalDesignDays,
-                totalTechnicalDesignDays,
-                totalBuildDays,
-                totalSitDays,
-                totalUatDays,
-                regressionTestingDays,
-                smokeTestingDays,
-                goLiveDays
-        );
-    }
+    // This method was removed as it conflicted with the interface definition
+    // The interface expects List<ReleaseEffortSummaryResponse> but this returned ReleaseEffortSummaryResponse
+    // The correct implementation is below at line 327
 
     @Override
     public Double calculateTotalFunctionalDesignDays(Long releaseId) {
