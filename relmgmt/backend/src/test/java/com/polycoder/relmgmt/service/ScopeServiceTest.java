@@ -323,10 +323,6 @@ class ScopeServiceTest {
 
     @Test
     void testGetReleaseEffortSummary_Success() {
-        when(releaseRepository.existsById(1L)).thenReturn(true);
-        when(releaseRepository.findById(1L)).thenReturn(Optional.of(release));
-        when(scopeItemRepository.sumFunctionalDesignDaysByReleaseId(1L)).thenReturn(10.0);
-        when(componentRepository.sumTechnicalDesignDaysByReleaseId(1L)).thenReturn(15.0);
         // Mock scope items and components for the new implementation
         ScopeItem scopeItem = new ScopeItem();
         scopeItem.setId(1L);
@@ -440,7 +436,7 @@ class ScopeServiceTest {
     void testValidateScopeItem_InvalidEffort() {
         ScopeItemRequest request = new ScopeItemRequest();
         request.setName("Test Scope Item");
-        request.setFunctionalDesignDays(0.5); // Below minimum
+        request.setFunctionalDesignDays(-1.0); // Below minimum
 
         when(scopeItemRepository.existsByReleaseIdAndName(1L, "Test Scope Item")).thenReturn(false);
 

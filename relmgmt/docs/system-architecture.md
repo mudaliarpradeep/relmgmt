@@ -72,10 +72,11 @@ The backend is built using Spring Boot 3.5.4 with Java 21, structured into the f
 4. **Project Management**: Project operations
 5. **Scope Management**: Scope items and effort estimates
 6. **Allocation Engine**: Resource allocation algorithm based on defined rules
-7. **File Import/Export**: Excel file processing
-8. **Reporting Service**: Generation of standard reports
-9. **Notification Service**: Management of system notifications
-10. **Audit Service**: Transaction logging and audit trail management
+7. **Weekly Allocation Service**: Service for managing weekly resource allocations with time-based queries
+8. **File Import/Export**: Excel file processing
+9. **Reporting Service**: Generation of standard reports
+10. **Notification Service**: Management of system notifications
+11. **Audit Service**: Transaction logging and audit trail management
 
 ### 4.3 Data Layer
 
@@ -280,6 +281,8 @@ The system exposes a RESTful API with versioning and the following key endpoints
 - `GET /api/v1/releases/{id}/allocations`: Get allocations for a release
 - `GET /api/v1/resources/{id}/allocations`: Get allocations for a resource
 - `GET /api/v1/allocations/conflicts`: Get allocation conflicts
+- `GET /api/v1/allocations/weekly`: Get weekly allocation matrix with time window
+- `PUT /api/v1/allocations/weekly/{resourceId}/{weekStart}`: Update weekly allocation for a resource
 
 ### 6.8 Notifications
 

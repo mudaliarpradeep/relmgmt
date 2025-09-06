@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderWithRouter, waitFor, screen, within } from '../../test/test-utils';
+import { renderWithRouter, waitFor, screen, within, act } from '../../test/test-utils';
 import AllocationDetailPage from './AllocationDetailPage';
 import releaseService from '../../services/api/v1/releaseService';
 import { allocationService } from '../../services/api/v1/allocationService';
+import { ScopeService } from '../../services/api/v1/scopeService';
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -13,6 +14,13 @@ vi.mock('react-router-dom', async () => {
 });
 
 vi.mock('../../services/api/v1/releaseService');
+vi.mock('../../services/api/v1/scopeService', async () => {
+  return {
+    ScopeService: {
+      canGenerateAllocations: vi.fn(),
+    },
+  };
+});
 vi.mock('../../services/api/v1/allocationService', async () => {
   const actual = await vi.importActual<typeof import('../../services/api/v1/allocationService')>(
     '../../services/api/v1/allocationService'
@@ -28,6 +36,7 @@ vi.mock('../../services/api/v1/allocationService', async () => {
 
 const mockedReleaseService = vi.mocked(releaseService);
 const mockedAllocationService = vi.mocked(allocationService);
+const mockedScopeService = vi.mocked(ScopeService);
 
 describe('AllocationDetailPage', () => {
   beforeEach(() => {
@@ -61,6 +70,7 @@ describe('AllocationDetailPage', () => {
         updatedAt: '2025-01-01T00:00:00Z',
       },
     ]);
+    mockedScopeService.canGenerateAllocations.mockResolvedValueOnce(true);
 
     renderWithRouter(<AllocationDetailPage />, { initialEntries: ['/releases/10/allocations'] });
 
@@ -117,8 +127,8 @@ describe('AllocationDetailPage', () => {
     renderWithRouter(<AllocationDetailPage />, { initialEntries: ['/releases/10/allocations'] });
 
     await waitFor(() => {
-      expect(screen.getByText(/Capacity Load/)).toBeInTheDocument();
-      expect(screen.getByTestId('capacity-chart')).toBeInTheDocument();
+      expect(screen.getByText(/Weekly Capacity Overview/)).toBeInTheDocument();
+      expect(screen.getByTestId('weekly-capacity-chart')).toBeInTheDocument();
     });
   });
 
@@ -134,6 +144,7 @@ describe('AllocationDetailPage', () => {
     } as any);
     mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce([]);
     mockedAllocationService.generateAllocation.mockResolvedValueOnce();
+    mockedScopeService.canGenerateAllocations.mockResolvedValueOnce(true);
     // After generate, reload returns one allocation
     mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce([
       {
@@ -159,7 +170,10 @@ describe('AllocationDetailPage', () => {
     });
 
     const genBtn = screen.getAllByText(/Generate Allocations/)[0];
-    genBtn.click();
+    
+    await act(async () => {
+      genBtn.click();
+    });
 
     await waitFor(() => {
       expect(mockedAllocationService.generateAllocation).toHaveBeenCalledWith(10);
@@ -179,6 +193,53 @@ describe('AllocationDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Error')).toBeInTheDocument();
       expect(screen.getByText('Failed to load release and allocation data')).toBeInTheDocument();
+    });
+  });
+
+  it('disables generate button when no scope items exist', async () => {
+    mockedReleaseService.getRelease.mockResolvedValue({
+      id: 10,
+      name: 'R25Q1 - Core Uplift',
+      identifier: '2025-001',
+      phases: [],
+      blockers: [],
+      createdAt: '',
+      updatedAt: '',
+    } as any);
+    mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce([]);
+    mockedScopeService.canGenerateAllocations.mockResolvedValueOnce(false);
+
+    renderWithRouter(<AllocationDetailPage />, { initialEntries: ['/releases/10/allocations'] });
+
+    await waitFor(() => {
+      expect(screen.getByText(/No allocations found/)).toBeInTheDocument();
+    });
+
+    const genBtn = screen.getAllByText(/Generate Allocations/)[0];
+    expect(genBtn).toBeDisabled();
+    expect(screen.getAllByText(/Cannot generate allocations: No scope items with effort estimates found/)).toHaveLength(2);
+  });
+
+  it('handles invalid allocation data gracefully', async () => {
+    mockedReleaseService.getRelease.mockResolvedValue({
+      id: 10,
+      name: 'R25Q1 - Core Uplift',
+      identifier: '2025-001',
+      phases: [],
+      blockers: [],
+      createdAt: '',
+      updatedAt: '',
+    } as any);
+    // Mock the allocation service to return non-array data (simulating API error)
+    mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce(null as any);
+    mockedScopeService.canGenerateAllocations.mockResolvedValueOnce(false);
+
+    renderWithRouter(<AllocationDetailPage />, { initialEntries: ['/releases/10/allocations'] });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Allocations for R25Q1 - Core Uplift/)).toBeInTheDocument();
+      expect(screen.getByText(/0 allocations/)).toBeInTheDocument();
+      expect(screen.getByText(/No allocations found/)).toBeInTheDocument();
     });
   });
 });

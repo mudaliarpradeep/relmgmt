@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
 import { vi } from 'vitest';
 import { renderWithRouter } from '../../test/test-utils';
 import DashboardPage from './DashboardPage';
@@ -74,13 +74,17 @@ describe('DashboardPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the dashboard', () => {
-    renderWithRouter(<DashboardPage />);
+  it('renders the dashboard', async () => {
+    await act(async () => {
+      renderWithRouter(<DashboardPage />);
+    });
     expect(screen.getByTestId('stat-card-blue')).toBeInTheDocument();
   });
 
   it('renders all stat cards with correct data', async () => {
-    renderWithRouter(<DashboardPage />);
+    await act(async () => {
+      renderWithRouter(<DashboardPage />);
+    });
     
     // Check that all stat cards are rendered
     expect(screen.getByTestId('stat-card-blue')).toBeInTheDocument();
@@ -112,8 +116,10 @@ describe('DashboardPage', () => {
     expect(statValues[3]).toHaveTextContent('2');
   });
 
-  it('renders all dashboard sections', () => {
-    renderWithRouter(<DashboardPage />);
+  it('renders all dashboard sections', async () => {
+    await act(async () => {
+      renderWithRouter(<DashboardPage />);
+    });
     
     // Check that all dashboard sections are rendered
     expect(screen.getByTestId('active-releases')).toBeInTheDocument();
@@ -123,8 +129,10 @@ describe('DashboardPage', () => {
     expect(screen.getByTestId('allocation-conflicts')).toBeInTheDocument();
   });
 
-  it('renders dashboard sections in correct order', () => {
-    renderWithRouter(<DashboardPage />);
+  it('renders dashboard sections in correct order', async () => {
+    await act(async () => {
+      renderWithRouter(<DashboardPage />);
+    });
     
     // Check that sections appear in the expected order
     const container = screen.getByTestId('stat-card-blue').parentElement;
@@ -145,8 +153,10 @@ describe('DashboardPage', () => {
     expect(fourthRow).toHaveClass('grid', 'grid-cols-1', 'lg:grid-cols-2');
   });
 
-  it('has proper container styling', () => {
-    renderWithRouter(<DashboardPage />);
+  it('has proper container styling', async () => {
+    await act(async () => {
+      renderWithRouter(<DashboardPage />);
+    });
     
     const container = screen.getByTestId('stat-card-blue').parentElement?.parentElement;
     expect(container).toHaveClass('w-full', 'max-w-7xl', 'mx-auto', 'px-2', 'sm:px-4', 'lg:px-6', 'xl:px-8', 'py-4', 'sm:py-6', 'lg:py-8');

@@ -3,10 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { allocationService } from '../../services/api/v1/allocationService';
 import type { Allocation } from '../../services/api/v1/allocationService';
 import releaseService from '../../services/api/v1/releaseService';
+import { ScopeService } from '../../services/api/v1/scopeService';
 import type { Release } from '../../services/api/sharedTypes';
 import CapacityChart from '../../components/charts/CapacityChart';
-import { computeMaxWeeklyAllocationPerResource, enumerateWeeks, computeWeeklyAllocationForWeek } from '../../lib/capacity';
-import AllocationGrid from '../../components/allocation/AllocationGrid';
+import { enumerateWeeks, computeWeeklyAllocationForWeek } from '../../lib/capacity';
+import WeeklyAllocationGrid from '../../components/allocation/WeeklyAllocationGrid';
+import WeeklyCapacityChart from '../../components/charts/WeeklyCapacityChart';
 
 const AllocationDetailPage: React.FC = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
@@ -17,6 +19,7 @@ const AllocationDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'max' | 'weekly'>('max');
   const [selectedWeek, setSelectedWeek] = useState<string>('');
+  const [canGenerateAllocations, setCanGenerateAllocations] = useState(false);
 
   useEffect(() => {
     if (releaseId) {
@@ -27,13 +30,15 @@ const AllocationDetailPage: React.FC = () => {
   const loadReleaseAndAllocations = async () => {
     try {
       setLoading(true);
-      const [releaseData, allocationsData] = await Promise.all([
+      const [releaseData, allocationsData, canGenerate] = await Promise.all([
         releaseService.getRelease(parseInt(releaseId!)),
-        allocationService.getAllocationsForRelease(parseInt(releaseId!))
+        allocationService.getAllocationsForRelease(parseInt(releaseId!)),
+        ScopeService.canGenerateAllocations(parseInt(releaseId!))
       ]);
       setRelease(releaseData);
-      setAllocations(allocationsData);
-      const weeks = enumerateWeeks(allocationsData);
+      setAllocations(Array.isArray(allocationsData) ? allocationsData : []);
+      setCanGenerateAllocations(canGenerate);
+      const weeks = enumerateWeeks(Array.isArray(allocationsData) ? allocationsData : []);
       setSelectedWeek(weeks[0] || '');
       setError(null);
     } catch (err) {
@@ -124,7 +129,7 @@ const AllocationDetailPage: React.FC = () => {
               Allocations for {release?.name}
             </h1>
             <p className="mt-2 text-gray-600">
-              Release ID: {release?.identifier} | {allocations.length} allocations
+              Release ID: {release?.identifier} | {Array.isArray(allocations) ? allocations.length : 0} allocations
             </p>
           </div>
           <div className="flex space-x-3">
@@ -139,7 +144,7 @@ const AllocationDetailPage: React.FC = () => {
             </Link>
             <button
               onClick={handleGenerateAllocations}
-              disabled={generating}
+              disabled={generating || !canGenerateAllocations}
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
             >
               {generating ? (
@@ -156,6 +161,11 @@ const AllocationDetailPage: React.FC = () => {
                 </>
               )}
             </button>
+            {!canGenerateAllocations && (
+              <div className="mt-2 text-sm text-red-600">
+                ⚠️ Cannot generate allocations: No scope items with effort estimates found
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -184,6 +194,17 @@ const AllocationDetailPage: React.FC = () => {
                 <dt className="text-sm font-medium text-gray-500">Blockers</dt>
                 <dd className="mt-1 text-sm text-gray-900">{release.blockers?.length || 0} blockers</dd>
               </div>
+              <div>
+                <dt className="text-sm font-medium text-gray-500">Scope Items</dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  <Link 
+                    to={`/releases/${release.id}/scope-items`}
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    View scope items
+                  </Link>
+                </dd>
+              </div>
             </dl>
           </div>
         </div>
@@ -198,7 +219,7 @@ const AllocationDetailPage: React.FC = () => {
           </p>
         </div>
 
-        {allocations.length === 0 ? (
+        {(!Array.isArray(allocations) || allocations.length === 0) ? (
           <div className="px-6 py-12 text-center">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -207,28 +228,57 @@ const AllocationDetailPage: React.FC = () => {
             <p className="mt-1 text-sm text-gray-500">
               Generate allocations to see resource assignments for this release.
             </p>
+            <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Note:</strong> Allocations require both phases and scope items with effort estimates. 
+                    Efforts are automatically calculated from scope items and components.
+                  </p>
+                </div>
+              </div>
+            </div>
             <div className="mt-6">
               <button
                 onClick={handleGenerateAllocations}
-                disabled={generating}
+                disabled={generating || !canGenerateAllocations}
                 className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
               >
                 {generating ? 'Generating...' : 'Generate Allocations'}
               </button>
+              {!canGenerateAllocations && (
+                <div className="mt-2 text-sm text-red-600">
+                  ⚠️ Cannot generate allocations: No scope items with effort estimates found
+                </div>
+              )}
             </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
             {/* Weekly Allocation Grid */}
             <div className="px-6 pt-6">
-              <h3 className="text-md font-medium text-gray-900 mb-2">Weekly Allocation Grid</h3>
-              <AllocationGrid allocations={allocations} />
+              <h3 className="text-md font-medium text-gray-900 mb-4">Weekly Allocation Grid</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Resource allocations by week with active release phases overlaid. 
+                Each cell shows allocation days for that resource in that week.
+              </p>
+              <WeeklyAllocationGrid allocations={Array.isArray(allocations) ? allocations : []} />
             </div>
 
-            {/* Capacity Chart */}
+            {/* Weekly Capacity Chart */}
             <div className="px-6 pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-md font-medium text-gray-900">Capacity Load</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-md font-medium text-gray-900">Weekly Capacity Overview</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Total allocations and peak resource usage across all weeks
+                  </p>
+                </div>
                 <div className="flex items-center space-x-3">
                   <select
                     aria-label="View Mode"
@@ -236,7 +286,7 @@ const AllocationDetailPage: React.FC = () => {
                     value={viewMode}
                     onChange={(e) => setViewMode(e.target.value as 'max' | 'weekly')}
                   >
-                    <option value="max">Max per Resource</option>
+                    <option value="max">Weekly Overview</option>
                     <option value="weekly">Specific Week</option>
                   </select>
                   {viewMode === 'weekly' && (
@@ -253,13 +303,15 @@ const AllocationDetailPage: React.FC = () => {
                   )}
                 </div>
               </div>
-              <CapacityChart
-                data={
-                  viewMode === 'max'
-                    ? computeMaxWeeklyAllocationPerResource(allocations)
-                    : (selectedWeek ? computeWeeklyAllocationForWeek(allocations, selectedWeek) : [])
-                }
-              />
+              {viewMode === 'max' ? (
+                <WeeklyCapacityChart allocations={Array.isArray(allocations) ? allocations : []} />
+              ) : (
+                <CapacityChart
+                  data={
+                    selectedWeek ? computeWeeklyAllocationForWeek(Array.isArray(allocations) ? allocations : [], selectedWeek) : []
+                  }
+                />
+              )}
             </div>
 
             <table className="min-w-full divide-y divide-gray-200">
@@ -286,7 +338,7 @@ const AllocationDetailPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {allocations.map((allocation) => (
+                {Array.isArray(allocations) && allocations.map((allocation) => (
                   <tr key={allocation.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">

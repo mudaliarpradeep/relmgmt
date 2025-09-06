@@ -713,3 +713,40 @@ export const EffortPhase = {
 } as const;
 
 export type EffortPhaseEnum = typeof EffortPhase[keyof typeof EffortPhase];
+
+// Weekly Allocation Types
+export interface WeeklyAllocation {
+  weekStart: string; // YYYY-MM-DD (Monday)
+  personDays: number;
+  projectName?: string;
+  projectId?: string;
+}
+
+export interface ResourceAllocation {
+  id: string;
+  name: string;
+  grade: string;
+  skillFunction: string;
+  skillSubFunction?: string;
+  profileUrl: string;
+  weeklyAllocations: WeeklyAllocation[];
+}
+
+export interface WeeklyAllocationMatrix {
+  resources: ResourceAllocation[];
+  currentWeekStart: string;
+  timeWindow: {
+    startWeek: string;
+    endWeek: string;
+    totalWeeks: number;
+  };
+}
+
+export interface ResourceProfile {
+  id: string;
+  name: string;
+  grade: string;
+  skillFunction: string;
+  skillSubFunction?: string;
+  profileUrl: string;
+}

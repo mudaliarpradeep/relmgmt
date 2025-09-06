@@ -1,30 +1,73 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { format, startOfWeek } from 'date-fns';
 import { allocationService } from '../../services/api/v1/allocationService';
-import type { AllocationConflictResponse } from '../../services/api/v1/allocationService';
+import type { AllocationConflictResponse, WeeklyAllocationMatrix } from '../../services/api/v1/allocationService';
 import StatCard from '../../components/ui/StatCard';
 import ConflictsChart from '../../components/charts/ConflictsChart';
+import WeeklyAllocationTable from '../../components/allocation/WeeklyAllocationTable';
 
 const AllocationListPage: React.FC = () => {
   const [conflicts, setConflicts] = useState<AllocationConflictResponse[]>([]);
+  const [weeklyMatrix, setWeeklyMatrix] = useState<WeeklyAllocationMatrix | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState<string>('');
 
   useEffect(() => {
+    // Set current week start to Monday of current week
+    const today = new Date();
+    const mondayOfWeek = startOfWeek(today, { weekStartsOn: 1 });
+    const weekStartString = format(mondayOfWeek, 'yyyy-MM-dd');
+    setCurrentWeekStart(weekStartString);
+    
     loadAllocationConflicts();
+    loadWeeklyAllocations(weekStartString);
   }, []);
 
   const loadAllocationConflicts = async () => {
     try {
-      setLoading(true);
       const data = await allocationService.getAllocationConflicts();
       setConflicts(data);
       setError(null);
     } catch (err) {
       setError('Failed to load allocation conflicts');
       console.error('Error loading allocation conflicts:', err);
+    }
+  };
+
+  const loadWeeklyAllocations = async (weekStart: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await allocationService.getWeeklyAllocations(weekStart);
+      setWeeklyMatrix(data);
+    } catch (err) {
+      setError('Failed to load weekly allocations');
+      console.error('Error loading weekly allocations:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWeekChange = (newWeekStart: string) => {
+    setCurrentWeekStart(newWeekStart);
+    loadWeeklyAllocations(newWeekStart);
+  };
+
+  const handleResourceClick = (resourceId: string) => {
+    // Navigate to resource profile page
+    window.open(`/resources/${resourceId}`, '_blank');
+  };
+
+  const handleAllocationUpdate = async (resourceId: string, weekStart: string, personDays: number) => {
+    try {
+      await allocationService.updateWeeklyAllocation(resourceId, weekStart, personDays);
+      // Reload data after update
+      await loadWeeklyAllocations(currentWeekStart);
+    } catch (err) {
+      console.error('Error updating allocation:', err);
+      setError('Failed to update allocation');
     }
   };
 
@@ -95,6 +138,82 @@ const AllocationListPage: React.FC = () => {
         />
       </div>
 
+      {/* Weekly Allocations */}
+      <div className="bg-white shadow rounded-lg mb-8">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900">Weekly Resource Allocations</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Resource allocation matrix showing person days allocated per resource per week
+          </p>
+        </div>
+
+        {/* Week Navigation */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center space-x-4">
+            <label htmlFor="week-selector" className="text-sm font-medium text-gray-700">
+              Current Week:
+            </label>
+            <input
+              id="week-selector"
+              type="date"
+              value={currentWeekStart}
+              onChange={(e) => handleWeekChange(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <div className="text-sm text-gray-500">
+              Showing: Past 4 weeks + current week + next 24 weeks (29 weeks total)
+            </div>
+          </div>
+        </div>
+
+        {weeklyMatrix ? (
+          <div className="p-6">
+            <WeeklyAllocationTable
+              matrix={weeklyMatrix}
+              onResourceClick={handleResourceClick}
+              onAllocationUpdate={handleAllocationUpdate}
+            />
+          </div>
+        ) : (
+          <div className="px-6 py-12 text-center">
+            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No allocation data found</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              No resources or allocations found for the selected time window.
+            </p>
+          </div>
+        )}
+
+        {/* Legend */}
+        <div className="px-6 py-4 border-t border-gray-200">
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Allocation Legend</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded"></div>
+              <span className="text-sm text-gray-700">No allocation (0 days)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-yellow-50 border border-yellow-300 rounded"></div>
+              <span className="text-sm text-gray-700">Under-allocated (&lt; 2 days)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-green-50 border border-green-300 rounded"></div>
+              <span className="text-sm text-gray-700">Normal (2-4.5 days)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-orange-50 border border-orange-300 rounded"></div>
+              <span className="text-sm text-gray-700">High (4.5-5 days)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-red-50 border border-red-300 rounded"></div>
+              <span className="text-sm text-gray-700">Over-allocated (&gt; 5 days)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Allocation Conflicts */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
@@ -162,7 +281,7 @@ const AllocationListPage: React.FC = () => {
                         {weeklyConflict.totalAllocation.toFixed(1)} days
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {weeklyConflict.maxAllocation.toFixed(1)} days
+                        {weeklyConflict.standardLoad.toFixed(1)} days
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`text-sm ${getConflictSeverity(weeklyConflict.overAllocation)}`}>

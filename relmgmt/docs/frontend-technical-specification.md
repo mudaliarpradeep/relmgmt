@@ -129,6 +129,7 @@ frontend/
 - **ScopeItemTable**: Table for displaying scope items
 - **ComponentTable**: Inline table for managing components within scope items
 - **AllocationTable**: Table for displaying allocations
+- **WeeklyAllocationTable**: Weekly allocation matrix with horizontal scrolling and lazy loading
 - **AuditLogTable**: Table for displaying audit logs
 
 #### 4.1.6 Chart Components
@@ -219,6 +220,7 @@ frontend/
 - **AllocationListPage**: List of allocations
 - **AllocationDetailPage**: Detailed view of allocations with capacity charts
 - **AllocationConflictsPage**: Page for viewing and resolving allocation conflicts
+- **WeeklyAllocationPage**: Weekly allocation matrix with resource information and time-based columns
 
 #### 4.2.8 Reports
 
@@ -315,6 +317,12 @@ The frontend is configured to work with the backend CORS settings:
 - **Validation**: Enum values validated before API calls
 - **Fallback Handling**: Graceful handling of unknown enum values
 
+#### 6.2.3 Effort Estimation and Allocation
+- **Effort Derivation**: Automatic calculation and display of effort estimates from scope items
+- **Real-time Updates**: Effort summary table updates automatically when scope items/components change
+- **Allocation Generation**: Integration with derived effort estimates for resource allocation
+- **Zero Effort Handling**: Proper display and handling of zero effort scenarios
+
 #### 6.2.3 Service Modules
 
 #### 6.2.1 ScopeItemService
@@ -338,6 +346,15 @@ class ComponentService {
   async updateComponent(id: number, data: ComponentRequest): Promise<Component>
   async deleteComponent(id: number): Promise<void>
   async getComponentTypes(): Promise<ComponentType[]>
+}
+```
+
+#### 6.2.3 WeeklyAllocationService
+```typescript
+class WeeklyAllocationService {
+  async getWeeklyAllocations(currentWeekStart: string): Promise<WeeklyAllocationMatrix>
+  async updateWeeklyAllocation(resourceId: string, weekStart: string, personDays: number): Promise<void>
+  async getResourceProfile(resourceId: string): Promise<ResourceProfile>
 }
 ```
 
@@ -428,6 +445,40 @@ interface ReleaseEffortSummary {
 }
 ```
 
+#### 6.3.4 Weekly Allocation Types
+```typescript
+interface WeeklyAllocation {
+  weekStart: string; // YYYY-MM-DD (Monday)
+  personDays: number;
+  projectName?: string;
+  projectId?: string;
+}
+
+interface Resource {
+  id: string;
+  name: string;
+  grade: ResourceGrade;
+  skillFunction: SkillFunction;
+  skillSubFunction: SkillSubFunction;
+  profileUrl: string;
+  weeklyAllocations: WeeklyAllocation[];
+}
+
+interface WeeklyAllocationMatrix {
+  resources: Resource[];
+  currentWeekStart: string;
+  timeWindow: {
+    startWeek: string;
+    endWeek: string;
+    totalWeeks: number;
+  };
+}
+
+type ResourceGrade = "Junior" | "Mid" | "Senior" | "Lead" | "Principal";
+type SkillFunction = "Engineering" | "Design" | "Product" | "QA" | "DevOps";
+type SkillSubFunction = "Frontend" | "Backend" | "Full-Stack" | "Mobile" | "Data" | "Infrastructure";
+```
+
 ## 7. Form Validation
 
 ### 7.1 Scope Item Validation Schema
@@ -516,6 +567,7 @@ const routes = [
   { path: '/scope-items/:id', element: <ScopeItemDetailPage /> },
   { path: '/scope-items/:id/edit', element: <ScopeItemFormPage /> },
   { path: '/allocations', element: <AllocationListPage /> },
+  { path: '/allocations/weekly', element: <WeeklyAllocationPage /> },
   { path: '/releases/:releaseId/allocations', element: <AllocationDetailPage /> },
   { path: '/reports', element: <ReportListPage /> },
   { path: '/reports/resource-utilization', element: <ResourceUtilizationReportPage /> },

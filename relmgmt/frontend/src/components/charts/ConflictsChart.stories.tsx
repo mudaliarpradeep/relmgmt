@@ -20,15 +20,15 @@ const sampleConflicts: AllocationConflictResponse[] = [
     resourceId: 7,
     resourceName: 'John Doe',
     weeklyConflicts: [
-      { weekStarting: '2025-01-06', totalAllocation: 6.0, maxAllocation: 4.5, overAllocation: 1.5 },
-      { weekStarting: '2025-01-13', totalAllocation: 5.2, maxAllocation: 4.5, overAllocation: 0.7 },
+      { weekStarting: '2025-01-06', totalAllocation: 6.0, standardLoad: 4.5, overAllocation: 1.5 },
+      { weekStarting: '2025-01-13', totalAllocation: 5.2, standardLoad: 4.5, overAllocation: 0.7 },
     ],
   },
   {
     resourceId: 8,
     resourceName: 'Jane Smith',
     weeklyConflicts: [
-      { weekStarting: '2025-01-06', totalAllocation: 4.6, maxAllocation: 4.5, overAllocation: 0.1 },
+      { weekStarting: '2025-01-06', totalAllocation: 4.6, standardLoad: 4.5, overAllocation: 0.1 },
     ],
   },
 ];

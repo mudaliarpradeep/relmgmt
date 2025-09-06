@@ -7,13 +7,14 @@ interface AllocationGridProps {
 }
 
 const AllocationGrid: React.FC<AllocationGridProps> = ({ allocations }) => {
-  const weeks = enumerateWeeks(allocations);
-  const resourceNames = Array.from(new Set(allocations.map((a) => a.resourceName))).sort();
+  const safeAllocations = Array.isArray(allocations) ? allocations : [];
+  const weeks = enumerateWeeks(safeAllocations);
+  const resourceNames = Array.from(new Set(safeAllocations.map((a) => a.resourceName))).sort();
 
   // Precompute per-week allocations per resource for quick lookup
   const perWeekMap: Record<string, Record<string, number>> = {};
   for (const wk of weeks) {
-    const rows = computeWeeklyAllocationForWeek(allocations, wk);
+    const rows = computeWeeklyAllocationForWeek(safeAllocations, wk);
     for (const row of rows) {
       if (!perWeekMap[row.resourceName]) perWeekMap[row.resourceName] = {};
       perWeekMap[row.resourceName][wk] = row.allocated;

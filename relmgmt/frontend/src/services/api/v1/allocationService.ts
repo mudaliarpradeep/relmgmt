@@ -1,4 +1,5 @@
 import { apiClient } from '../apiClient';
+import type { WeeklyAllocationMatrix, ResourceProfile } from '../../../types';
 
 export interface Allocation {
   id: number;
@@ -24,7 +25,7 @@ export interface AllocationConflictResponse {
 export interface WeeklyConflict {
   weekStarting: string;
   totalAllocation: number;
-  maxAllocation: number;
+  standardLoad: number;
   overAllocation: number;
 }
 
@@ -61,6 +62,33 @@ class AllocationService {
    */
   async getAllocationConflicts(): Promise<AllocationConflictResponse[]> {
     const response = await apiClient.get('/v1/allocations/conflicts');
+    return response.data;
+  }
+
+  /**
+   * Get weekly allocation matrix with time window
+   */
+  async getWeeklyAllocations(currentWeekStart: string): Promise<WeeklyAllocationMatrix> {
+    const response = await apiClient.get('/v1/allocations/weekly', {
+      params: { currentWeekStart }
+    });
+    return response.data;
+  }
+
+  /**
+   * Update weekly allocation for a resource
+   */
+  async updateWeeklyAllocation(resourceId: string, weekStart: string, personDays: number): Promise<void> {
+    await apiClient.put(`/v1/allocations/weekly/${resourceId}/${weekStart}`, null, {
+      params: { personDays }
+    });
+  }
+
+  /**
+   * Get resource profile information
+   */
+  async getResourceProfile(resourceId: string): Promise<ResourceProfile> {
+    const response = await apiClient.get(`/v1/resources/${resourceId}/profile`);
     return response.data;
   }
 }

@@ -235,7 +235,7 @@ class ScopeControllerTest {
 
     @Test
     void testUpdateScopeItem_InvalidRequest() throws Exception {
-        testScopeItemRequest.setFunctionalDesignDays(0.5); // Below minimum
+        testScopeItemRequest.setFunctionalDesignDays(-1.0); // Below minimum (should trigger validation error)
 
         mockMvc.perform(put("/api/v1/scope-items/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -353,7 +353,7 @@ class ScopeControllerTest {
 
     @Test
     void testUpdateScopeItem_ValidationError() throws Exception {
-        testScopeItemRequest.setUatDays(0.0); // Below minimum
+        testScopeItemRequest.setUatDays(1001.0); // Above maximum (should trigger validation error)
 
         mockMvc.perform(put("/api/v1/scope-items/1")
                         .contentType(MediaType.APPLICATION_JSON)

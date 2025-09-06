@@ -73,7 +73,7 @@ describe('AllocationService', () => {
         resourceId: 7,
         resourceName: 'John Doe',
         weeklyConflicts: [
-          { weekStarting: '2025-01-06', totalAllocation: 6.0, maxAllocation: 4.5, overAllocation: 1.5 },
+          { weekStarting: '2025-01-06', totalAllocation: 6.0, standardLoad: 4.5, overAllocation: 1.5 },
         ],
       },
     ];
@@ -83,6 +83,70 @@ describe('AllocationService', () => {
     expect(result).toHaveLength(1);
     expect(result[0].weeklyConflicts[0].overAllocation).toBe(1.5);
     expect(mockedApiClient.get).toHaveBeenCalledWith('/v1/allocations/conflicts');
+  });
+
+  it('getWeeklyAllocations should GET and return weekly allocation matrix', async () => {
+    const mockMatrix = {
+      resources: [
+        {
+          id: '1',
+          name: 'John Doe',
+          grade: 'Senior',
+          skillFunction: 'Engineering',
+          skillSubFunction: 'Frontend',
+          profileUrl: '/resources/1',
+          weeklyAllocations: [
+            {
+              weekStart: '2024-09-01',
+              personDays: 4.5,
+              projectName: 'Project Alpha',
+              projectId: '1'
+            }
+          ]
+        }
+      ],
+      currentWeekStart: '2024-09-01',
+      timeWindow: {
+        startWeek: '2024-08-04',
+        endWeek: '2024-10-27',
+        totalWeeks: 29
+      }
+    };
+    mockedApiClient.get.mockResolvedValueOnce({ data: mockMatrix } as any);
+
+    const result = await allocationService.getWeeklyAllocations('2024-09-01');
+    expect(result.resources).toHaveLength(1);
+    expect(result.resources[0].name).toBe('John Doe');
+    expect(result.timeWindow.totalWeeks).toBe(29);
+    expect(mockedApiClient.get).toHaveBeenCalledWith('/v1/allocations/weekly', {
+      params: { currentWeekStart: '2024-09-01' }
+    });
+  });
+
+  it('updateWeeklyAllocation should PUT to update endpoint', async () => {
+    mockedApiClient.put.mockResolvedValueOnce({ status: 200, data: null } as any);
+
+    await expect(allocationService.updateWeeklyAllocation('1', '2024-09-01', 4.5)).resolves.not.toThrow();
+    expect(mockedApiClient.put).toHaveBeenCalledWith('/v1/allocations/weekly/1/2024-09-01', null, {
+      params: { personDays: 4.5 }
+    });
+  });
+
+  it('getResourceProfile should GET and return resource profile', async () => {
+    const mockProfile = {
+      id: '1',
+      name: 'John Doe',
+      grade: 'Senior',
+      skillFunction: 'Engineering',
+      skillSubFunction: 'Frontend',
+      profileUrl: '/resources/1'
+    };
+    mockedApiClient.get.mockResolvedValueOnce({ data: mockProfile } as any);
+
+    const result = await allocationService.getResourceProfile('1');
+    expect(result.name).toBe('John Doe');
+    expect(result.grade).toBe('Senior');
+    expect(mockedApiClient.get).toHaveBeenCalledWith('/v1/resources/1/profile');
   });
 
   it('should propagate API errors', async () => {

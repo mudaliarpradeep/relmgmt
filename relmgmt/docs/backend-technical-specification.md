@@ -623,6 +623,57 @@ public enum EffortPhase {
 }
 ```
 
+#### 4.4.4 Weekly Allocation DTOs
+```java
+public class WeeklyAllocationResponse {
+    private String weekStart; // YYYY-MM-DD (Monday)
+    private Double personDays;
+    private String projectName;
+    private String projectId;
+
+    // Constructors, getters and setters
+}
+
+public class ResourceProfileResponse {
+    private String id;
+    private String name;
+    private String grade;
+    private String skillFunction;
+    private String skillSubFunction;
+    private String profileUrl;
+
+    // Constructors, getters and setters
+}
+
+public class WeeklyAllocationMatrixResponse {
+    private List<ResourceAllocationResponse> resources;
+    private String currentWeekStart;
+    private TimeWindowResponse timeWindow;
+
+    // Constructors, getters and setters
+}
+
+public class ResourceAllocationResponse {
+    private String id;
+    private String name;
+    private String grade;
+    private String skillFunction;
+    private String skillSubFunction;
+    private String profileUrl;
+    private List<WeeklyAllocationResponse> weeklyAllocations;
+
+    // Constructors, getters and setters
+}
+
+public class TimeWindowResponse {
+    private String startWeek;
+    private String endWeek;
+    private Integer totalWeeks;
+
+    // Constructors, getters and setters
+}
+```
+
 ### 4.5 Services
 
 #### 4.5.1 ScopeItemService
@@ -657,6 +708,17 @@ public interface ComponentService {
     ComponentResponse create(Long scopeItemId, ComponentRequest request);
     ComponentResponse update(Long id, ComponentRequest request);
     void delete(Long id);
+}
+```
+
+#### 4.5.3 WeeklyAllocationService
+```java
+@Service
+public interface WeeklyAllocationService {
+    WeeklyAllocationMatrixResponse getWeeklyAllocations(String currentWeekStart);
+    void updateWeeklyAllocation(String resourceId, String weekStart, Double personDays);
+    ResourceProfileResponse getResourceProfile(String resourceId);
+    List<WeeklyAllocationResponse> getResourceWeeklyAllocations(String resourceId, String startWeek, String endWeek);
 }
 ```
 
@@ -745,6 +807,38 @@ public class ComponentController {
 }
 ```
 
+#### 4.6.3 WeeklyAllocationController
+```java
+@RestController
+@RequestMapping("/api/v1")
+@Tag(name = "Weekly Allocation Management", description = "APIs for managing weekly resource allocations")
+public class WeeklyAllocationController {
+    
+    @GetMapping("/allocations/weekly")
+    public ResponseEntity<WeeklyAllocationMatrixResponse> getWeeklyAllocations(
+            @RequestParam String currentWeekStart) {
+        WeeklyAllocationMatrixResponse matrix = weeklyAllocationService.getWeeklyAllocations(currentWeekStart);
+        return ResponseEntity.ok(matrix);
+    }
+    
+    @PutMapping("/allocations/weekly/{resourceId}/{weekStart}")
+    public ResponseEntity<Void> updateWeeklyAllocation(
+            @PathVariable String resourceId,
+            @PathVariable String weekStart,
+            @RequestParam Double personDays) {
+        weeklyAllocationService.updateWeeklyAllocation(resourceId, weekStart, personDays);
+        return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/resources/{resourceId}/profile")
+    public ResponseEntity<ResourceProfileResponse> getResourceProfile(
+            @PathVariable String resourceId) {
+        ResourceProfileResponse profile = weeklyAllocationService.getResourceProfile(resourceId);
+        return ResponseEntity.ok(profile);
+    }
+}
+```
+
 ### 4.7 Effort Calculation Logic
 
 #### 4.7.1 Release-Level Effort Derivation
@@ -817,6 +911,14 @@ public class EffortCalculationService {
 - **Phase Enum Validation**: Consistent validation of ReleasePhase enum values
 - **Enum Conversion**: Proper handling of enum name conversions between frontend and backend
 - **Error Handling**: Clear error messages for invalid enum values
+
+### 7.3.3 Effort Estimation and Allocation
+- **Effort Derivation**: Automatic calculation of effort estimates from scope items and components
+- **Scope Item Effort**: Functional Design + SIT + UAT + Sum of (Technical Design + Build) from all components
+- **Release Effort**: Sum of all scope item efforts
+- **Allocation Generation**: Requires both phases AND derived effort estimates from scope items
+- **Resource Loading Rules**: Build team 35% during SIT, 25% during UAT
+- **Zero Effort Handling**: No resource loading when phase effort is 0
 
 #### 7.3.3 Scope Item Endpoints
 - `GET /api/v1/releases/{releaseId}/scope-items` - Get all scope items for a release

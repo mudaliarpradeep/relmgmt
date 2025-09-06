@@ -221,16 +221,16 @@ export class ScopeService {
       errors.push('Description must not exceed 500 characters');
     }
 
-    if (data.functionalDesignDays < 1 || data.functionalDesignDays > 1000) {
-      errors.push('Functional design days must be between 1 and 1000');
+    if (data.functionalDesignDays < 0 || data.functionalDesignDays > 1000) {
+      errors.push('Functional design days must be between 0 and 1000');
     }
 
-    if (data.sitDays < 1 || data.sitDays > 1000) {
-      errors.push('SIT days must be between 1 and 1000');
+    if (data.sitDays < 0 || data.sitDays > 1000) {
+      errors.push('SIT days must be between 0 and 1000');
     }
 
-    if (data.uatDays < 1 || data.uatDays > 1000) {
-      errors.push('UAT days must be between 1 and 1000');
+    if (data.uatDays < 0 || data.uatDays > 1000) {
+      errors.push('UAT days must be between 0 and 1000');
     }
 
     if (!data.components || data.components.length === 0) {
@@ -290,6 +290,25 @@ export class ScopeService {
       `${this.RELEASES_URL}/${releaseId}/effort-summary`
     );
     return response.data;
+  }
+
+  /**
+   * Check if a release has scope items for allocation generation
+   * Returns true if the release has scope items with effort estimates
+   */
+  static async canGenerateAllocations(releaseId: number): Promise<boolean> {
+    try {
+      const scopeItems = await this.getAllScopeItemsByReleaseId(releaseId);
+      return scopeItems.length > 0 && scopeItems.some(item => 
+        item.functionalDesignDays > 0 || 
+        item.sitDays > 0 || 
+        item.uatDays > 0 ||
+        item.components.some(comp => comp.technicalDesignDays > 0 || comp.buildDays > 0)
+      );
+    } catch (error) {
+      console.error('Error checking allocation generation capability:', error);
+      return false;
+    }
   }
 }
 

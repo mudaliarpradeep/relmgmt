@@ -130,6 +130,12 @@ public interface ScopeService {
      * Calculate total UAT days for a release
      */
     Double calculateTotalUatDays(Long releaseId);
+
+    /**
+     * Check if a release can generate allocations
+     * Returns true if the release has scope items with effort estimates
+     */
+    boolean canGenerateAllocations(Long releaseId);
 }
 
 

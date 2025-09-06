@@ -15,9 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -346,6 +344,36 @@ public class ScopeServiceImpl implements ScopeService {
 
         effortMap.computeIfAbsent(componentType, k -> new java.util.HashMap<>())
                  .merge(phase, effort, Double::sum);
+    }
+
+    @Override
+    public boolean canGenerateAllocations(Long releaseId) {
+        List<ScopeItem> scopeItems = scopeItemRepository.findByReleaseId(releaseId);
+        
+        if (scopeItems.isEmpty()) {
+            return false;
+        }
+        
+        // Check if any scope item has effort estimates
+        for (ScopeItem scopeItem : scopeItems) {
+            // Check scope item level efforts
+            if ((scopeItem.getFunctionalDesignDays() != null && scopeItem.getFunctionalDesignDays() > 0) ||
+                (scopeItem.getSitDays() != null && scopeItem.getSitDays() > 0) ||
+                (scopeItem.getUatDays() != null && scopeItem.getUatDays() > 0)) {
+                return true;
+            }
+            
+            // Check component level efforts
+            List<Component> components = componentRepository.findByScopeItemId(scopeItem.getId());
+            for (Component component : components) {
+                if ((component.getTechnicalDesignDays() != null && component.getTechnicalDesignDays() > 0) ||
+                    (component.getBuildDays() != null && component.getBuildDays() > 0)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 }
 

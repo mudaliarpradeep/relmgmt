@@ -16,6 +16,14 @@ if (typeof (globalThis as any).ResizeObserver === 'undefined') {
   (globalThis as any).ResizeObserver = ResizeObserverMock;
 }
 
+// Mock navigation API to suppress JSDOM warnings
+if (typeof (globalThis as any).navigate === 'undefined') {
+  // @ts-expect-error - injecting into global for test env
+  (globalThis as any).navigate = () => {
+    // Mock implementation - no-op
+  };
+}
+
 // Establish API mocking before all tests.
 beforeAll(() => server.listen());
 

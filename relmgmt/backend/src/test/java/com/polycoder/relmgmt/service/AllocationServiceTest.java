@@ -2,17 +2,23 @@ package com.polycoder.relmgmt.service;
 
 import com.polycoder.relmgmt.dto.AllocationConflictResponse;
 import com.polycoder.relmgmt.entity.Allocation;
+import com.polycoder.relmgmt.entity.Component;
 import com.polycoder.relmgmt.entity.EffortEstimate;
 import com.polycoder.relmgmt.entity.Phase;
 import com.polycoder.relmgmt.entity.PhaseTypeEnum;
+import com.polycoder.relmgmt.entity.Release;
 import com.polycoder.relmgmt.entity.Resource;
+import com.polycoder.relmgmt.entity.ScopeItem;
 import com.polycoder.relmgmt.entity.SkillFunctionEnum;
 import com.polycoder.relmgmt.entity.SkillSubFunctionEnum;
 import com.polycoder.relmgmt.entity.StatusEnum;
 import com.polycoder.relmgmt.repository.AllocationRepository;
+import com.polycoder.relmgmt.repository.ComponentRepository;
 import com.polycoder.relmgmt.repository.EffortEstimateRepository;
 import com.polycoder.relmgmt.repository.PhaseRepository;
 import com.polycoder.relmgmt.repository.ResourceRepository;
+import com.polycoder.relmgmt.repository.ScopeItemRepository;
+import com.polycoder.relmgmt.repository.ReleaseRepository;
 import com.polycoder.relmgmt.service.impl.AllocationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +28,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -36,6 +43,9 @@ class AllocationServiceTest {
     private EffortEstimateRepository effortEstimateRepository;
     private ResourceRepository resourceRepository;
     private PhaseRepository phaseRepository;
+    private ScopeItemRepository scopeItemRepository;
+    private ReleaseRepository releaseRepository;
+    private ComponentRepository componentRepository;
     private AllocationService allocationService;
 
     @BeforeEach
@@ -44,11 +54,17 @@ class AllocationServiceTest {
         effortEstimateRepository = Mockito.mock(EffortEstimateRepository.class);
         resourceRepository = Mockito.mock(ResourceRepository.class);
         phaseRepository = Mockito.mock(PhaseRepository.class);
+        scopeItemRepository = Mockito.mock(ScopeItemRepository.class);
+        releaseRepository = Mockito.mock(ReleaseRepository.class);
+        componentRepository = Mockito.mock(ComponentRepository.class);
         allocationService = new AllocationServiceImpl(
             allocationRepository,
             effortEstimateRepository,
             resourceRepository,
-            phaseRepository
+            phaseRepository,
+            scopeItemRepository,
+            releaseRepository,
+            componentRepository
         );
     }
 
@@ -70,7 +86,7 @@ class AllocationServiceTest {
     void testGenerateAllocation_NoEstimates_NoSaves() {
         Long releaseId = 100L;
         when(allocationRepository.findByReleaseId(releaseId)).thenReturn(Collections.emptyList());
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(Collections.emptyList());
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(Collections.emptyList());
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(Collections.emptyList());
 
         allocationService.generateAllocation(releaseId);
@@ -83,16 +99,28 @@ class AllocationServiceTest {
         Long releaseId = 300L;
         when(allocationRepository.findByReleaseId(releaseId)).thenReturn(Collections.emptyList());
 
+        // Mock release
+        Release release = new Release();
+        release.setId(releaseId);
+        release.setName("Test Release");
+        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+
         LocalDate start = LocalDate.of(2025, 1, 6);
         LocalDate end = LocalDate.of(2025, 1, 17);
         Phase functionalDesign = new Phase(PhaseTypeEnum.FUNCTIONAL_DESIGN, start, end);
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(List.of(functionalDesign));
 
-        EffortEstimate e1 = new EffortEstimate();
-        e1.setPhase(PhaseTypeEnum.FUNCTIONAL_DESIGN);
-        e1.setSkillFunction(SkillFunctionEnum.FUNCTIONAL_DESIGN);
-        e1.setEffortDays(10.0);
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(List.of(e1));
+        // Mock scope items with effort estimates
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setName("Test Scope Item");
+        scopeItem.setFunctionalDesignDays(10.0);
+        scopeItem.setSitDays(0.0);
+        scopeItem.setUatDays(0.0);
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(List.of(scopeItem));
+        
+        // Mock components (empty for this test)
+        when(componentRepository.findByScopeItemId(1L)).thenReturn(Collections.emptyList());
 
         Resource r1 = createResource(1L, "FD-1", SkillFunctionEnum.FUNCTIONAL_DESIGN, null);
         Resource r2 = createResource(2L, "FD-2", SkillFunctionEnum.FUNCTIONAL_DESIGN, null);
@@ -134,12 +162,26 @@ class AllocationServiceTest {
         Phase technicalDesign = new Phase(PhaseTypeEnum.TECHNICAL_DESIGN, start, end);
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(List.of(technicalDesign));
 
-        EffortEstimate e1 = new EffortEstimate();
-        e1.setPhase(PhaseTypeEnum.TECHNICAL_DESIGN);
-        e1.setSkillFunction(SkillFunctionEnum.TECHNICAL_DESIGN);
-        e1.setSkillSubFunction(SkillSubFunctionEnum.FORGEROCK_IDM);
-        e1.setEffortDays(8.0);
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(List.of(e1));
+        // Mock release
+        Release release = new Release();
+        release.setId(releaseId);
+        release.setName("Test Release");
+        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+
+        // Create scope items that will generate Technical Design effort
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setName("Test Scope Item");
+        scopeItem.setRelease(release);
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(List.of(scopeItem));
+
+        // Create components that will generate Technical Design effort
+        Component component = new Component();
+        component.setId(1L);
+        component.setName("Test Component");
+        component.setTechnicalDesignDays(8.0);
+        component.setScopeItem(scopeItem);
+        when(componentRepository.findByScopeItemId(1L)).thenReturn(List.of(component));
 
         Resource r1 = createResource(1L, "TD-1", SkillFunctionEnum.TECHNICAL_DESIGN, SkillSubFunctionEnum.FORGEROCK_IDM);
         Resource r2 = createResource(2L, "TD-2", SkillFunctionEnum.TECHNICAL_DESIGN, SkillSubFunctionEnum.SAILPOINT);
@@ -178,11 +220,19 @@ class AllocationServiceTest {
         Phase sit = new Phase(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST, start, end);
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(List.of(sit));
 
-        EffortEstimate e1 = new EffortEstimate();
-        e1.setPhase(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST);
-        e1.setSkillFunction(SkillFunctionEnum.TEST);
-        e1.setEffortDays(12.0);
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(List.of(e1));
+        // Mock release
+        Release release = new Release();
+        release.setId(releaseId);
+        release.setName("Test Release");
+        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+
+        // Create scope items that will generate SIT effort
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setName("Test Scope Item");
+        scopeItem.setSitDays(12.0);
+        scopeItem.setRelease(release);
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(List.of(scopeItem));
 
         Resource r1 = createResource(1L, "TEST-1", SkillFunctionEnum.TEST, SkillSubFunctionEnum.MANUAL);
         Resource r2 = createResource(2L, "TEST-2", SkillFunctionEnum.TEST, SkillSubFunctionEnum.AUTOMATED);
@@ -225,12 +275,26 @@ class AllocationServiceTest {
         Phase build = new Phase(PhaseTypeEnum.BUILD, start, end);
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(List.of(build));
 
-        EffortEstimate e1 = new EffortEstimate();
-        e1.setPhase(PhaseTypeEnum.BUILD);
-        e1.setSkillFunction(SkillFunctionEnum.BUILD);
-        e1.setSkillSubFunction(SkillSubFunctionEnum.FORGEROCK_IDM);
-        e1.setEffortDays(9.0);
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(List.of(e1));
+        // Mock release
+        Release release = new Release();
+        release.setId(releaseId);
+        release.setName("Test Release");
+        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+
+        // Create scope items that will generate Build effort
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setName("Test Scope Item");
+        scopeItem.setRelease(release);
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(List.of(scopeItem));
+
+        // Create components that will generate Build effort
+        Component component = new Component();
+        component.setId(1L);
+        component.setName("Test Component");
+        component.setBuildDays(9.0);
+        component.setScopeItem(scopeItem);
+        when(componentRepository.findByScopeItemId(1L)).thenReturn(List.of(component));
 
         for (SkillFunctionEnum fn : SkillFunctionEnum.values()) {
             when(resourceRepository.findBySkillFunctionAndStatus(fn, StatusEnum.ACTIVE)).thenReturn(Collections.emptyList());
@@ -265,12 +329,26 @@ class AllocationServiceTest {
         Phase shortPhase = new Phase(PhaseTypeEnum.BUILD, start, end);
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(List.of(shortPhase));
 
-        EffortEstimate e1 = new EffortEstimate();
-        e1.setPhase(PhaseTypeEnum.BUILD);
-        e1.setSkillFunction(SkillFunctionEnum.BUILD);
-        e1.setSkillSubFunction(SkillSubFunctionEnum.FORGEROCK_IDM);
-        e1.setEffortDays(5.0); // More effort than working days
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(List.of(e1));
+        // Mock release
+        Release release = new Release();
+        release.setId(releaseId);
+        release.setName("Test Release");
+        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+
+        // Create scope items that will generate Build effort
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setName("Test Scope Item");
+        scopeItem.setRelease(release);
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(List.of(scopeItem));
+
+        // Create components that will generate Build effort
+        Component component = new Component();
+        component.setId(1L);
+        component.setName("Test Component");
+        component.setBuildDays(5.0); // More effort than working days
+        component.setScopeItem(scopeItem);
+        when(componentRepository.findByScopeItemId(1L)).thenReturn(List.of(component));
 
         Resource r1 = createResource(1L, "B-1", SkillFunctionEnum.BUILD, SkillSubFunctionEnum.FORGEROCK_IDM);
         when(resourceRepository.findBySkillFunctionAndStatus(SkillFunctionEnum.BUILD, StatusEnum.ACTIVE))
@@ -313,17 +391,24 @@ class AllocationServiceTest {
         
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(List.of(build, sit, uat));
 
-        EffortEstimate buildEstimate = new EffortEstimate();
-        buildEstimate.setPhase(PhaseTypeEnum.BUILD);
-        buildEstimate.setSkillFunction(SkillFunctionEnum.BUILD);
-        buildEstimate.setEffortDays(10.0);
+        // Setup Release and ScopeItem
+        Release release = new Release();
+        release.setId(releaseId);
+        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
         
-        EffortEstimate sitEstimate = new EffortEstimate();
-        sitEstimate.setPhase(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST);
-        sitEstimate.setSkillFunction(SkillFunctionEnum.TEST);
-        sitEstimate.setEffortDays(8.0);
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setRelease(release);
+        scopeItem.setSitDays(8.0);    // SIT effort
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(List.of(scopeItem));
         
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(List.of(buildEstimate, sitEstimate));
+        // Setup Component with effort data
+        Component component = new Component();
+        component.setId(1L);
+        component.setBuildDays(10.0); // Build effort
+        // SIT effort is set on ScopeItem, not Component
+        component.setScopeItem(scopeItem);
+        when(componentRepository.findByScopeItemId(1L)).thenReturn(List.of(component));
 
         Resource buildResource = createResource(1L, "B-1", SkillFunctionEnum.BUILD, SkillSubFunctionEnum.FORGEROCK_IDM);
         Resource testResource = createResource(2L, "T-1", SkillFunctionEnum.TEST, SkillSubFunctionEnum.MANUAL);
@@ -344,7 +429,7 @@ class AllocationServiceTest {
 
         verify(allocationRepository).saveAll(argThat(allocations -> {
             List<Allocation> allocationList = (List<Allocation>) allocations;
-            assertThat(allocationList).hasSize(6); // BUILD + SIT + UAT (Build) + UAT (Test) + SMOKE (Build) + SMOKE (Test)
+            assertThat(allocationList).hasSize(7); // BUILD + SIT + SIT build allocation + UAT (Build) + UAT (Test) + SMOKE (Build) + SMOKE (Test)
             
             // Find UAT allocations
             List<Allocation> uatAllocations = allocationList.stream()
@@ -353,12 +438,12 @@ class AllocationServiceTest {
             
             assertThat(uatAllocations).hasSize(2);
             
-            // Check UAT Build allocation (30% of Build effort)
+            // Check UAT Build allocation (25% of Build effort)
             Allocation uatBuild = uatAllocations.stream()
                 .filter(a -> a.getResource().getSkillFunction() == SkillFunctionEnum.BUILD)
                 .findFirst().orElse(null);
             assertThat(uatBuild).isNotNull();
-            assertThat(uatBuild.getAllocationDays()).isEqualTo(3.0); // 10.0 * 0.3
+            assertThat(uatBuild.getAllocationDays()).isEqualTo(2.5); // 10.0 * 0.25
             
             // Check UAT Test allocation (30% of SIT effort)
             Allocation uatTest = uatAllocations.stream()
@@ -391,17 +476,24 @@ class AllocationServiceTest {
         // Smoke phase will be auto-generated after UAT
         when(phaseRepository.findByReleaseId(releaseId)).thenReturn(List.of(build, sit, uat));
 
-        EffortEstimate buildEstimate = new EffortEstimate();
-        buildEstimate.setPhase(PhaseTypeEnum.BUILD);
-        buildEstimate.setSkillFunction(SkillFunctionEnum.BUILD);
-        buildEstimate.setEffortDays(10.0);
+        // Setup Release and ScopeItem
+        Release release = new Release();
+        release.setId(releaseId);
+        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
         
-        EffortEstimate sitEstimate = new EffortEstimate();
-        sitEstimate.setPhase(PhaseTypeEnum.SYSTEM_INTEGRATION_TEST);
-        sitEstimate.setSkillFunction(SkillFunctionEnum.TEST);
-        sitEstimate.setEffortDays(8.0);
+        ScopeItem scopeItem = new ScopeItem();
+        scopeItem.setId(1L);
+        scopeItem.setRelease(release);
+        scopeItem.setSitDays(8.0);    // SIT effort
+        when(scopeItemRepository.findByReleaseId(releaseId)).thenReturn(List.of(scopeItem));
         
-        when(effortEstimateRepository.findByReleaseId(releaseId)).thenReturn(List.of(buildEstimate, sitEstimate));
+        // Setup Component with effort data
+        Component component = new Component();
+        component.setId(1L);
+        component.setBuildDays(10.0); // Build effort
+        // SIT effort is set on ScopeItem, not Component
+        component.setScopeItem(scopeItem);
+        when(componentRepository.findByScopeItemId(1L)).thenReturn(List.of(component));
 
         Resource buildResource = createResource(1L, "B-1", SkillFunctionEnum.BUILD, SkillSubFunctionEnum.FORGEROCK_IDM);
         Resource testResource = createResource(2L, "T-1", SkillFunctionEnum.TEST, SkillSubFunctionEnum.MANUAL);
@@ -422,7 +514,7 @@ class AllocationServiceTest {
 
         verify(allocationRepository).saveAll(argThat(allocations -> {
             List<Allocation> allocationList = (List<Allocation>) allocations;
-            assertThat(allocationList).hasSize(6); // BUILD + SIT + UAT (Build) + UAT (Test) + SMOKE (Build) + SMOKE (Test)
+            assertThat(allocationList).hasSize(7); // BUILD + SIT + SIT build allocation + UAT (Build) + UAT (Test) + SMOKE (Build) + SMOKE (Test)
             
             // Find Smoke allocations
             List<Allocation> smokeAllocations = allocationList.stream()

@@ -1,5 +1,6 @@
 package com.polycoder.relmgmt.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -9,6 +10,7 @@ public class Allocation extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "release_id", nullable = false)
+    @JsonIgnore
     private Release release;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

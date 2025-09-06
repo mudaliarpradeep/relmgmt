@@ -11,7 +11,7 @@ export const handlers = [
         resourceId: 1,
         resourceName: 'Alice',
         weeklyConflicts: [
-          { weekStarting: '2025-01-06', totalAllocation: 6.0, maxAllocation: 4.5, overAllocation: 1.5 },
+          { weekStarting: '2025-01-06', totalAllocation: 6.0, standardLoad: 4.5, overAllocation: 1.5 },
         ],
       },
     ])

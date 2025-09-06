@@ -15,7 +15,7 @@ describe('ReportService', () => {
         resourceId: 7,
         resourceName: 'John Doe',
         weeklyConflicts: [
-          { weekStarting: '2025-01-06', totalAllocation: 6.0, maxAllocation: 4.5, overAllocation: 1.5 },
+          { weekStarting: '2025-01-06', totalAllocation: 6.0, standardLoad: 4.5, overAllocation: 1.5 },
         ],
       },
     ];

@@ -1,5 +1,6 @@
 package com.polycoder.relmgmt.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,7 @@ public class Blocker extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "release_id", nullable = false)
+    @JsonIgnore
     private Release release;
 
     // Default constructor

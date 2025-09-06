@@ -1,5 +1,6 @@
 package com.polycoder.relmgmt.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class ScopeItem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "release_id", nullable = false)
+    @JsonIgnore
     private Release release;
 
     @NotBlank(message = "Scope item name is required")

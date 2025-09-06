@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
@@ -147,4 +148,11 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
      */
     @Query("SELECT r FROM Resource r WHERE r.status = :status AND r.projectEndDate IS NOT NULL AND r.projectEndDate < :currentDate")
     List<Resource> findActiveResourcesWithPastEndDates(@Param("status") StatusEnum status, @Param("currentDate") LocalDate currentDate);
+
+    /**
+     * Find resources by a set of IDs
+     * @param ids the set of IDs to search for
+     * @return List of resources with the specified IDs
+     */
+    List<Resource> findByIdIn(Set<Long> ids);
 }

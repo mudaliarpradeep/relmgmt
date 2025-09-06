@@ -134,13 +134,25 @@ Each resource in the roster shall have the following attributes:
 #### 4.2.4 Effort Estimation and Derivation Rules
 - **Component-Level Efforts**: Each component shall have separate Technical Design and Build effort estimates.
 - **Scope Item-Level Efforts**: Each scope item shall have single values for Functional Design, SIT, and UAT efforts.
+- **Scope Item Total Effort Calculation**:
+  - Scope Item Total = Functional Design + SIT + UAT + Sum of (Technical Design + Build) from all components
 - **Release-Level Effort Derivation**:
+  - Release Total = Sum of all scope item efforts
   - Functional Design, Technical Design, Build, SIT, and UAT effort values shall be automatically calculated as summations of the corresponding efforts from all scope items assigned to the release.
-  - Regression Testing, Smoke Testing, and Go-Live efforts shall be manually assigned at the release level.
+  - Regression Testing, Smoke Testing, and Go-Live efforts shall be manually assigned at the release level (Phase 2).
+- **Automatic Recalculation**:
+  - Effort estimates shall be automatically recalculated when scope items are added/removed/modified
+  - Effort estimates shall be automatically recalculated when components are added/removed/modified within scope items
+- **Allocation Generation Requirements**:
+  - Allocation generation requires both phases AND derived effort estimates from scope items
+  - If no scope items exist, allocation generation shall be allowed with 0 effort
+  - If phase effort is 0, no resources shall be loaded for that phase
+- **Resource Loading Rules**:
+  - Build team: 35% of build effort during SIT phase, 25% during UAT phase
 - **Validation Rules**:
   - Minimum effort value: 0 person-days
   - Maximum effort value: 1000 person-days
-  - All required phases must have effort estimates
+  - Effort estimates are automatically calculated and cannot be manually overridden
   - Effort units must be person-days (whole numbers or decimals allowed)
 
 #### 4.2.5 Effort Summary Table
@@ -174,13 +186,15 @@ The system shall allocate resources to releases based on the following rules:
    - The maximum allocation shall be 1 person-day per day.
 
 3. **Phase-specific Allocation**:
-   - **Functional Design**: Load resources with skill function "Functional Design" based on scope estimates and available capacity.
-   - **Technical Design**: Load resources with skill function "Technical Design" and matching skill sub-function based on component estimates and available capacity.
-   - **Build**: Load resources with skill function "Build" and matching skill sub-function based on component estimates and available capacity.
-   - **SIT**: Load resources with skill function "Test" and sub-function "Manual" based on scope estimates and available capacity.
+   - **Functional Design**: Load resources with skill function "Functional Design" based on derived scope estimates and available capacity.
+   - **Technical Design**: Load resources with skill function "Technical Design" and matching skill sub-function based on derived component estimates and available capacity.
+   - **Build**: Load resources with skill function "Build" and matching skill sub-function based on derived component estimates and available capacity.
+   - **SIT**: 
+     - Test resources: Load resources with skill function "Test" and sub-function "Manual" based on derived scope estimates and available capacity.
+     - Build resources: 35% of Build phase effort for all loaded Build resources.
    - **UAT**: 
      - Test resources: 30% of SIT phase effort for all loaded Test resources.
-     - Build resources: 30% of Build phase effort for all loaded Build resources.
+     - Build resources: 25% of Build phase effort for all loaded Build resources.
    - **Regression Testing** (follows UAT):
      - Test resources: 20% of SIT phase effort for all loaded Test resources.
      - Build resources: 15% of Build phase effort for all loaded Build resources.
@@ -402,7 +416,14 @@ The system shall allocate resources to releases based on the following rules:
    - Validation: Minimum 1 PD, Maximum 1000 PD per effort field
 
 6. **Resource Allocation**
-   - Allocation grid/matrix
+   - Allocation grid/matrix with weekly time periods
+   - Weekly allocation table showing person days allocated per resource per week
+   - Resource information columns (Name, Grade, Skill Function, Skill Sub-Function)
+   - Weekly columns with "D-MMM" format (e.g., "1-Sep", "8-Sep", "15-Sep")
+   - Horizontal scrolling for weekly columns with lazy loading
+   - Time window: Past 4 weeks + current week + next 24 weeks (29 weeks total)
+   - Project names displayed alongside person days in weekly cells
+   - Resource name links to resource profile pages
    - Manual override capabilities
 
 7. **Visualization**

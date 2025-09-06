@@ -54,6 +54,23 @@ describe('AllocationGrid', () => {
     expect(janeW1?.textContent).toContain('0.0');
     expect(janeW2?.textContent).toContain('2.5');
   });
+
+  it('handles non-array allocations gracefully', () => {
+    // Test with null
+    const { unmount: unmount1 } = render(<AllocationGrid allocations={null as any} />);
+    expect(screen.getByTestId('allocation-grid')).toBeInTheDocument();
+    unmount1();
+
+    // Test with undefined
+    const { unmount: unmount2 } = render(<AllocationGrid allocations={undefined as any} />);
+    expect(screen.getByTestId('allocation-grid')).toBeInTheDocument();
+    unmount2();
+
+    // Test with non-array value
+    const { unmount: unmount3 } = render(<AllocationGrid allocations={'invalid' as any} />);
+    expect(screen.getByTestId('allocation-grid')).toBeInTheDocument();
+    unmount3();
+  });
 });
 
 

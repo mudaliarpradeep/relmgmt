@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor, fireEvent } from '../../test/test-utils';
+import { screen, waitFor, fireEvent, act } from '../../test/test-utils';
 import NotificationListPage from './NotificationListPage';
 import { renderWithAuth } from '../../test/test-utils';
 import NotificationService from '../../services/api/v1/notificationService';
@@ -58,12 +58,16 @@ describe('NotificationListPage', () => {
     expect(screen.getByText('Read item')).toBeInTheDocument();
 
     // Mark one as read
-    await fireEvent.click(screen.getByRole('button', { name: /mark read/i }));
+    await act(async () => {
+      await fireEvent.click(screen.getByRole('button', { name: /mark read/i }));
+    });
     expect(mockedService.markAsRead).toHaveBeenCalledWith(1);
 
     // Dismiss a notification
     const dismissButtons = screen.getAllByRole('button', { name: /dismiss/i });
-    await fireEvent.click(dismissButtons[0]);
+    await act(async () => {
+      await fireEvent.click(dismissButtons[0]);
+    });
     expect(mockedService.deleteNotification).toHaveBeenCalled();
   });
 
@@ -80,7 +84,9 @@ describe('NotificationListPage', () => {
     fireEvent.change(screen.getByLabelText(/event type/i), { target: { value: EventType.BLOCKER_ADDED } });
     fireEvent.change(screen.getByLabelText(/^read$/i), { target: { value: 'true' } });
 
-    await fireEvent.click(screen.getByRole('button', { name: /apply/i }));
+    await act(async () => {
+      await fireEvent.click(screen.getByRole('button', { name: /apply/i }));
+    });
 
     // Initial load + filter apply; some environments double-invoke effects in dev
     expect(mockedService.getNotifications.mock.calls.length).toBeGreaterThanOrEqual(2);
@@ -95,7 +101,9 @@ describe('NotificationListPage', () => {
     renderWithAuth(<NotificationListPage />);
 
     await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
-    await fireEvent.click(screen.getByRole('button', { name: /mark all as read/i }));
+    await act(async () => {
+      await fireEvent.click(screen.getByRole('button', { name: /mark all as read/i }));
+    });
     expect(mockedService.markAllAsRead).toHaveBeenCalled();
   });
 });

@@ -9,6 +9,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const [showReportsSubmenu, setShowReportsSubmenu] = useState(false);
+  const [showAllocationsSubmenu, setShowAllocationsSubmenu] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
@@ -18,12 +19,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     return location.pathname.startsWith('/reports');
   };
 
+  const isAllocationsActive = () => {
+    return location.pathname.startsWith('/allocations');
+  };
+
   const menuItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/resources', label: 'Resource Management', icon: '👥' },
     { path: '/releases', label: 'Release Management', icon: '🚀' },
-    { path: '/allocations', label: 'Allocation Management', icon: '⚖️' },
     { path: '/notifications', label: 'Notifications', icon: '🔔' },
+  ];
+
+  const allocationItems = [
+    { path: '/allocations', label: 'Allocation Management', icon: '📋' },
   ];
 
   const reportItems = [
@@ -31,6 +39,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { path: '/reports/resource-utilization', label: 'Resource Utilization', icon: '📈' },
     { path: '/reports/release-timeline', label: 'Release Timeline', icon: '🗓️' },
   ];
+
+  const handleAllocationsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowAllocationsSubmenu(!showAllocationsSubmenu);
+  };
+
+  const handleAllocationItemClick = () => {
+    setShowAllocationsSubmenu(false);
+    onClose();
+  };
 
   const handleReportsClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -85,6 +103,53 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 {item.label}
               </Link>
             ))}
+
+            {/* Allocation Management Menu Item */}
+            <div className="relative">
+              <button
+                onClick={handleAllocationsClick}
+                className={`
+                  w-full flex items-center justify-between px-4 py-3 mb-2 text-sm font-medium rounded-lg transition-colors
+                  ${isAllocationsActive()
+                    ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }
+                `}
+              >
+                <div className="flex items-center">
+                  <span className="mr-3 text-lg">⚖️</span>
+                  <span>Allocation Management</span>
+                </div>
+                <span className={`transform transition-transform duration-200 ${showAllocationsSubmenu ? 'rotate-90' : ''}`}>
+                  ▶
+                </span>
+              </button>
+
+              {/* Allocation Submenu Overlay */}
+              {showAllocationsSubmenu && (
+                <div className="absolute left-full top-0 ml-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <div className="py-2">
+                    {allocationItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={handleAllocationItemClick}
+                        className={`
+                          flex items-center px-4 py-3 text-sm font-medium transition-colors
+                          ${isActive(item.path)
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          }
+                        `}
+                      >
+                        <span className="mr-3 text-lg">{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Reports Menu Item */}
             <div className="relative">

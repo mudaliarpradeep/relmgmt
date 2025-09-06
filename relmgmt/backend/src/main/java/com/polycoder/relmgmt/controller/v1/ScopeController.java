@@ -328,6 +328,26 @@ public class ScopeController {
         boolean canDelete = scopeService.canDeleteScopeItem(id);
         return ResponseEntity.ok(canDelete);
     }
+
+    /**
+     * GET /api/v1/releases/{releaseId}/can-generate-allocations : Check if release can generate allocations.
+     *
+     * @param releaseId the release ID
+     * @return the ResponseEntity with status 200 (OK) and the allocation generation possibility
+     */
+    @GetMapping("/releases/{releaseId}/can-generate-allocations")
+    @Operation(summary = "Check if release can generate allocations", description = "Check if a release has scope items with effort estimates to generate allocations")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully checked allocation generation possibility"),
+            @ApiResponse(responseCode = "404", description = "Release not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> canGenerateAllocations(
+            @Parameter(description = "ID of the release") @PathVariable Long releaseId) {
+
+        boolean canGenerate = scopeService.canGenerateAllocations(releaseId);
+        return ResponseEntity.ok(canGenerate);
+    }
 }
 
 

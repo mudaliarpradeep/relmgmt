@@ -129,15 +129,45 @@
     - Add Storybook: list state variants (loading/error/empty) and modal ✅
     - Add header preview interaction tests (badge decrement, mark-all) ✅
 
-11. **FE-Phase-11: Data Model Migration and Integration** 🔄 **NEW PHASE**
-    - Update existing components to work with new data model
-    - Migrate project-based UI to scope item-based UI
-    - Implement inline component management
-    - Update routing to reflect new structure
-    - Write integration tests for complete workflows
-    - Implement end-to-end tests with Cypress
-    - Conduct accessibility testing
-    - Perform performance optimization
+11. **FE-Phase-11: Effort Estimation Derivation Implementation** ✅ **COMPLETE**
+    - **Backend Changes**:
+      - ✅ Updated AllocationServiceImpl to use derived effort estimates from scope items
+      - ✅ Added calculateDerivedEfforts method for scope item effort calculation
+      - ✅ Updated resource loading rules (Build: 35% during SIT, 25% during UAT)
+      - ✅ Added validation for scope items before allocation generation
+      - ✅ Fixed all compilation errors and updated tests
+    - **Frontend Changes**:
+      - ✅ Update effort summary table to show derived estimates
+      - ✅ Update allocation generation UI to reflect new requirements
+      - ✅ Update validation messages for effort estimation
+      - ✅ Update tests for new effort derivation logic
+    - **Documentation Updates**:
+      - ✅ Updated PRD with new effort calculation rules
+      - ✅ Updated backend technical specification
+      - ✅ Updated frontend technical specification
+      - ✅ Updated status.md with new requirements
+
+12. **FE-Phase-12: Weekly Allocation Table Implementation** ✅ **COMPLETE**
+    - **Backend Changes**:
+      - ✅ Created new DTOs for weekly allocation data (WeeklyAllocationResponse, ResourceProfileResponse, etc.)
+      - ✅ Implemented WeeklyAllocationService interface and implementation
+      - ✅ Added new REST endpoints in AllocationController for weekly allocations and resource profiles
+      - ✅ Updated AllocationRepository with new query methods for date range filtering
+      - ✅ All backend unit tests passing (WeeklyAllocationServiceTest)
+    - **Frontend Changes**:
+      - ✅ Added new TypeScript interfaces for weekly allocation data
+      - ✅ Created WeeklyAllocationTable component with specified layout (resource name, grade, skill function, sub-function, weekly columns)
+      - ✅ Created WeeklyAllocationPage component for new route (/allocations/weekly)
+      - ✅ Updated allocationService with new API methods
+      - ✅ Added routing for /allocations/weekly
+      - ✅ Updated sidebar navigation with new "Weekly Allocations" link
+      - ✅ Implemented time window management (past 4 weeks + current + next 24 weeks)
+      - ✅ Added horizontal scrolling and resource profile integration
+    - **Documentation Updates**:
+      - ✅ Updated PRD with weekly allocation table requirements
+      - ✅ Updated system architecture documentation with new components and endpoints
+      - ✅ Updated frontend and backend technical specifications
+      - ✅ Updated status.md with implementation progress
 
 ---
 
@@ -252,7 +282,19 @@
     - Write tests for notification controller ✅
     - Implement notification controller ✅
 
-11. **BE-Phase-11: Audit and Transaction Logging** 🔄 **IN PROGRESS**
+11. **BE-Phase-11: Weekly Allocation System** ✅ **COMPLETED**
+    - Write tests for weekly allocation DTOs ✅
+    - Implement weekly allocation DTOs (WeeklyAllocationResponse, ResourceProfileResponse, etc.) ✅
+    - Write tests for WeeklyAllocationService ✅
+    - Implement WeeklyAllocationService interface and implementation ✅
+    - Write tests for new allocation repository methods ✅
+    - Implement date range query methods in AllocationRepository ✅
+    - Write tests for weekly allocation controller endpoints ✅
+    - Implement new REST endpoints in AllocationController ✅
+    - Write tests for resource profile endpoints ✅
+    - Implement resource profile API endpoints ✅
+
+12. **BE-Phase-12: Audit and Transaction Logging** 🔄 **IN PROGRESS**
     - Write tests for transaction logging aspect
     - Implement transaction logging aspect
     - Write tests for audit service
@@ -260,7 +302,7 @@
     - Write tests for audit controller
     - Implement audit controller
 
-12. **BE-Phase-12: Integration Testing and Performance Optimization**
+13. **BE-Phase-13: Integration Testing and Performance Optimization**
     - Write integration tests for complete workflows
     - Optimize database queries
     - Implement caching where appropriate
@@ -332,6 +374,8 @@
 - **FE-Phase-7**: Complete allocation system with capacity charts and conflict detection
 - **FE-Phase-8**: Complete reporting system with export functionality
 - **FE-Phase-9**: Complete notification system with real-time updates
+- **FE-Phase-11**: Complete effort estimation derivation system
+- **FE-Phase-12**: Complete weekly allocation table with time window management
 - **BE-Phase-1**: Complete Spring Boot infrastructure with PostgreSQL integration
 - **BE-Phase-2**: Full authentication system with JWT tokens and security
 - **BE-Phase-3**: Complete resource management with Excel import/export
@@ -339,6 +383,7 @@
 - **BE-Phase-8**: Complete allocation engine with conflict detection
 - **BE-Phase-9**: Complete reporting system with multiple report types
 - **BE-Phase-10**: Complete notification system with event-driven updates
+- **BE-Phase-11**: Complete weekly allocation system with new DTOs and endpoints
 
 ### **🔄 Current Phase Priorities (Phase 6 & Data Model Migration)**
 1. **Frontend Scope Item & Component Management (FE-Phase-6)**

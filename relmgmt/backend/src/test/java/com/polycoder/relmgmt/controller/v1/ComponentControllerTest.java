@@ -149,7 +149,7 @@ class ComponentControllerTest {
 
     @Test
     void testUpdateComponent_InvalidRequest() throws Exception {
-        testComponentRequest.setTechnicalDesignDays(0.5); // Below minimum
+        testComponentRequest.setTechnicalDesignDays(-1.0); // Below minimum (should trigger validation error)
 
         mockMvc.perform(put("/api/v1/components/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -244,7 +244,7 @@ class ComponentControllerTest {
 
     @Test
     void testUpdateComponent_ValidationError() throws Exception {
-        testComponentRequest.setTechnicalDesignDays(0.0); // Below minimum
+        testComponentRequest.setTechnicalDesignDays(1001.0); // Above maximum (should trigger validation error)
 
         mockMvc.perform(put("/api/v1/components/1")
                         .contentType(MediaType.APPLICATION_JSON)
