@@ -4,6 +4,8 @@
 
 This document provides the technical specification for the frontend implementation of the Release Management System (RMS) MVP. The frontend will be built using React 19.1.0 with Vite as the build tool and will consume the RESTful API provided by the backend.
 
+**Last Updated**: September 8, 2025 - Critical allocation bug fixes and PRD compliance improvements implemented.
+
 ## 2. Technology Stack
 
 - **Framework**: React 19.1.0

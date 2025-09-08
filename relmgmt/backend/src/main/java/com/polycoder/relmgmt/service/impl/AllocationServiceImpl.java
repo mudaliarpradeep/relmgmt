@@ -343,7 +343,8 @@ public class AllocationServiceImpl implements AllocationService {
 
     /**
      * Calculate allocation factor based on effort days and phase duration
-     * Ensures allocation factor stays within PRD limits (0.5-1.0 person-days)
+     * Ensures allocation factor stays within PRD limits (0.5-0.9 person-days per day)
+     * Maximum 4.5 PD per week (0.9 × 5 working days)
      */
     private double calculateAllocationFactor(double effortDays, Phase phase) {
         int workingDays = countWorkingDays(phase.getStartDate(), phase.getEndDate());
@@ -353,11 +354,12 @@ public class AllocationServiceImpl implements AllocationService {
         
         double calculatedFactor = effortDays / workingDays;
         
-        // Enforce PRD limits: minimum 0.5, maximum 1.0 person-days
+        // Enforce PRD limits: minimum 0.5, maximum 0.9 person-days per day
+        // This ensures maximum 4.5 PD per week (0.9 × 5 working days)
         if (calculatedFactor < 0.5) {
             return 0.5;
-        } else if (calculatedFactor > 1.0) {
-            return 1.0;
+        } else if (calculatedFactor > 0.9) {
+            return 0.9;
         }
         
         return calculatedFactor;

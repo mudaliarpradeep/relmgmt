@@ -183,7 +183,8 @@ The system shall allocate resources to releases based on the following rules:
 2. **Partial Allocation**:
    - A resource can have partial allocation to a release.
    - The minimum allocation factor shall be 0.5 person-days.
-   - The maximum allocation shall be 1 person-day per day.
+   - The maximum allocation factor shall be 0.9 (equivalent to 4.5 person-days per week).
+   - **Implementation Note**: System enforces 0.9 maximum allocation factor to ensure 4.5 PD per week compliance.
 
 3. **Phase-specific Allocation**:
    - **Functional Design**: Load resources with skill function "Functional Design" based on derived scope estimates and available capacity.

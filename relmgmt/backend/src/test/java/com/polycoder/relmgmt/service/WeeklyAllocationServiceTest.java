@@ -59,8 +59,8 @@ class WeeklyAllocationServiceTest {
         testAllocation.setResource(testResource);
         testAllocation.setRelease(testRelease);
         testAllocation.setPhase(PhaseTypeEnum.BUILD);
-        testAllocation.setStartDate(LocalDate.of(2024, 9, 1));
-        testAllocation.setEndDate(LocalDate.of(2024, 9, 7));
+        testAllocation.setStartDate(LocalDate.of(2024, 9, 2)); // Monday
+        testAllocation.setEndDate(LocalDate.of(2024, 9, 6));   // Friday
         testAllocation.setAllocationFactor(0.9);
         testAllocation.setAllocationDays(6.3);
     }
@@ -153,8 +153,8 @@ class WeeklyAllocationServiceTest {
     void getResourceWeeklyAllocations_ShouldReturnWeeklyAllocations() {
         // Arrange
         String resourceId = "1";
-        String startWeek = "2024-09-01";
-        String endWeek = "2024-09-08";
+        String startWeek = "2024-09-02";
+        String endWeek = "2024-09-09";
         List<Allocation> allocations = Arrays.asList(testAllocation);
 
         when(allocationRepository.findByResourceIdAndDateRange(1L, LocalDate.parse(startWeek), LocalDate.parse(endWeek)))
@@ -169,8 +169,8 @@ class WeeklyAllocationServiceTest {
         
         WeeklyAllocationResponse weeklyAllocation = result.get(0);
         // The week start should be the Monday of the week containing the allocation
-        // Since the allocation starts on 2024-09-01 (Sunday), the Monday of that week is 2024-08-26
-        assertEquals("2024-08-26", weeklyAllocation.getWeekStart());
+        // Since the allocation starts on 2024-09-02 (Monday), the Monday of that week is 2024-09-02
+        assertEquals("2024-09-02", weeklyAllocation.getWeekStart());
         assertTrue(weeklyAllocation.getPersonDays() > 0);
         assertEquals("Test Release", weeklyAllocation.getProjectName());
         assertEquals("1", weeklyAllocation.getProjectId());

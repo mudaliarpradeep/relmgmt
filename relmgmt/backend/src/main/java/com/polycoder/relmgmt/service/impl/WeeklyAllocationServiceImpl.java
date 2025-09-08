@@ -169,8 +169,8 @@ public class WeeklyAllocationServiceImpl implements WeeklyAllocationService {
                     LocalDate overlapEnd = allocation.getEndDate().isBefore(weekEnd) ? 
                         allocation.getEndDate() : weekEnd;
                     
-                    long overlapDays = overlapStart.until(overlapEnd).getDays() + 1;
-                    double weeklyAllocation = (overlapDays * allocation.getAllocationFactor()) / 7.0;
+                    int workingDays = countWorkingDays(overlapStart, overlapEnd);
+                    double weeklyAllocation = workingDays * allocation.getAllocationFactor();
                     totalPersonDays += weeklyAllocation;
                     
                     // Use the first project name found (in a real implementation, you might want to aggregate)
@@ -201,5 +201,18 @@ public class WeeklyAllocationServiceImpl implements WeeklyAllocationService {
     private boolean isAllocationActiveInWeek(Allocation allocation, LocalDate weekStart, LocalDate weekEnd) {
         return !allocation.getStartDate().isAfter(weekEnd) && 
                !allocation.getEndDate().isBefore(weekStart);
+    }
+
+    private int countWorkingDays(LocalDate start, LocalDate end) {
+        int count = 0;
+        LocalDate d = start;
+        while (!d.isAfter(end)) {
+            DayOfWeek dow = d.getDayOfWeek();
+            if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
+                count++;
+            }
+            d = d.plusDays(1);
+        }
+        return count;
     }
 }

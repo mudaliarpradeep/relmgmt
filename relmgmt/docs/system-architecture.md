@@ -4,6 +4,8 @@
 
 The Release Management System (RMS) is designed as a modern web application following a client-server architecture. This document outlines the technical architecture, components, data flow, and deployment considerations for the system.
 
+**Last Updated**: September 8, 2025 - Critical allocation bug fixes and PRD compliance improvements implemented.
+
 ## 2. High-Level Architecture
 
 The system follows a 3-tier architecture:

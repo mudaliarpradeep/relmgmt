@@ -367,7 +367,7 @@ class AllocationServiceTest {
             List<Allocation> allocationList = (List<Allocation>) allocations;
             assertThat(allocationList).hasSize(1);
             Allocation a = allocationList.get(0);
-            assertThat(a.getAllocationFactor()).isEqualTo(1.0); // Should be capped at maximum
+            assertThat(a.getAllocationFactor()).isEqualTo(0.9); // Should be capped at maximum (PRD: 4.5 PD per week)
             return true;
         }));
     }

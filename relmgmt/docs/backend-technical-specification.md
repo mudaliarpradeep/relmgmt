@@ -4,6 +4,8 @@
 
 This document provides the technical specification for the backend implementation of the Release Management System (RMS) MVP. The backend will be built using Spring Boot 3.5.4 with Java 21 and will expose a RESTful API for the frontend to consume.
 
+**Last Updated**: September 8, 2025 - Critical allocation bug fixes and PRD compliance improvements implemented.
+
 ## 2. Technology Stack
 
 - **Language**: Java 21
