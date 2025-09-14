@@ -1,0 +1,249 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Run dependency updates weekly on Mondays at 6 AM UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-gradle-dependencies:
+    name: Update Gradle Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Update Gradle wrapper
+      run: |
+        cd relmgmt/backend
+        chmod +x gradlew
+        ./gradlew wrapper --gradle-version=latest
+
+    - name: Check for dependency updates
+      run: |
+        cd relmgmt/backend
+        ./gradlew dependencyUpdates > dependency-updates.txt 2>&1 || true
+        cat dependency-updates.txt
+
+    - name: Create dependency update branch
+      run: |
+        BRANCH_NAME="dependency-updates/gradle-$(date +%Y%m%d)"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b $branch_name || git checkout $branch_name
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+    - name: Commit Gradle wrapper updates
+      run: |
+        if git diff --quiet; then
+          echo "No Gradle wrapper updates available"
+        else
+          git add relmgmt/backend/gradle/wrapper/
+          git commit -m "chore: update Gradle wrapper to latest version" || echo "No changes to commit"
+        fi
+
+    - name: Push changes and create PR
+      if: env.BRANCH_NAME != ''
+      run: |
+        git push origin ${{ env.BRANCH_NAME }} || echo "No changes to push"
+        
+        # Create PR if branch exists and has commits
+        if git log origin/main..${{ env.BRANCH_NAME }} --oneline | grep -q .; then
+          gh pr create \
+            --title "chore: Update Gradle dependencies $(date +%Y-%m-%d)" \
+            --body "Automated dependency updates for Gradle dependencies. Please review and merge if tests pass." \
+            --base main \
+            --head ${{ env.BRANCH_NAME }} \
+            --label "dependencies" \
+            --label "automated" || echo "PR already exists"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-npm-dependencies:
+    name: Update NPM Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: relmgmt/frontend/package-lock.json
+
+    - name: Create dependency update branch
+      run: |
+        BRANCH_NAME="dependency-updates/npm-$(date +%Y%m%d)"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b $BRANCH_NAME || git checkout $BRANCH_NAME
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+    - name: Check for outdated packages
+      run: |
+        cd relmgmt/frontend
+        npm outdated > outdated-packages.txt || true
+        cat outdated-packages.txt
+
+    - name: Update dependencies
+      run: |
+        cd relmgmt/frontend
+        
+        # Update patch and minor versions
+        npm update
+        
+        # Check for major version updates (manual review required)
+        npx npm-check-updates --target minor > ncu-report.txt || true
+        cat ncu-report.txt
+
+    - name: Run tests to verify updates
+      run: |
+        cd relmgmt/frontend
+        npm ci
+        npm run lint
+        npm run test
+        npm run build
+
+    - name: Commit dependency updates
+      run: |
+        if git diff --quiet relmgmt/frontend/package-lock.json; then
+          echo "No dependency updates available"
+        else
+          git add relmgmt/frontend/package*.json
+          git commit -m "chore: update npm dependencies to latest compatible versions" || echo "No changes to commit"
+        fi
+
+    - name: Push changes and create PR
+      if: env.BRANCH_NAME != ''
+      run: |
+        git push origin ${{ env.BRANCH_NAME }} || echo "No changes to push"
+        
+        # Create PR if branch exists and has commits
+        if git log origin/main..${{ env.BRANCH_NAME }} --oneline | grep -q .; then
+          gh pr create \
+            --title "chore: Update NPM dependencies $(date +%Y-%m-%d)" \
+            --body "Automated dependency updates for NPM dependencies. Tests have passed. Please review and merge." \
+            --base main \
+            --head ${{ env.BRANCH_NAME }} \
+            --label "dependencies" \
+            --label "automated" || echo "PR already exists"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-updates:
+    name: Security Updates
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: relmgmt/frontend/package-lock.json
+
+    - name: Create security update branch
+      run: |
+        BRANCH_NAME="security-updates/$(date +%Y%m%d)"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b $BRANCH_NAME || git checkout $BRANCH_NAME
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+    - name: Run npm audit fix
+      run: |
+        cd relmgmt/frontend
+        npm audit fix --audit-level moderate || true
+
+    - name: Run tests after security fixes
+      run: |
+        cd relmgmt/frontend
+        npm ci
+        npm run test
+        npm run build
+
+    - name: Commit security updates
+      run: |
+        if git diff --quiet relmgmt/frontend/package-lock.json; then
+          echo "No security updates available"
+        else
+          git add relmgmt/frontend/package*.json
+          git commit -m "fix: apply npm security updates" || echo "No changes to commit"
+        fi
+
+    - name: Push changes and create PR
+      if: env.BRANCH_NAME != ''
+      run: |
+        git push origin ${{ env.BRANCH_NAME }} || echo "No changes to push"
+        
+        # Create PR if branch exists and has commits
+        if git log origin/main..${{ env.BRANCH_NAME }} --oneline | grep -q .; then
+          gh pr create \
+            --title "🔒 Security: Apply npm security updates $(date +%Y-%m-%d)" \
+            --body "Automated security updates applied via npm audit fix. Please review and merge urgently." \
+            --base main \
+            --head ${{ env.BRANCH_NAME }} \
+            --label "security" \
+            --label "automated" \
+            --label "urgent" || echo "PR already exists"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup-old-branches:
+    name: Cleanup Old Dependency Branches
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete old dependency update branches
+      run: |
+        # Delete dependency update branches older than 30 days
+        git for-each-ref --format='%(refname:short) %(committerdate)' refs/remotes/origin/dependency-updates/ | \
+        while read branch date; do
+          if [ $(date -d "$date" +%s) -lt $(date -d "30 days ago" +%s) ]; then
+            echo "Deleting old branch: $branch"
+            git push origin --delete ${branch#origin/} || echo "Branch $branch may already be deleted"
+          fi
+        done

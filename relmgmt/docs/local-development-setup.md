@@ -383,4 +383,152 @@ The application is configured to handle CORS automatically, but if you encounter
    - Check browser Network tab for CORS errors
    - Verify backend is running and accessible
    - Check backend logs for CORS-related messages
-   - Ensure no proxy or firewall is blocking requests 
+   - Ensure no proxy or firewall is blocking requests
+
+## Production Docker Testing
+
+The project includes production-ready Docker configurations for testing deployment scenarios locally.
+
+### Production Docker Compose
+
+**Location**: `relmgmt/docker/docker-compose.prod.yml`
+
+This configuration mirrors the production environment with:
+- PostgreSQL 17.5 with Alpine Linux
+- Multi-stage Docker builds for both services
+- Resource limits and health checks
+- Production-optimized environment variables
+- Security hardening (non-root users)
+
+### Testing Production Configuration Locally
+
+1. **Navigate to docker directory**:
+   ```bash
+   cd relmgmt/docker
+   ```
+
+2. **Create production environment file**:
+   ```bash
+   cp env.prod.example .env.prod
+   # Edit .env.prod with your production values
+   ```
+
+3. **Start production environment**:
+   ```bash
+   docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
+   ```
+
+4. **Verify services**:
+   ```bash
+   # Check all services are running
+   docker-compose -f docker-compose.prod.yml ps
+   
+   # Test backend health
+   curl -f http://localhost:8080/actuator/health
+   
+   # Test frontend health
+   curl -f http://localhost:3000/health
+   ```
+
+5. **View logs**:
+   ```bash
+   # All services
+   docker-compose -f docker-compose.prod.yml logs -f
+   
+   # Individual services
+   docker-compose -f docker-compose.prod.yml logs -f relmgmt-backend
+   docker-compose -f docker-compose.prod.yml logs -f relmgmt-frontend
+   ```
+
+6. **Stop production environment**:
+   ```bash
+   docker-compose -f docker-compose.prod.yml --env-file .env.prod down
+   ```
+
+### Production Docker Images
+
+#### Backend Image Features
+- **Base Image**: Eclipse Temurin 21 JRE (lightweight runtime)
+- **Multi-stage Build**: JDK for building, JRE for runtime
+- **Security**: Non-root user execution
+- **Health Checks**: Spring Boot Actuator integration
+- **Optimization**: Layer caching and JVM tuning
+
+#### Frontend Image Features
+- **Base Image**: Nginx Alpine (minimal production server)
+- **Build Arguments**: Environment-specific configuration
+- **Security**: Custom nginx config with security headers
+- **Performance**: Gzip compression and caching headers
+- **SPA Support**: Proper routing for React Router
+
+### Build Images Locally
+
+```bash
+# Build backend image
+cd relmgmt/backend
+docker build -t relmgmt-backend:local .
+
+# Build frontend image with environment variables
+cd relmgmt/frontend
+docker build -t relmgmt-frontend:local \
+  --build-arg VITE_API_URL=http://localhost:8080/api \
+  --build-arg VITE_APP_TITLE="Release Management System - Local" .
+
+# Test built images
+docker run --rm -p 8080:8080 --name test-backend \
+  -e SPRING_PROFILES_ACTIVE=dev \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/relmgmt \
+  relmgmt-backend:local
+
+docker run --rm -p 3000:3000 --name test-frontend \
+  relmgmt-frontend:local
+```
+
+### Continuous Integration Testing
+
+The project includes comprehensive GitHub Actions workflows for CI/CD:
+
+#### Backend CI/CD (`relmgmt/.github/workflows/backend-ci.yml`)
+- PostgreSQL service for integration tests
+- Multi-platform builds (amd64/arm64)
+- GitHub Container Registry publishing
+- Automated deployment to staging/production
+
+#### Frontend CI/CD (`relmgmt/.github/workflows/frontend-ci.yml`)
+- Linting and testing with coverage
+- Bundle analysis and optimization
+- Storybook deployment to GitHub Pages
+- Security scanning with Trivy
+
+#### Security Scanning (`relmgmt/.github/workflows/security-scan.yml`)
+- CodeQL analysis for Java and JavaScript
+- Container vulnerability scanning
+- Dependency security checks
+- Secret scanning
+
+### Environment Parity
+
+The local development setup maintains parity with production:
+
+| Component | Development | Production | Status |
+|-----------|-------------|------------|--------|
+| **Database** | PostgreSQL 17.5 (Docker) | PostgreSQL 17.5 (Render) | ✅ Matching |
+| **Backend** | Spring Boot 3.5.4 | Spring Boot 3.5.4 | ✅ Matching |
+| **Frontend** | Vite Dev Server | Nginx Alpine | ⚠️ Different (expected) |
+| **Java Version** | OpenJDK 21 | Eclipse Temurin 21 | ✅ Compatible |
+| **Node Version** | Node 20 | Node 20 Alpine | ✅ Matching |
+
+### CI/CD Integration
+
+Local development integrates with the CI/CD pipeline:
+
+1. **Pre-commit Hooks**: Code quality checks before commits
+2. **Branch Protection**: Automated testing on pull requests
+3. **Deployment Pipeline**: Automatic deployment on main/develop pushes
+4. **Security Scanning**: Automated vulnerability detection
+5. **Dependency Management**: Weekly automated dependency updates
+
+For complete CI/CD and deployment information, see:
+- **CI/CD Guide**: `docs/ci-cd-deployment.md`
+- **Environment Configuration**: `docs/environment-configuration.md`
+- **System Architecture**: `docs/system-architecture.md` 

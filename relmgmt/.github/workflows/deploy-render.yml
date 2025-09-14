@@ -1,0 +1,245 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'relmgmt/**'
+      - 'render.yaml'
+      - '.github/workflows/deploy-render.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  RENDER_API_URL: https://api.render.com/v1
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend to Render
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy Backend Service
+      run: |
+        echo "🚀 Deploying backend to Render..."
+        
+        # Trigger deployment via Render API
+        response=$(curl -s -w "%{http_code}" -X POST \
+          "${{ env.RENDER_API_URL }}/services/${{ secrets.RENDER_BACKEND_SERVICE_ID }}/deploys" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "clearCache": "do_not_clear"
+          }')
+        
+        http_code=${response: -3}
+        response_body=${response%???}
+        
+        if [ "$http_code" -eq "201" ]; then
+          echo "✅ Backend deployment triggered successfully"
+          deploy_id=$(echo "$response_body" | jq -r '.id')
+          echo "Deploy ID: $deploy_id"
+          echo "BACKEND_DEPLOY_ID=$deploy_id" >> $GITHUB_ENV
+        else
+          echo "❌ Backend deployment failed with HTTP $http_code"
+          echo "Response: $response_body"
+          exit 1
+        fi
+
+    - name: Wait for Backend Deployment
+      run: |
+        echo "⏳ Waiting for backend deployment to complete..."
+        
+        for i in {1..60}; do
+          response=$(curl -s \
+            "${{ env.RENDER_API_URL }}/deploys/${{ env.BACKEND_DEPLOY_ID }}" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}")
+          
+          status=$(echo "$response" | jq -r '.status')
+          
+          case "$status" in
+            "live")
+              echo "✅ Backend deployment completed successfully!"
+              exit 0
+              ;;
+            "build_failed"|"update_failed"|"canceled")
+              echo "❌ Backend deployment failed with status: $status"
+              exit 1
+              ;;
+            "created"|"building"|"deploying")
+              echo "🔄 Deployment in progress (attempt $i/60): $status"
+              sleep 30
+              ;;
+            *)
+              echo "❓ Unknown deployment status: $status"
+              ;;
+          esac
+        done
+        
+        echo "❌ Backend deployment timed out after 30 minutes"
+        exit 1
+
+    - name: Verify Backend Health
+      run: |
+        echo "🔍 Verifying backend health..."
+        
+        backend_url="https://${{ secrets.RENDER_BACKEND_SERVICE_NAME }}.onrender.com"
+        
+        for i in {1..10}; do
+          if curl -f "$backend_url/actuator/health" -o /dev/null -s; then
+            echo "✅ Backend health check passed"
+            echo "Backend URL: $backend_url"
+            break
+          else
+            echo "⏳ Backend not ready yet (attempt $i/10), waiting 30 seconds..."
+            sleep 30
+          fi
+        done
+
+  deploy-frontend:
+    name: Deploy Frontend to Render
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy Frontend Service
+      run: |
+        echo "🚀 Deploying frontend to Render..."
+        
+        # Trigger deployment via Render API
+        response=$(curl -s -w "%{http_code}" -X POST \
+          "${{ env.RENDER_API_URL }}/services/${{ secrets.RENDER_FRONTEND_SERVICE_ID }}/deploys" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "clearCache": "clear"
+          }')
+        
+        http_code=${response: -3}
+        response_body=${response%???}
+        
+        if [ "$http_code" -eq "201" ]; then
+          echo "✅ Frontend deployment triggered successfully"
+          deploy_id=$(echo "$response_body" | jq -r '.id')
+          echo "Deploy ID: $deploy_id"
+          echo "FRONTEND_DEPLOY_ID=$deploy_id" >> $GITHUB_ENV
+        else
+          echo "❌ Frontend deployment failed with HTTP $http_code"
+          echo "Response: $response_body"
+          exit 1
+        fi
+
+    - name: Wait for Frontend Deployment
+      run: |
+        echo "⏳ Waiting for frontend deployment to complete..."
+        
+        for i in {1..40}; do
+          response=$(curl -s \
+            "${{ env.RENDER_API_URL }}/deploys/${{ env.FRONTEND_DEPLOY_ID }}" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}")
+          
+          status=$(echo "$response" | jq -r '.status')
+          
+          case "$status" in
+            "live")
+              echo "✅ Frontend deployment completed successfully!"
+              exit 0
+              ;;
+            "build_failed"|"update_failed"|"canceled")
+              echo "❌ Frontend deployment failed with status: $status"
+              exit 1
+              ;;
+            "created"|"building"|"deploying")
+              echo "🔄 Deployment in progress (attempt $i/40): $status"
+              sleep 30
+              ;;
+            *)
+              echo "❓ Unknown deployment status: $status"
+              ;;
+          esac
+        done
+        
+        echo "❌ Frontend deployment timed out after 20 minutes"
+        exit 1
+
+    - name: Verify Frontend Health
+      run: |
+        echo "🔍 Verifying frontend health..."
+        
+        frontend_url="https://${{ secrets.RENDER_FRONTEND_SERVICE_NAME }}.onrender.com"
+        
+        for i in {1..10}; do
+          if curl -f "$frontend_url/" -o /dev/null -s; then
+            echo "✅ Frontend health check passed"
+            echo "Frontend URL: $frontend_url"
+            break
+          else
+            echo "⏳ Frontend not ready yet (attempt $i/10), waiting 15 seconds..."
+            sleep 15
+          fi
+        done
+
+  notify-deployment:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, deploy-frontend]
+    if: always()
+
+    steps:
+    - name: Notify Success
+      if: needs.deploy-backend.result == 'success' && needs.deploy-frontend.result == 'success'
+      run: |
+        echo "🎉 Deployment to Render completed successfully!"
+        echo "Backend: https://${{ secrets.RENDER_BACKEND_SERVICE_NAME }}.onrender.com"
+        echo "Frontend: https://${{ secrets.RENDER_FRONTEND_SERVICE_NAME }}.onrender.com"
+        
+        # Add notification logic here (Slack, Teams, email, etc.)
+        # curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+        #   -H "Content-Type: application/json" \
+        #   -d '{
+        #     "text": "✅ Release Management System deployed successfully to Render!",
+        #     "attachments": [{
+        #       "color": "good",
+        #       "fields": [
+        #         {"title": "Backend", "value": "https://${{ secrets.RENDER_BACKEND_SERVICE_NAME }}.onrender.com", "short": true},
+        #         {"title": "Frontend", "value": "https://${{ secrets.RENDER_FRONTEND_SERVICE_NAME }}.onrender.com", "short": true}
+        #       ]
+        #     }]
+        #   }'
+
+    - name: Notify Failure
+      if: needs.deploy-backend.result == 'failure' || needs.deploy-frontend.result == 'failure'
+      run: |
+        echo "❌ Deployment to Render failed!"
+        echo "Backend status: ${{ needs.deploy-backend.result }}"
+        echo "Frontend status: ${{ needs.deploy-frontend.result }}"
+        
+        # Add failure notification logic here
+        # curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+        #   -H "Content-Type: application/json" \
+        #   -d '{
+        #     "text": "❌ Release Management System deployment to Render failed!",
+        #     "attachments": [{
+        #       "color": "danger",
+        #       "fields": [
+        #         {"title": "Backend", "value": "${{ needs.deploy-backend.result }}", "short": true},
+        #         {"title": "Frontend", "value": "${{ needs.deploy-frontend.result }}", "short": true}
+        #       ]
+        #     }]
+        #   }'

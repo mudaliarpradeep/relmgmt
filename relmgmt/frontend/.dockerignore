@@ -1,0 +1,53 @@
+# Frontend .dockerignore - exclude unnecessary files from Docker build context
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+
+# Test files
+coverage/
+.nyc_output/
+
+# Storybook
+storybook-static/
+
+# Environment files (these should be handled via Docker environment variables)
+.env*
+!.env.example
+
+# Documentation
+README.md
+*.md
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+
+# ESLint and Prettier cache
+.eslintcache
+.prettier-cache
+
+# Testing
+jest.config.js
+vitest.config.ts

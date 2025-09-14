@@ -1,0 +1,218 @@
+name: Full Stack Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      backend_image:
+        description: 'Backend image tag (leave empty for latest)'
+        required: false
+        type: string
+      frontend_image:
+        description: 'Frontend image tag (leave empty for latest)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: relmgmt-backend
+  FRONTEND_IMAGE_NAME: relmgmt-frontend
+
+jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      backend_image: ${{ steps.images.outputs.backend_image }}
+      frontend_image: ${{ steps.images.outputs.frontend_image }}
+      environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+    - name: Set image tags
+      id: images
+      run: |
+        BACKEND_TAG="${{ github.event.inputs.backend_image }}"
+        FRONTEND_TAG="${{ github.event.inputs.frontend_image }}"
+        
+        if [ -z "$BACKEND_TAG" ]; then
+          BACKEND_TAG="latest"
+        fi
+        
+        if [ -z "$FRONTEND_TAG" ]; then
+          FRONTEND_TAG="latest"
+        fi
+        
+        echo "backend_image=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.BACKEND_IMAGE_NAME }}:$BACKEND_TAG" >> $GITHUB_OUTPUT
+        echo "frontend_image=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.FRONTEND_IMAGE_NAME }}:$FRONTEND_TAG" >> $GITHUB_OUTPUT
+
+  deploy-infrastructure:
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    environment: ${{ needs.validate-inputs.outputs.environment }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy Database Infrastructure
+      run: |
+        echo "🗄️ Setting up database infrastructure for ${{ needs.validate-inputs.outputs.environment }}"
+        # Add database setup logic here
+        # This could be:
+        # - Terraform/Pulumi for cloud resources
+        # - Database migration scripts
+        # - Environment-specific database setup
+
+    - name: Run Database Migrations
+      run: |
+        echo "🔄 Running database migrations for ${{ needs.validate-inputs.outputs.environment }}"
+        # Add migration logic here
+        # This could be:
+        # - Flyway migrations
+        # - Liquibase changesets
+        # - Custom migration scripts
+
+  deploy-backend:
+    needs: [validate-inputs, deploy-infrastructure]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.validate-inputs.outputs.environment }}
+    
+    steps:
+    - name: Deploy Backend Service
+      run: |
+        echo "🚀 Deploying backend to ${{ needs.validate-inputs.outputs.environment }}"
+        echo "Using image: ${{ needs.validate-inputs.outputs.backend_image }}"
+        
+        # Add backend deployment logic here based on your hosting platform
+        # Examples:
+        
+        # For Render:
+        # curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_BACKEND_SERVICE_ID }}/deploys" \
+        #   -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+        #   -H "Content-Type: application/json" \
+        #   -d '{"imageUrl": "${{ needs.validate-inputs.outputs.backend_image }}"}'
+        
+        # For AWS ECS:
+        # aws ecs update-service \
+        #   --cluster ${{ vars.ECS_CLUSTER }} \
+        #   --service ${{ vars.ECS_SERVICE }} \
+        #   --task-definition ${{ vars.ECS_TASK_DEFINITION }} \
+        #   --force-new-deployment
+        
+        # For Kubernetes:
+        # kubectl set image deployment/relmgmt-backend \
+        #   relmgmt-backend=${{ needs.validate-inputs.outputs.backend_image }} \
+        #   --namespace=${{ needs.validate-inputs.outputs.environment }}
+
+    - name: Wait for Backend Health Check
+      run: |
+        echo "⏳ Waiting for backend to be healthy..."
+        # Add health check logic here
+        # for i in {1..30}; do
+        #   if curl -f ${{ vars.BACKEND_URL }}/actuator/health; then
+        #     echo "✅ Backend is healthy"
+        #     exit 0
+        #   fi
+        #   echo "Attempt $i failed, retrying in 10 seconds..."
+        #   sleep 10
+        # done
+        # echo "❌ Backend health check failed"
+        # exit 1
+
+  deploy-frontend:
+    needs: [validate-inputs, deploy-backend]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.validate-inputs.outputs.environment }}
+    
+    steps:
+    - name: Deploy Frontend Service
+      run: |
+        echo "🚀 Deploying frontend to ${{ needs.validate-inputs.outputs.environment }}"
+        echo "Using image: ${{ needs.validate-inputs.outputs.frontend_image }}"
+        
+        # Add frontend deployment logic here based on your hosting platform
+        # Examples:
+        
+        # For Render Static Site:
+        # curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_FRONTEND_SERVICE_ID }}/deploys" \
+        #   -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
+        
+        # For AWS S3 + CloudFront:
+        # aws s3 sync ./dist s3://${{ vars.S3_BUCKET }} --delete
+        # aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        
+        # For Netlify:
+        # netlify deploy --prod --dir=dist --site=${{ vars.NETLIFY_SITE_ID }} --auth=${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+    - name: Wait for Frontend Health Check
+      run: |
+        echo "⏳ Waiting for frontend to be healthy..."
+        # Add health check logic here
+        # for i in {1..20}; do
+        #   if curl -f ${{ vars.FRONTEND_URL }}/health; then
+        #     echo "✅ Frontend is healthy"
+        #     exit 0
+        #   fi
+        #   echo "Attempt $i failed, retrying in 5 seconds..."
+        #   sleep 5
+        # done
+        # echo "❌ Frontend health check failed"
+        # exit 1
+
+  run-smoke-tests:
+    needs: [validate-inputs, deploy-frontend]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.validate-inputs.outputs.environment }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js for E2E tests
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: relmgmt/frontend/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd relmgmt/frontend
+        npm ci
+
+    - name: Run smoke tests
+      run: |
+        echo "🧪 Running smoke tests against ${{ needs.validate-inputs.outputs.environment }}"
+        # Add smoke test logic here
+        # cd relmgmt/frontend
+        # npm run test:e2e -- --env=${{ needs.validate-inputs.outputs.environment }}
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: smoke-test-results-${{ needs.validate-inputs.outputs.environment }}
+        path: relmgmt/frontend/test-results/
+        retention-days: 30
+
+  notify-deployment:
+    needs: [validate-inputs, run-smoke-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify deployment status
+      run: |
+        if [ "${{ needs.run-smoke-tests.result }}" = "success" ]; then
+          echo "✅ Deployment to ${{ needs.validate-inputs.outputs.environment }} completed successfully!"
+          # Add success notification logic here (Slack, Teams, email, etc.)
+        else
+          echo "❌ Deployment to ${{ needs.validate-inputs.outputs.environment }} failed!"
+          # Add failure notification logic here
+        fi

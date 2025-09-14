@@ -1,0 +1,120 @@
+# Render Blueprint for Release Management System
+# This file defines the infrastructure for deploying to Render
+
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: relmgmt-database
+    env: docker
+    plan: starter  # Free tier
+    region: oregon
+    dockerfilePath: ./docker/postgres/Dockerfile
+    envVars:
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_DB
+        value: relmgmt
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+        
+  # Backend API Service
+  - type: web
+    name: relmgmt-backend
+    env: docker
+    region: oregon
+    plan: starter  # $7/month
+    dockerfilePath: ./relmgmt/backend/Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: relmgmt-database
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: relmgmt-database
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: relmgmt-database
+          property: password
+      - key: APP_JWT_SECRET
+        generateValue: true
+      - key: APP_JWT_EXPIRATION
+        value: "86400000"
+      - key: LOGGING_LEVEL_ROOT
+        value: WARN
+      - key: LOGGING_LEVEL_COM_POLYCODER_RELMGMT
+        value: INFO
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: "5"
+      - key: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+        value: "2"
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: none
+      - key: SPRING_FLYWAY_ENABLED
+        value: "true"
+      - key: SPRING_FLYWAY_CLEAN_DISABLED
+        value: "true"
+      - key: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+        value: "health,info,metrics"
+    healthCheckPath: /actuator/health
+    domains:
+      - relmgmt-api.onrender.com
+
+  # Frontend Static Site
+  - type: web
+    name: relmgmt-frontend
+    env: static
+    region: oregon
+    buildCommand: |
+      cd relmgmt/frontend
+      npm ci
+      npm run build
+    staticPublishPath: ./relmgmt/frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: relmgmt-backend
+          property: host
+          prefix: https://
+          suffix: /api
+      - key: VITE_APP_TITLE
+        value: "Release Management System"
+      - key: VITE_LOG_LEVEL
+        value: "error"
+      - key: VITE_NOTIF_POLL_MS
+        value: "120000"
+    domains:
+      - relmgmt.onrender.com
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: "1; mode=block"
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /assets/*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: relmgmt-database
+    databaseName: relmgmt
+    user: postgres
+    plan: free  # Free tier - 1GB storage
+    region: oregon

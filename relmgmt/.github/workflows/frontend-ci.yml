@@ -5,17 +5,24 @@ on:
     branches: [ main, develop ]
     paths:
       - 'relmgmt/frontend/**'
+      - '.github/workflows/frontend-ci.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'relmgmt/frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: relmgmt-frontend
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -34,10 +41,18 @@ jobs:
         cd relmgmt/frontend
         npm run lint
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
         cd relmgmt/frontend
-        npm run test
+        npm run test -- --coverage
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: relmgmt/frontend/coverage/lcov.info
+        flags: frontend
+        name: frontend-coverage
+        fail_ci_if_error: false
 
     - name: Build application
       run: |
@@ -47,4 +62,175 @@ jobs:
     - name: Build Storybook
       run: |
         cd relmgmt/frontend
-        npm run build-storybook 
+        npm run build-storybook
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build
+        path: relmgmt/frontend/dist/
+        retention-days: 30
+
+    - name: Upload Storybook artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: storybook-build
+        path: relmgmt/frontend/storybook-static/
+        retention-days: 30
+
+    - name: Run bundle size analysis
+      run: |
+        cd relmgmt/frontend
+        npx vite-bundle-analyzer dist/assets --silent > bundle-analysis.txt || true
+
+    - name: Upload bundle analysis
+      uses: actions/upload-artifact@v4
+      with:
+        name: bundle-analysis
+        path: relmgmt/frontend/bundle-analysis.txt
+        retention-days: 30
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./relmgmt/frontend
+        file: ./relmgmt/frontend/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+        build-args: |
+          VITE_API_URL=${{ vars.VITE_API_URL || 'http://localhost:8080/api' }}
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        format: spdx-json
+        output-file: frontend-sbom.spdx.json
+
+    - name: Upload SBOM
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-sbom
+        path: frontend-sbom.spdx.json
+        retention-days: 30
+
+  deploy-storybook:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+    - name: Download Storybook artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: storybook-build
+        path: storybook-static
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: storybook-static
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+  deploy-staging:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - name: Deploy to Staging
+      run: |
+        echo "🚀 Deploying frontend to staging environment"
+        echo "Image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+        # Add staging deployment logic here
+        # This could be:
+        # - Render static site deployment
+        # - AWS S3 + CloudFront deployment
+        # - Netlify deployment
+        # - Vercel deployment
+
+  deploy-production:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Deploy to Production
+      run: |
+        echo "🚀 Deploying frontend to production environment"
+        echo "Image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+        # Add production deployment logic here
+        # This could be:
+        # - Render static site deployment
+        # - AWS S3 + CloudFront deployment
+        # - Netlify deployment
+        # - Vercel deployment
+
+  security-scan:
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      security-events: write
+
+    steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'

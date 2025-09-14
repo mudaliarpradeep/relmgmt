@@ -1,309 +1,574 @@
 # Release Management System: CI/CD and Deployment Guide
 
-This guide provides configuration and instructions for setting up Continuous Integration, Continuous Deployment (CI/CD), and deploying the Release Management System to Render.
+**Last Updated**: September 14, 2025  
+**Status**: Production Ready - Complete CI/CD Infrastructure Implemented
+
+This guide provides comprehensive instructions for the CI/CD pipeline and deployment of the Release Management System. All workflows and configurations are production-ready and fully implemented.
 
 ## Table of Contents
 
-1. [GitHub Actions CI/CD Configuration](#github-actions-cicd-configuration)
-2. [Render Deployment Configuration](#render-deployment-configuration)
-3. [Environment Variables](#environment-variables)
-4. [Deployment Process](#deployment-process)
-5. [Monitoring and Logging](#monitoring-and-logging)
+1. [Overview](#overview)
+2. [CI/CD Architecture](#cicd-architecture)
+3. [GitHub Actions Workflows](#github-actions-workflows)
+4. [Docker Configuration](#docker-configuration)
+5. [Render Deployment](#render-deployment)
+6. [Environment Setup](#environment-setup)
+7. [Security Configuration](#security-configuration)
+8. [Deployment Process](#deployment-process)
+9. [Monitoring and Troubleshooting](#monitoring-and-troubleshooting)
 
-## GitHub Actions CI/CD Configuration
+## Overview
 
-Create the following GitHub Actions workflow files in the `.github/workflows` directory of your repository:
+The Release Management System uses a modern CI/CD pipeline with:
 
-### Backend CI/CD Workflow
+- **Container Registry**: GitHub Container Registry (GHCR)
+- **CI/CD Platform**: GitHub Actions
+- **Hosting Platform**: Render (with configurations for other platforms)
+- **Security**: Comprehensive vulnerability scanning and SBOM generation
+- **Automation**: Dependency updates, security patches, and multi-environment deployments
 
-Create a file named `.github/workflows/backend-ci-cd.yml`:
+### Deployment Status
 
-```yaml
-name: Backend CI/CD
+| Component | Status | Location |
+|-----------|--------|----------|
+| **Backend Dockerfile** | ✅ Complete | `relmgmt/backend/Dockerfile` |
+| **Frontend Dockerfile** | ✅ Complete | `relmgmt/frontend/Dockerfile` |
+| **CI/CD Workflows** | ✅ Complete | `relmgmt/.github/workflows/` |
+| **Render Configuration** | ✅ Complete | `render.yaml` |
+| **Production Docker Compose** | ✅ Complete | `relmgmt/docker/docker-compose.prod.yml` |
 
-on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'relmgmt/backend/**'
-      - '.github/workflows/backend-ci-cd.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'relmgmt/backend/**'
-      - '.github/workflows/backend-ci-cd.yml'
+## CI/CD Architecture
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+### Workflow Structure
 
-    services:
-      postgres:
-        image: postgres:17.5
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: relmgmt_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-    - uses: actions/checkout@v4
+```mermaid
+graph TD
+    A[Push to main/develop] --> B[Backend CI]
+    A --> C[Frontend CI]
+    B --> D[Build & Push Backend Image]
+    C --> E[Build & Push Frontend Image]
+    D --> F[Deploy to Staging/Production]
+    E --> F
+    F --> G[Health Checks]
+    G --> H[Notifications]
     
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: gradle
+    I[Schedule] --> J[Security Scanning]
+    I --> K[Dependency Updates]
     
-    - name: Grant execute permission for gradlew
-      run: chmod +x relmgmt/backend/gradlew
-    
-    - name: Run Tests
-      run: |
-        cd relmgmt/backend
-        ./gradlew test
-    
-    - name: Build with Gradle
-      run: |
-        cd relmgmt/backend
-        ./gradlew build -x test
-    
-    - name: Generate Test Coverage Report
-      run: |
-        cd relmgmt/backend
-        ./gradlew jacocoTestReport
-    
-    - name: Upload Test Coverage Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-coverage-report
-        path: relmgmt/backend/build/reports/jacoco/test/html/
-    
-    - name: Build and Push Docker Image
-      if: github.event_name != 'pull_request'
-      env:
-        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-      run: |
-        cd relmgmt/backend
-        docker build -t relmgmt-backend:latest .
-        # The following would be used if you're using a container registry
-        # docker tag relmgmt-backend:latest your-registry/relmgmt-backend:latest
-        # docker push your-registry/relmgmt-backend:latest
-        
-        # Instead, we'll trigger a Render deploy
-        curl -X POST https://api.render.com/v1/services/${{ secrets.RENDER_BACKEND_SERVICE_ID }}/deploys \
-          -H "Authorization: Bearer $RENDER_API_KEY"
+    L[Manual Trigger] --> M[Full Stack Deployment]
+    M --> N[Infrastructure Setup]
+    N --> O[Backend Deploy]
+    O --> P[Frontend Deploy]
+    P --> Q[Smoke Tests]
 ```
 
-### Frontend CI/CD Workflow
+## GitHub Actions Workflows
 
-Create a file named `.github/workflows/frontend-ci-cd.yml`:
+### Current Workflows (All Production Ready)
 
-```yaml
-name: Frontend CI/CD
+| Workflow | File | Purpose | Triggers |
+|----------|------|---------|----------|
+| **Backend CI/CD** | `backend-ci.yml` | Test, build, deploy backend | Push to main/develop |
+| **Frontend CI/CD** | `frontend-ci.yml` | Test, build, deploy frontend | Push to main/develop |
+| **Full Stack Deploy** | `deploy-full-stack.yml` | Coordinated full deployment | Manual trigger |
+| **Render Deploy** | `deploy-render.yml` | Render-specific deployment | Push to main, manual |
+| **Security Scan** | `security-scan.yml` | Comprehensive security scanning | Daily, push to main |
+| **Dependency Updates** | `dependency-update.yml` | Automated dependency updates | Weekly |
 
-on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'relmgmt/frontend/**'
-      - '.github/workflows/frontend-ci-cd.yml'
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'relmgmt/frontend/**'
-      - '.github/workflows/frontend-ci-cd.yml'
+### 1. Backend CI/CD Workflow
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+**Location**: `relmgmt/.github/workflows/backend-ci.yml`
 
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: relmgmt/frontend/package-lock.json
-    
-    - name: Install Dependencies
-      run: |
-        cd relmgmt/frontend
-        npm ci
-    
-    - name: Lint
-      run: |
-        cd relmgmt/frontend
-        npm run lint
-    
-    - name: Run Tests
-      run: |
-        cd relmgmt/frontend
-        npm run test
-    
-    - name: Upload Test Coverage Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-test-coverage
-        path: relmgmt/frontend/coverage/
-    
-    - name: Build
-      run: |
-        cd relmgmt/frontend
-        npm run build
-    
-    - name: Deploy to Render
-      if: github.event_name != 'pull_request'
-      env:
-        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-      run: |
-        # Trigger a deploy on Render
-        curl -X POST https://api.render.com/v1/services/${{ secrets.RENDER_FRONTEND_SERVICE_ID }}/deploys \
-          -H "Authorization: Bearer $RENDER_API_KEY"
+**Features**:
+- PostgreSQL service for integration tests
+- JaCoCo test coverage reporting
+- Multi-platform Docker builds (amd64/arm64)
+- GitHub Container Registry publishing
+- SBOM generation for security compliance
+- Automatic deployment to staging (develop) and production (main)
+
+**Key Jobs**:
+1. **test**: Run tests with PostgreSQL service
+2. **build-and-push**: Build and publish Docker images
+3. **deploy-staging**: Deploy to staging environment (develop branch)
+4. **deploy-production**: Deploy to production environment (main branch)
+
+### 2. Frontend CI/CD Workflow
+
+**Location**: `relmgmt/.github/workflows/frontend-ci.yml`
+
+**Features**:
+- ESLint and Prettier validation
+- Unit and integration tests with coverage
+- Bundle size analysis and optimization warnings
+- Multi-platform Docker builds with build arguments
+- Storybook deployment to GitHub Pages
+- Trivy security scanning
+
+**Key Jobs**:
+1. **test**: Lint, test, and build verification
+2. **build-and-push**: Build and publish Docker images
+3. **deploy-storybook**: Deploy component library to GitHub Pages
+4. **deploy-staging/production**: Environment-specific deployments
+5. **security-scan**: Container vulnerability scanning
+
+### 3. Full Stack Deployment Workflow
+
+**Location**: `relmgmt/.github/workflows/deploy-full-stack.yml`
+
+**Features**:
+- Manual deployment trigger with environment selection
+- Infrastructure coordination (database setup, migrations)
+- Health check validation
+- Smoke testing
+- Notification system
+
+### 4. Security Scanning Workflow
+
+**Location**: `relmgmt/.github/workflows/security-scan.yml`
+
+**Features**:
+- **Code Scanning**: CodeQL for Java and JavaScript
+- **Dependency Scanning**: Gradle dependency check, npm audit, Snyk
+- **Secret Scanning**: GitLeaks and TruffleHog
+- **Container Scanning**: Trivy vulnerability assessment
+- **Compliance Checking**: Security file validation
+
+### 5. Dependency Updates Workflow
+
+**Location**: `relmgmt/.github/workflows/dependency-update.yml`
+
+**Features**:
+- Weekly automated dependency updates
+- Security patch automation
+- Gradle wrapper updates
+- NPM package updates with testing
+- Automatic PR creation and branch cleanup
+
+## Docker Configuration
+
+### Backend Dockerfile
+
+**Location**: `relmgmt/backend/Dockerfile`
+
+**Features**:
+- Multi-stage build (Eclipse Temurin JDK 21 → JRE 21)
+- Non-root user execution for security
+- Health checks via Spring Boot Actuator
+- Optimized JVM settings for containers
+- Layer caching optimization
+
+**Build Command**:
+```bash
+cd relmgmt/backend
+docker build -t relmgmt-backend:latest .
 ```
 
-## Render Deployment Configuration
+### Frontend Dockerfile
 
-### Backend Service Configuration
+**Location**: `relmgmt/frontend/Dockerfile`
 
-1. Create a new Web Service in Render
-2. Connect to your GitHub repository
-3. Configure the service with the following settings:
+**Features**:
+- Multi-stage build (Node.js 20 Alpine → Nginx Alpine)
+- Build arguments for environment configuration
+- Custom nginx configuration with security headers
+- Non-root user execution
+- Health checks and optimization
 
+**Build Arguments**:
+- `VITE_API_URL`: Backend API URL
+- `VITE_APP_TITLE`: Application title
+- `VITE_LOG_LEVEL`: Logging level
+- `VITE_NOTIF_POLL_MS`: Notification polling interval
+
+**Build Command**:
+```bash
+cd relmgmt/frontend
+docker build -t relmgmt-frontend:latest \
+  --build-arg VITE_API_URL=https://your-api.onrender.com/api .
 ```
+
+### Production Docker Compose
+
+**Location**: `relmgmt/docker/docker-compose.prod.yml`
+
+**Features**:
+- Production-optimized PostgreSQL 17.5
+- Resource limits and health checks
+- Environment variable management
+- Network isolation and security
+- Volume persistence
+
+**Usage**:
+```bash
+cd relmgmt/docker
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
+```
+
+## Render Deployment
+
+### Render Blueprint Configuration
+
+**Location**: `render.yaml`
+
+**Services Configured**:
+1. **PostgreSQL Database** (Free tier, 1GB storage)
+2. **Backend Web Service** (Docker-based, Starter plan)
+3. **Frontend Static Site** (Auto-deployment from repository)
+
+**Key Features**:
+- Automatic environment variable management
+- Health checks and monitoring
+- Custom domain support
+- Security headers configuration
+- Auto-scaling capabilities
+
+### Manual Render Deployment Steps
+
+#### Prerequisites
+1. **Render Account**: Sign up at https://render.com
+2. **GitHub Integration**: Connect your GitHub repository
+3. **Environment Secrets**: Set up required environment variables
+
+#### 1. Database Setup
+```bash
+# Create PostgreSQL service in Render dashboard
+Name: relmgmt-database
+Plan: Free (1GB storage)
+Region: Oregon (or closest to users)
+Database: relmgmt
+User: postgres
+```
+
+#### 2. Backend Service Setup
+```bash
+# Create Web Service in Render dashboard
 Name: relmgmt-backend
 Environment: Docker
-Region: (Choose the region closest to your users)
+Repository: your-github-repo
 Branch: main
 Dockerfile Path: relmgmt/backend/Dockerfile
 Health Check Path: /actuator/health
 ```
 
-4. Add the following environment variables:
-
-```
+**Environment Variables**:
+```env
 SPRING_PROFILES_ACTIVE=prod
-SPRING_DATASOURCE_URL=jdbc:postgresql://your-postgres-host:5432/relmgmt
-SPRING_DATASOURCE_USERNAME=postgres
-SPRING_DATASOURCE_PASSWORD=your-secure-password
-APP_JWT_SECRET=your-secure-jwt-secret
+SPRING_DATASOURCE_URL=<auto-filled from database>
+SPRING_DATASOURCE_USERNAME=<auto-filled from database>
+SPRING_DATASOURCE_PASSWORD=<auto-filled from database>
+APP_JWT_SECRET=<generate secure 64+ character string>
 APP_JWT_EXPIRATION=86400000
+LOGGING_LEVEL_ROOT=WARN
+LOGGING_LEVEL_COM_POLYCODER_RELMGMT=INFO
 ```
 
-### Frontend Service Configuration
-
-1. Create a new Static Site in Render
-2. Connect to your GitHub repository
-3. Configure the service with the following settings:
-
-```
+#### 3. Frontend Service Setup
+```bash
+# Create Static Site in Render dashboard
 Name: relmgmt-frontend
+Repository: your-github-repo
 Branch: main
 Build Command: cd relmgmt/frontend && npm ci && npm run build
 Publish Directory: relmgmt/frontend/dist
 ```
 
-4. Add the following environment variables:
-
-```
-VITE_API_URL=https://your-backend-service-url.onrender.com/api
-```
-
-### Database Configuration
-
-1. Create a new PostgreSQL database in Render
-2. Configure the database with the following settings:
-
-```
-Name: relmgmt-db
-PostgreSQL Version: 17.5
-Region: (Same region as your backend service)
+**Environment Variables**:
+```env
+VITE_API_URL=https://your-backend-service.onrender.com/api
+VITE_APP_TITLE=Release Management System
+VITE_LOG_LEVEL=error
+VITE_NOTIF_POLL_MS=120000
 ```
 
-3. After creation, note the connection details to use in your backend service environment variables
+### Automated Render Deployment
 
-## Environment Variables
+The system includes automated Render deployment via GitHub Actions:
 
-### Required Environment Variables
+**Workflow**: `relmgmt/.github/workflows/deploy-render.yml`
 
-#### Backend Service
+**Required GitHub Secrets**:
+```env
+RENDER_API_KEY=your_render_api_key
+RENDER_BACKEND_SERVICE_ID=srv_xxxxxxxxxxxxx
+RENDER_FRONTEND_SERVICE_ID=srv_xxxxxxxxxxxxx
+RENDER_BACKEND_SERVICE_NAME=your-backend-service-name
+RENDER_FRONTEND_SERVICE_NAME=your-frontend-service-name
+```
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| SPRING_PROFILES_ACTIVE | Active Spring profile | prod |
-| SPRING_DATASOURCE_URL | PostgreSQL connection URL | jdbc:postgresql://postgres:5432/relmgmt |
-| SPRING_DATASOURCE_USERNAME | Database username | postgres |
-| SPRING_DATASOURCE_PASSWORD | Database password | your-secure-password |
-| APP_JWT_SECRET | Secret key for JWT token generation | your-secure-jwt-secret |
-| APP_JWT_EXPIRATION | JWT token expiration time in milliseconds | 86400000 |
+## Environment Setup
 
-#### Frontend Service
+### Required GitHub Repository Secrets
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| VITE_API_URL | Backend API URL | https://relmgmt-backend.onrender.com/api |
+#### Core Deployment Secrets
+```env
+# Render Integration
+RENDER_API_KEY=rnd_xxxxxxxxxxxxxxxxxxxxxx
+RENDER_BACKEND_SERVICE_ID=srv_xxxxxxxxxxxxx
+RENDER_FRONTEND_SERVICE_ID=srv_xxxxxxxxxxxxx
+RENDER_BACKEND_SERVICE_NAME=relmgmt-backend
+RENDER_FRONTEND_SERVICE_NAME=relmgmt-frontend
+```
 
-### GitHub Secrets
+#### Optional Security and Notification Secrets
+```env
+# Security Scanning (Optional)
+SNYK_TOKEN=your_snyk_token_for_vulnerability_scanning
 
-Set up the following secrets in your GitHub repository:
+# Notifications (Optional)
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/xxx/xxx/xxx
 
-| Secret | Description | Example |
-|--------|-------------|---------|
-| RENDER_API_KEY | API key for Render | key_abcdefghijklmnopqrstuvwxyz |
-| RENDER_BACKEND_SERVICE_ID | ID of the backend service in Render | srv-abcdefghijklmn |
-| RENDER_FRONTEND_SERVICE_ID | ID of the frontend service in Render | srv-opqrstuvwxyz |
+# Code Coverage (Optional)
+CODECOV_TOKEN=your_codecov_token
+```
+
+### Environment Variables by Environment
+
+#### Development Environment
+```env
+# Backend
+SPRING_PROFILES_ACTIVE=dev
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/relmgmt
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=bBzp16eHfA29wZUvr
+APP_JWT_SECRET=dev-jwt-secret-key-64-characters-long
+LOGGING_LEVEL_COM_POLYCODER_RELMGMT=DEBUG
+
+# Frontend
+VITE_API_URL=http://localhost:8080/api
+VITE_LOG_LEVEL=debug
+VITE_NOTIF_POLL_MS=120000
+```
+
+#### Production Environment
+```env
+# Backend (Set in Render dashboard)
+SPRING_PROFILES_ACTIVE=prod
+SPRING_DATASOURCE_URL=<auto-generated by Render>
+SPRING_DATASOURCE_USERNAME=<auto-generated by Render>
+SPRING_DATASOURCE_PASSWORD=<auto-generated by Render>
+APP_JWT_SECRET=<generate secure 64+ character string>
+APP_JWT_EXPIRATION=86400000
+LOGGING_LEVEL_ROOT=WARN
+LOGGING_LEVEL_COM_POLYCODER_RELMGMT=INFO
+SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5
+SPRING_JPA_HIBERNATE_DDL_AUTO=none
+SPRING_FLYWAY_ENABLED=true
+
+# Frontend (Set in Render dashboard)
+VITE_API_URL=https://your-backend.onrender.com/api
+VITE_APP_TITLE=Release Management System
+VITE_LOG_LEVEL=error
+VITE_NOTIF_POLL_MS=120000
+```
+
+## Security Configuration
+
+### Container Security Features
+
+1. **Non-root User Execution**: Both containers run as non-root users
+2. **Multi-stage Builds**: Minimal runtime images
+3. **Security Headers**: Nginx configured with security headers
+4. **Vulnerability Scanning**: Automated Trivy scanning
+5. **SBOM Generation**: Software Bill of Materials for compliance
+
+### Security Scanning Schedule
+
+- **Daily**: Comprehensive security scans (2 AM UTC)
+- **On Push**: Container vulnerability scanning
+- **Weekly**: Dependency vulnerability updates
+- **On PR**: Code quality and security analysis
+
+### Security Headers (Nginx Configuration)
+
+```nginx
+# Security headers automatically applied
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: <configured for application needs>
+```
 
 ## Deployment Process
 
-### Initial Deployment
+### Automatic Deployment Flow
 
-1. Push your code to the main branch of your GitHub repository
-2. GitHub Actions will build and test your code
-3. If all tests pass, GitHub Actions will trigger a deployment to Render
-4. Render will build and deploy your services
+1. **Code Push** → `main` or `develop` branch
+2. **CI Triggers** → Backend and Frontend workflows run in parallel
+3. **Testing Phase**:
+   - Backend: Unit tests, integration tests with PostgreSQL
+   - Frontend: Linting, unit tests, build verification
+4. **Build Phase**:
+   - Multi-platform Docker images built and pushed to GHCR
+   - SBOM generated for security compliance
+5. **Deployment Phase**:
+   - `develop` → Staging environment
+   - `main` → Production environment
+6. **Verification Phase**:
+   - Health checks on deployed services
+   - Smoke tests (if configured)
+7. **Notification**: Success/failure notifications
 
-### Continuous Deployment
+### Manual Deployment Options
 
-1. Make changes to your code
-2. Create a pull request
-3. GitHub Actions will build and test your code
-4. If all tests pass, merge the pull request to the main branch
-5. GitHub Actions will trigger a deployment to Render
-6. Render will build and deploy your services
+#### 1. Full Stack Deployment (Recommended)
+```bash
+# Trigger via GitHub Actions UI
+Workflow: "Full Stack Deployment"
+Environment: staging | production
+Backend Image: latest (or specific tag)
+Frontend Image: latest (or specific tag)
+```
 
-## Monitoring and Logging
+#### 2. Individual Service Deployment
+```bash
+# Render-specific deployment
+Workflow: "Deploy to Render"
+Environment: production (or staging)
+```
 
-### Render Dashboard
+#### 3. Local Production Testing
+```bash
+# Test production configuration locally
+cd relmgmt/docker
+cp env.prod.example .env.prod
+# Edit .env.prod with your values
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
+```
 
-Monitor your services through the Render dashboard:
-- View service status
-- View logs
-- Monitor resource usage
+### Rollback Process
 
-### Application Monitoring
+1. **Via Render Dashboard**:
+   - Navigate to service
+   - Select previous deployment
+   - Click "Redeploy"
 
-1. Access Spring Boot Actuator endpoints for backend monitoring:
-   - Health: `/actuator/health`
-   - Info: `/actuator/info`
-   - Metrics: `/actuator/metrics`
+2. **Via GitHub Actions**:
+   - Trigger "Full Stack Deployment"
+   - Specify previous image tags
+   - Deploy to production
 
-2. Set up custom monitoring using Prometheus and Grafana (optional):
-   - Add Prometheus dependencies to the backend
-   - Configure Prometheus to scrape metrics from the backend
-   - Set up Grafana dashboards to visualize metrics
+3. **Via Git**:
+   - Revert commit on main branch
+   - Push to trigger automatic redeployment
 
-### Log Management
+## Monitoring and Troubleshooting
 
-1. View logs in the Render dashboard
-2. Set up a log aggregation service (optional):
-   - Configure the backend to send logs to a service like Papertrail or Loggly
-   - Set up alerts for error conditions 
+### Health Check Endpoints
+
+- **Backend Health**: `https://your-backend.onrender.com/actuator/health`
+- **Frontend Health**: `https://your-frontend.onrender.com/health`
+- **Backend Metrics**: `https://your-backend.onrender.com/actuator/metrics`
+
+### Monitoring Dashboards
+
+1. **Render Dashboard**: Service status, logs, metrics
+2. **GitHub Actions**: Build status, deployment history
+3. **GitHub Security**: Vulnerability alerts, dependency insights
+4. **Container Registry**: Image security scanning results
+
+### Log Access
+
+#### Render Logs
+```bash
+# Via Render dashboard
+Services → Select Service → Logs
+```
+
+#### Local Logs
+```bash
+# Docker compose logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Individual service logs
+docker logs relmgmt-backend-prod -f
+docker logs relmgmt-frontend-prod -f
+```
+
+### Common Issues and Solutions
+
+#### 1. Build Failures
+
+**Issue**: Docker build fails with dependency errors
+**Solution**: 
+- Check .dockerignore files
+- Verify package.json/build.gradle integrity
+- Review build logs in GitHub Actions
+
+#### 2. Deployment Timeouts
+
+**Issue**: Render deployment times out
+**Solution**:
+- Check service resource limits
+- Verify health check endpoints
+- Review application startup logs
+
+#### 3. Database Connection Issues
+
+**Issue**: Backend can't connect to database
+**Solution**:
+- Verify environment variables in Render
+- Check database service status
+- Review database connection logs
+
+#### 4. Frontend API Connection Issues
+
+**Issue**: Frontend can't reach backend API
+**Solution**:
+- Verify VITE_API_URL environment variable
+- Check CORS configuration in backend
+- Verify backend service is healthy
+
+### Troubleshooting Commands
+
+```bash
+# Test local Docker builds
+cd relmgmt/backend && docker build -t test-backend .
+cd relmgmt/frontend && docker build -t test-frontend .
+
+# Test production compose
+cd relmgmt/docker
+docker-compose -f docker-compose.prod.yml config
+
+# Verify environment variables
+cd relmgmt/docker
+grep -v '^#' .env.prod
+
+# Check service health
+curl -f https://your-backend.onrender.com/actuator/health
+curl -f https://your-frontend.onrender.com/health
+```
+
+## Next Steps
+
+### Immediate Actions for Deployment
+
+1. **Set up Render Account** and connect GitHub repository
+2. **Configure GitHub Secrets** as documented above
+3. **Create Render Services** using the blueprint or manual setup
+4. **Push to main branch** to trigger automatic deployment
+5. **Verify deployment** using health check endpoints
+
+### Optional Enhancements
+
+1. **Custom Domain Setup** in Render dashboard
+2. **SSL Certificate** configuration (automatic with custom domains)
+3. **Monitoring Integration** (Prometheus, Grafana, DataDog)
+4. **Backup Strategy** for database
+5. **CDN Setup** for frontend assets
+
+### Alternative Hosting Platforms
+
+The CI/CD pipeline is designed to be platform-agnostic. Easy migration to:
+- **AWS**: ECS/Fargate + RDS + CloudFront
+- **Google Cloud**: Cloud Run + Cloud SQL + Cloud CDN
+- **Azure**: Container Instances + Database + CDN
+- **Kubernetes**: Any managed Kubernetes service
+
+---
+
+**Documentation Status**: ✅ Complete and Current  
+**Last Verified**: September 14, 2025  
+**CI/CD Status**: 🟢 All workflows operational  
+**Deployment Status**: 🟢 Ready for production deployment

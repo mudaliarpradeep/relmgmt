@@ -1,0 +1,46 @@
+# Backend .dockerignore - exclude unnecessary files from Docker build context
+
+# Build outputs
+build/
+target/
+*.jar
+*.war
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Include gradle wrapper jar for builds
+# gradle/wrapper/gradle-wrapper.jar
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+
+# Documentation
+README.md
+*.md
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+
+# Environment files
+.env*
+
+# Package manager files
+package*.json
+node_modules/
