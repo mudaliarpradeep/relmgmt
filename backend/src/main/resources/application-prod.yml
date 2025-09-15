@@ -1,0 +1,58 @@
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none  # Use Flyway for schema management
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    # These will be overridden by environment variables in production
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/relmgmt}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:5}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:2}
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
+    clean-disabled: ${SPRING_FLYWAY_CLEAN_DISABLED:true}
+    locations: classpath:db/migration
+
+# Production logging configuration
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:WARN}
+    com.polycoder.relmgmt: ${LOGGING_LEVEL_COM_POLYCODER_RELMGMT:INFO}
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+# JWT Configuration for production
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:your-secret-key-here-make-it-long-and-secure-in-production}
+    expiration: ${APP_JWT_EXPIRATION:86400000}
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# Actuator Configuration for production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:health,info,metrics}
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
