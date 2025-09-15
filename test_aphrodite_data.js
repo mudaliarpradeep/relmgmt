@@ -9,7 +9,7 @@ async function checkAphroditeData() {
     // Get all releases
     console.log('1. Getting all releases...');
     const releasesResponse = await axios.get(`${BASE_URL}/releases`);
-    const releases = releasesResponse.data;
+    const releases = releasesResponse.data.content; // Handle paginated response
     console.log(`Found ${releases.length} releases:`);
     releases.forEach(release => {
       console.log(`  - ${release.name} (ID: ${release.id}, Identifier: ${release.identifier})`);
