@@ -12,25 +12,12 @@ services:
     plan: free  # FREE TIER - 750 hours/month (sleeps after 15 min inactivity)
     dockerfilePath: ./backend/Dockerfile
     buildCommand: ""
-    # Compose JDBC URL from DB components to ensure Spring compatibility
-    startCommand: >
-      export SPRING_PROFILES_ACTIVE=prod &&
-      export SPRING_DATASOURCE_URL="jdbc:postgresql://${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}?sslmode=require" &&
-      exec java $JAVA_OPTS -jar app.jar
     envVars:
-      # Database connection components (auto-injected from linked database)
-      - key: RENDER_DB_HOST
+      # Database connection (auto-injected from linked database)
+      - key: SPRING_DATASOURCE_URL
         fromDatabase:
           name: relmgmt-database
-          property: host
-      - key: RENDER_DB_PORT
-        fromDatabase:
-          name: relmgmt-database
-          property: port
-      - key: RENDER_DB_NAME
-        fromDatabase:
-          name: relmgmt-database
-          property: database
+          property: connectionString
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: relmgmt-database
@@ -41,6 +28,8 @@ services:
           property: password
       
       # Application configuration
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
       - key: APP_JWT_SECRET
         generateValue: true
       - key: APP_JWT_EXPIRATION
@@ -83,7 +72,6 @@ services:
   - type: web
     name: relmgmt-frontend
     env: static
-    region: oregon
     plan: free  # FREE TIER - unlimited static site hosting
     buildCommand: |
       cd frontend
@@ -136,7 +124,6 @@ databases:
   # PostgreSQL Database - FREE TIER
   - name: relmgmt-database
     databaseName: relmgmt
-    user: postgres
     plan: free  # FREE TIER - 1GB storage, 1GB RAM, 1 CPU
     region: oregon
     # Free tier limitations:
