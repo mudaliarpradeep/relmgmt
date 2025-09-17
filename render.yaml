@@ -72,7 +72,7 @@ services:
   - type: web
     name: relmgmt-frontend
     env: static
-    plan: free  # FREE TIER - unlimited static site hosting
+    # Static sites are free by default - no plan needed
     buildCommand: |
       cd frontend
       npm ci
