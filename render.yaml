@@ -13,11 +13,19 @@ services:
     dockerfilePath: ./backend/Dockerfile
     buildCommand: ""
     envVars:
-      # Database connection (auto-injected from linked database)
-      - key: SPRING_DATASOURCE_URL
+      # Database connection components (auto-injected from linked database)
+      - key: RENDER_DB_HOST
         fromDatabase:
           name: relmgmt-database
-          property: connectionString
+          property: host
+      - key: RENDER_DB_PORT
+        fromDatabase:
+          name: relmgmt-database
+          property: port
+      - key: RENDER_DB_NAME
+        fromDatabase:
+          name: relmgmt-database
+          property: database
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: relmgmt-database
@@ -26,10 +34,9 @@ services:
         fromDatabase:
           name: relmgmt-database
           property: password
+      # JDBC URL will be constructed by startup script from RENDER_DB_* variables
       
       # Application configuration
-      - key: SPRING_PROFILES_ACTIVE
-        value: prod
       - key: APP_JWT_SECRET
         generateValue: true
       - key: APP_JWT_EXPIRATION

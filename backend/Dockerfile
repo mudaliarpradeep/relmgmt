@@ -40,6 +40,15 @@ WORKDIR /app
 # Copy built jar from builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
+# Create startup script to handle database URL construction
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'export SPRING_PROFILES_ACTIVE=prod' >> /app/start.sh && \
+    echo 'if [ -n "$RENDER_DB_HOST" ] && [ -n "$RENDER_DB_PORT" ] && [ -n "$RENDER_DB_NAME" ]; then' >> /app/start.sh && \
+    echo '  export SPRING_DATASOURCE_URL="jdbc:postgresql://${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}?sslmode=require"' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
+    echo 'exec java $JAVA_OPTS -jar app.jar' >> /app/start.sh && \
+    chmod +x /app/start.sh
+
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app
 
@@ -56,5 +65,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Set JVM options for production
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+# Run the application with startup script
+ENTRYPOINT ["/app/start.sh"]
