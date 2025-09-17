@@ -1,24 +1,36 @@
-# Render Blueprint for Release Management System
-# This file defines the infrastructure for deploying to Render
+# Render Blueprint for Release Management System - FREE TIER ONLY
+# This file defines the infrastructure for deploying to Render using only free tier services
+# Total cost: $0/month (all services on free tier)
 
 services:
         
-  # Backend API Service
+  # Backend API Service - FREE TIER
   - type: web
     name: relmgmt-backend
     env: docker
     region: oregon
-    plan: starter  # $7/month
+    plan: free  # FREE TIER - 750 hours/month (sleeps after 15 min inactivity)
     dockerfilePath: ./backend/Dockerfile
     buildCommand: ""
-    startCommand: ""
+    # Compose JDBC URL from DB components to ensure Spring compatibility
+    startCommand: >
+      export SPRING_PROFILES_ACTIVE=prod &&
+      export SPRING_DATASOURCE_URL="jdbc:postgresql://${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}?sslmode=require" &&
+      exec java $JAVA_OPTS -jar app.jar
     envVars:
-      - key: SPRING_PROFILES_ACTIVE
-        value: prod
-      - key: SPRING_DATASOURCE_URL
+      # Database connection components (auto-injected from linked database)
+      - key: RENDER_DB_HOST
         fromDatabase:
           name: relmgmt-database
-          property: connectionString
+          property: host
+      - key: RENDER_DB_PORT
+        fromDatabase:
+          name: relmgmt-database
+          property: port
+      - key: RENDER_DB_NAME
+        fromDatabase:
+          name: relmgmt-database
+          property: database
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: relmgmt-database
@@ -27,56 +39,74 @@ services:
         fromDatabase:
           name: relmgmt-database
           property: password
+      
+      # Application configuration
       - key: APP_JWT_SECRET
         generateValue: true
       - key: APP_JWT_EXPIRATION
         value: "86400000"
-      - key: LOGGING_LEVEL_ROOT
-        value: WARN
-      - key: LOGGING_LEVEL_COM_POLYCODER_RELMGMT
-        value: INFO
-      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
-        value: "5"
-      - key: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
-        value: "2"
+      
+      # Database and JPA settings (optimized for free tier)
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
-        value: none
+        value: "none"
       - key: SPRING_FLYWAY_ENABLED
         value: "true"
       - key: SPRING_FLYWAY_CLEAN_DISABLED
         value: "true"
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: "3"  # Reduced for free tier
+      - key: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+        value: "1"  # Reduced for free tier
+      - key: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
+        value: "30000"
+      - key: SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT
+        value: "300000"
+      - key: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
+        value: "600000"
+      
+      # Logging (reduced for free tier)
+      - key: LOGGING_LEVEL_ROOT
+        value: "WARN"
+      - key: LOGGING_LEVEL_COM_POLYCODER_RELMGMT
+        value: "INFO"
+      
+      # Actuator endpoints
       - key: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
         value: "health,info,metrics"
+      - key: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+        value: "when-authorized"
+    
     healthCheckPath: /actuator/health
-    domains:
-      - relmgmt-api.onrender.com
+    # Free tier gets auto-generated domain: relmgmt-backend-xxxx.onrender.com
 
-  # Frontend Static Site
+  # Frontend Static Site - FREE TIER
   - type: web
     name: relmgmt-frontend
     env: static
     region: oregon
+    plan: free  # FREE TIER - unlimited static site hosting
     buildCommand: |
       cd frontend
       npm ci
       npm run build
     staticPublishPath: ./frontend/dist
     envVars:
+      # API URL auto-wired from backend service
       - key: VITE_API_URL
         fromService:
           type: web
           name: relmgmt-backend
           property: host
           prefix: https://
-          suffix: /api
+          suffix: /api/v1
       - key: VITE_APP_TITLE
         value: "Release Management System"
       - key: VITE_LOG_LEVEL
         value: "error"
       - key: VITE_NOTIF_POLL_MS
         value: "120000"
-    domains:
-      - relmgmt.onrender.com
+    
+    # Security headers for production
     headers:
       - path: /*
         name: X-Frame-Options
@@ -93,14 +123,25 @@ services:
       - path: /assets/*
         name: Cache-Control
         value: "public, max-age=31536000, immutable"
+    
+    # SPA routing support
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+    
+    # Free tier gets auto-generated domain: relmgmt-frontend-xxxx.onrender.com
 
 databases:
+  # PostgreSQL Database - FREE TIER
   - name: relmgmt-database
     databaseName: relmgmt
     user: postgres
-    plan: free  # Free tier - 1GB storage
+    plan: free  # FREE TIER - 1GB storage, 1GB RAM, 1 CPU
     region: oregon
+    # Free tier limitations:
+    # - 1GB storage
+    # - 1GB RAM
+    # - 1 CPU
+    # - 100 connections max
+    # - No backups (manual export only)
