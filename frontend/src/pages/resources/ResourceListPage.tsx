@@ -72,7 +72,7 @@ const TableContent = React.memo(({
 }) => {
   return (
     <>
-      {resources.map((resource) => (
+      {(resources || []).map((resource) => (
         <tr
           key={resource.id}
           onClick={() => onRowClick(resource)}
@@ -148,7 +148,7 @@ const MobileCardContent = React.memo(({
 }) => {
   return (
     <>
-      {resources.map((resource) => (
+      {(resources || []).map((resource) => (
         <div
           key={resource.id}
           className="p-4 hover:bg-gray-50 cursor-pointer"

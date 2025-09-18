@@ -150,7 +150,7 @@ const ReleaseListPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {releases.map((release) => (
+                {(releases || []).map((release) => (
                   <tr key={release.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
@@ -169,10 +169,10 @@ const ReleaseListPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {release.phases?.length || 0} phases
+                      {(release.phases || []).length} phases
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {release.blockers?.length || 0} blockers
+                      {(release.blockers || []).length} blockers
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(release.createdAt)}
