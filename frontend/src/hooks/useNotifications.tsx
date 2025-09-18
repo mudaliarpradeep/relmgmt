@@ -31,7 +31,7 @@ export function NotificationsProvider({ children, pollMs, initialNotifications, 
   const pollRef = useRef<number | null>(null);
   const lastFiltersRef = useRef<NotificationFilters | undefined>(undefined);
 
-  const unreadCount = useMemo(() => notifications.filter(n => !n.isRead).length, [notifications]);
+  const unreadCount = useMemo(() => (notifications || []).filter(n => !n.isRead).length, [notifications]);
 
   const fetchNotifications = useCallback(async (filters?: NotificationFilters) => {
     setLoading(true);
