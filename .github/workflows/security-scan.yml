@@ -119,13 +119,33 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Check if there are changes to scan
+      id: check-changes
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" = "push" ] && [ -n "${{ github.event.before }}" ]; then
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "has-changes=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Run TruffleHog
+      if: steps.check-changes.outputs.has-changes == 'true'
       uses: trufflesecurity/trufflehog@main
       with:
         path: ./
-        base: main
+        base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before || 'HEAD~10') }}
         head: HEAD
         extra_args: --debug --only-verified
+
+    - name: Skip TruffleHog (no changes to scan)
+      if: steps.check-changes.outputs.has-changes == 'false'
+      run: |
+        echo "⚠️ Skipping TruffleHog scan - no changes detected"
+        echo "This is normal for scheduled runs when there are no new commits"
 
   container-scanning:
     name: Container Security Scanning
