@@ -1,6 +1,6 @@
 import { startOfWeek, addDays, isBefore, isAfter, isEqual, formatISO } from 'date-fns';
 import type { Allocation } from '../services/api/v1/allocationService';
-import type { CapacityDatum } from '../components/charts/CapacityChart';
+import type { CapacityDatum } from './capacityUtils';
 
 function isWeekday(date: Date): boolean {
   const day = date.getDay();

@@ -1,12 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ReferenceLine, Cell } from 'recharts';
-
-export interface CapacityDatum {
-  resourceName: string;
-  week: string; // ISO week label e.g., 2025-W01
-  allocated: number; // person-days in the week
-  capacity: number; // typically 4.5
-}
+import { CapacityDatum, getCapacityBarColor } from '../../lib/capacityUtils';
 
 interface CapacityChartProps {
   data: CapacityDatum[];
@@ -15,13 +9,6 @@ interface CapacityChartProps {
   error?: string | null;
   emptyMessage?: string;
 }
-
-export const getCapacityBarColor = (allocated: number, capacity: number): string => {
-  const epsilon = 0.001; // treat near-equality within one-thousandth as exact
-  if (Math.abs(allocated - capacity) <= epsilon) return '#16a34a'; // green
-  if (allocated < capacity - epsilon) return '#f59e0b'; // amber/yellow
-  return '#ef4444'; // red
-};
 
 const CapacityChart: React.FC<CapacityChartProps> = ({ data, height = 280, loading = false, error = null, emptyMessage = 'No capacity data to display.' }) => {
   if (loading) {

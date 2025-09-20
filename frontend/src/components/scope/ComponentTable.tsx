@@ -21,7 +21,7 @@ interface Component {
   technicalDesignDays: number;
   buildDays: number;
   scopeItemId: number;
-  effortEstimates?: any[];
+  effortEstimates?: unknown[];
   createdAt: string;
   updatedAt: string;
 }
@@ -194,7 +194,7 @@ export const ComponentTable: React.FC<ComponentTableProps> = ({
     setComponentRows(updatedRows);
   };
 
-  const handleInputChange = (rowIndex: number, field: keyof ComponentRowData, value: any) => {
+  const handleInputChange = (rowIndex: number, field: keyof ComponentRowData, value: string | number) => {
     const updatedRows = [...componentRows];
     updatedRows[rowIndex] = {
       ...updatedRows[rowIndex],

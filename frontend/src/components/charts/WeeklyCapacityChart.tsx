@@ -100,7 +100,7 @@ const WeeklyCapacityChart: React.FC<WeeklyCapacityChartProps> = ({
   };
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: WeekData }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const phases = getPhasesForWeek(data.week);

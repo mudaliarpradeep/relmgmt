@@ -114,6 +114,7 @@ export function NotificationsProvider({ children, pollMs, initialNotifications, 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotifications(): NotificationsContextValue {
   const ctx = useContext(NotificationsContext);
   if (!ctx) throw new Error('useNotifications must be used within a NotificationsProvider');

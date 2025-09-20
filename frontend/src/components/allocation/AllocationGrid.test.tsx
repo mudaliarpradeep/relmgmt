@@ -57,17 +57,17 @@ describe('AllocationGrid', () => {
 
   it('handles non-array allocations gracefully', () => {
     // Test with null
-    const { unmount: unmount1 } = render(<AllocationGrid allocations={null as any} />);
+    const { unmount: unmount1 } = render(<AllocationGrid allocations={null as unknown as Allocation[]} />);
     expect(screen.getByTestId('allocation-grid')).toBeInTheDocument();
     unmount1();
 
     // Test with undefined
-    const { unmount: unmount2 } = render(<AllocationGrid allocations={undefined as any} />);
+    const { unmount: unmount2 } = render(<AllocationGrid allocations={undefined as unknown as Allocation[]} />);
     expect(screen.getByTestId('allocation-grid')).toBeInTheDocument();
     unmount2();
 
     // Test with non-array value
-    const { unmount: unmount3 } = render(<AllocationGrid allocations={'invalid' as any} />);
+    const { unmount: unmount3 } = render(<AllocationGrid allocations={'invalid' as unknown as Allocation[]} />);
     expect(screen.getByTestId('allocation-grid')).toBeInTheDocument();
     unmount3();
   });

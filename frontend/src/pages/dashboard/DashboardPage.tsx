@@ -25,7 +25,7 @@ const DashboardPage: React.FC = () => {
         setResourcesError(null);
         // Fetch active resources count to minimize data transfer, we only need the total count
         const response = await ResourceService.getResources({ 
-          status: 'ACTIVE' as any, // Backend expects enum name, not display name
+          status: 'ACTIVE', // Backend expects enum name, not display name
           page: 0, 
           size: 1 
         });

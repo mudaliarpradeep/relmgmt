@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import CapacityChart, { type CapacityDatum } from './CapacityChart';
+import CapacityChart from './CapacityChart';
+import { type CapacityDatum } from '../../lib/capacityUtils';
 
 const meta: Meta<typeof CapacityChart> = {
   title: 'Charts/CapacityChart',

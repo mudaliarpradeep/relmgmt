@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScopeService } from '../../services/api/v1/scopeService';
 import { getComponentBadgeColor } from '../../types';
 
@@ -32,9 +32,9 @@ export const EffortSummaryTable: React.FC<EffortSummaryTableProps> = ({ releaseI
     if (isExpanded && effortSummaries.length === 0) {
       loadEffortSummary();
     }
-  }, [isExpanded, releaseId]);
+  }, [isExpanded, effortSummaries.length, loadEffortSummary]);
 
-  const loadEffortSummary = async () => {
+  const loadEffortSummary = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -46,7 +46,7 @@ export const EffortSummaryTable: React.FC<EffortSummaryTableProps> = ({ releaseI
     } finally {
       setLoading(false);
     }
-  };
+  }, [releaseId]);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
