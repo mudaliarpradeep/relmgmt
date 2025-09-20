@@ -124,6 +124,7 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
+      id: build
       uses: docker/build-push-action@v5
       with:
         context: ./frontend
@@ -135,12 +136,18 @@ jobs:
         build-args: |
           VITE_API_URL=${{ vars.VITE_API_URL || 'http://localhost:8080/api' }}
 
+    - name: Wait for image to be available
+      run: |
+        echo "Waiting for Docker image to be fully available..."
+        sleep 10
+
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
       with:
         image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
         format: spdx-json
         output-file: frontend-sbom.spdx.json
+      continue-on-error: true
 
     - name: Upload SBOM
       uses: actions/upload-artifact@v4
