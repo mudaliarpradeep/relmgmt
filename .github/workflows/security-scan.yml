@@ -37,7 +37,7 @@ jobs:
 
     - name: Build backend for CodeQL
       run: |
-        cd relmgmt/backend
+        cd backend
         chmod +x gradlew
         ./gradlew build -x test
 
@@ -46,11 +46,11 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: relmgmt/frontend/package-lock.json
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Build frontend for CodeQL
       run: |
-        cd relmgmt/frontend
+        cd frontend
         npm ci
         npm run build
 
@@ -73,7 +73,7 @@ jobs:
 
     - name: Run Gradle dependency check
       run: |
-        cd relmgmt/backend
+        cd backend
         chmod +x gradlew
         ./gradlew dependencyCheckAnalyze || true
 
@@ -82,7 +82,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: dependency-check-report
-        path: relmgmt/backend/build/reports/dependency-check-report.html
+        path: backend/build/reports/dependency-check-report.html
         retention-days: 30
 
     - name: Setup Node.js
@@ -90,11 +90,11 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: relmgmt/frontend/package-lock.json
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Run npm audit
       run: |
-        cd relmgmt/frontend
+        cd frontend
         npm ci
         npm audit --audit-level moderate || true
 
@@ -104,7 +104,7 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --severity-threshold=high --file=relmgmt/frontend/package.json
+        args: --severity-threshold=high --file=frontend/package.json
       continue-on-error: true
 
   secret-scanning:
@@ -141,7 +141,7 @@ jobs:
 
     - name: Build backend image for scanning
       run: |
-        cd relmgmt/backend
+        cd backend
         docker build -t relmgmt-backend:scan .
 
     - name: Run Trivy vulnerability scanner on backend
@@ -159,7 +159,7 @@ jobs:
 
     - name: Build frontend image for scanning
       run: |
-        cd relmgmt/frontend
+        cd frontend
         docker build -t relmgmt-frontend:scan .
 
     - name: Run Trivy vulnerability scanner on frontend
@@ -178,7 +178,7 @@ jobs:
     - name: Run Hadolint on Dockerfiles
       uses: hadolint/hadolint-action@v3.1.0
       with:
-        dockerfile: relmgmt/backend/Dockerfile
+        dockerfile: backend/Dockerfile
         format: sarif
         output-file: backend-hadolint-results.sarif
         no-fail: true
@@ -212,11 +212,11 @@ jobs:
         fi
         
         # Check for dependency lock files
-        if [ ! -f "relmgmt/backend/gradle/wrapper/gradle-wrapper.properties" ]; then
+        if [ ! -f "backend/gradle/wrapper/gradle-wrapper.properties" ]; then
           echo "⚠️ Gradle wrapper properties missing"
         fi
         
-        if [ ! -f "relmgmt/frontend/package-lock.json" ]; then
+        if [ ! -f "frontend/package-lock.json" ]; then
           echo "⚠️ package-lock.json missing"
         fi
         

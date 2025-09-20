@@ -179,18 +179,18 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: relmgmt/frontend/package-lock.json
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Install dependencies
       run: |
-        cd relmgmt/frontend
+        cd frontend
         npm ci
 
     - name: Run smoke tests
       run: |
         echo "🧪 Running smoke tests against ${{ needs.validate-inputs.outputs.environment }}"
         # Add smoke test logic here
-        # cd relmgmt/frontend
+        # cd frontend
         # npm run test:e2e -- --env=${{ needs.validate-inputs.outputs.environment }}
 
     - name: Upload test results
@@ -198,7 +198,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: smoke-test-results-${{ needs.validate-inputs.outputs.environment }}
-        path: relmgmt/frontend/test-results/
+        path: frontend/test-results/
         retention-days: 30
 
   notify-deployment:

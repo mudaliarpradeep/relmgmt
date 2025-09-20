@@ -39,13 +39,13 @@ jobs:
 
     - name: Update Gradle wrapper
       run: |
-        cd relmgmt/backend
+        cd backend
         chmod +x gradlew
         ./gradlew wrapper --gradle-version=latest
 
     - name: Check for dependency updates
       run: |
-        cd relmgmt/backend
+        cd backend
         ./gradlew dependencyUpdates > dependency-updates.txt 2>&1 || true
         cat dependency-updates.txt
 
@@ -62,7 +62,7 @@ jobs:
         if git diff --quiet; then
           echo "No Gradle wrapper updates available"
         else
-          git add relmgmt/backend/gradle/wrapper/
+          git add backend/gradle/wrapper/
           git commit -m "chore: update Gradle wrapper to latest version" || echo "No changes to commit"
         fi
 
@@ -99,7 +99,7 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: relmgmt/frontend/package-lock.json
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Create dependency update branch
       run: |
@@ -111,13 +111,13 @@ jobs:
 
     - name: Check for outdated packages
       run: |
-        cd relmgmt/frontend
+        cd frontend
         npm outdated > outdated-packages.txt || true
         cat outdated-packages.txt
 
     - name: Update dependencies
       run: |
-        cd relmgmt/frontend
+        cd frontend
         
         # Update patch and minor versions
         npm update
@@ -128,7 +128,7 @@ jobs:
 
     - name: Run tests to verify updates
       run: |
-        cd relmgmt/frontend
+        cd frontend
         npm ci
         npm run lint
         npm run test
@@ -136,10 +136,10 @@ jobs:
 
     - name: Commit dependency updates
       run: |
-        if git diff --quiet relmgmt/frontend/package-lock.json; then
+        if git diff --quiet frontend/package-lock.json; then
           echo "No dependency updates available"
         else
-          git add relmgmt/frontend/package*.json
+          git add frontend/package*.json
           git commit -m "chore: update npm dependencies to latest compatible versions" || echo "No changes to commit"
         fi
 
@@ -176,7 +176,7 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
-        cache-dependency-path: relmgmt/frontend/package-lock.json
+        cache-dependency-path: frontend/package-lock.json
 
     - name: Create security update branch
       run: |
@@ -188,22 +188,22 @@ jobs:
 
     - name: Run npm audit fix
       run: |
-        cd relmgmt/frontend
+        cd frontend
         npm audit fix --audit-level moderate || true
 
     - name: Run tests after security fixes
       run: |
-        cd relmgmt/frontend
+        cd frontend
         npm ci
         npm run test
         npm run build
 
     - name: Commit security updates
       run: |
-        if git diff --quiet relmgmt/frontend/package-lock.json; then
+        if git diff --quiet frontend/package-lock.json; then
           echo "No security updates available"
         else
-          git add relmgmt/frontend/package*.json
+          git add frontend/package*.json
           git commit -m "fix: apply npm security updates" || echo "No changes to commit"
         fi
 

@@ -606,7 +606,34 @@ The system is now ready for comprehensive user acceptance testing and production
 | **Documentation** | ✅ Complete | 100% | All technical specs updated with weekly allocation features |
 | **Weekly Allocation System** | ✅ Complete | 100% | Backend and frontend fully implemented |
 | **Critical Bug Fixes** | ✅ Complete | 100% | Allocation calculation bugs and PRD compliance resolved |
+| **JavaScript Runtime Errors** | ✅ Complete | 100% | Fixed undefined array .map() errors in frontend |
+| **GitHub Actions Workflows** | ✅ Complete | 100% | Fixed directory paths in all CI/CD workflows |
 
 ---
 
-*This status reflects the successful implementation of the weekly allocation table system, complete frontend and backend integration, and the significant progress made on the Component and Scope Item management system. The weekly allocation table provides a powerful new capability for viewing and managing resource allocations across time.*
+## Recent Fixes (Latest Updates)
+
+### JavaScript Runtime Error Fixes
+- **Issue**: Frontend JavaScript errors when calling `.map()` on undefined arrays
+- **Root Cause**: React components trying to call `.map()` on arrays before API data loaded
+- **Solution**: Added null checks using `(array || []).map()` pattern
+- **Files Fixed**:
+  - `frontend/src/hooks/useNotifications.tsx` - Fixed notifications filter
+  - `frontend/src/pages/releases/ReleaseListPage.tsx` - Fixed releases, phases, blockers arrays
+  - `frontend/src/pages/resources/ResourceListPage.tsx` - Fixed resources array in components
+
+### GitHub Actions Workflow Fixes
+- **Issue**: Security scanning and CI/CD workflows failing with "No such file or directory" errors
+- **Root Cause**: Workflows using incorrect paths `relmgmt/backend` and `relmgmt/frontend` instead of `backend` and `frontend`
+- **Solution**: Updated all workflow files to use correct directory paths
+- **Files Fixed**:
+  - `.github/workflows/security-scan.yml` - Fixed all security scanning paths
+  - `.github/workflows/backend-ci.yml` - Fixed backend CI/CD paths
+  - `.github/workflows/frontend-ci.yml` - Fixed frontend CI/CD paths
+  - `.github/workflows/deploy-render.yml` - Fixed deployment trigger paths
+  - `.github/workflows/deploy-full-stack.yml` - Fixed full-stack deployment paths
+  - `.github/workflows/dependency-update.yml` - Fixed dependency update paths
+
+---
+
+*This status reflects the successful implementation of the weekly allocation table system, complete frontend and backend integration, and the significant progress made on the Component and Scope Item management system. The weekly allocation table provides a powerful new capability for viewing and managing resource allocations across time. All critical JavaScript runtime errors and GitHub Actions workflow issues have been resolved.*

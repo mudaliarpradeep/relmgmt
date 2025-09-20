@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'relmgmt/**'
+      - 'backend/**'
+      - 'frontend/**'
       - 'render.yaml'
       - '.github/workflows/deploy-render.yml'
   workflow_dispatch:
