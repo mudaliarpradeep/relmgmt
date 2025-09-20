@@ -52,7 +52,7 @@ describe('AllocationDetailPage', () => {
       blockers: [],
       createdAt: '',
       updatedAt: '',
-    } as any);
+    } as import('../../services/api/sharedTypes').Release);
 
     mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce([
       {
@@ -91,7 +91,7 @@ describe('AllocationDetailPage', () => {
       blockers: [],
       createdAt: '',
       updatedAt: '',
-    } as any);
+    } as import('../../services/api/sharedTypes').Release);
 
     mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce([
       {
@@ -141,7 +141,7 @@ describe('AllocationDetailPage', () => {
       blockers: [],
       createdAt: '',
       updatedAt: '',
-    } as any);
+    } as import('../../services/api/sharedTypes').Release);
     mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce([]);
     mockedAllocationService.generateAllocation.mockResolvedValueOnce();
     mockedScopeService.canGenerateAllocations.mockResolvedValueOnce(true);
@@ -205,7 +205,7 @@ describe('AllocationDetailPage', () => {
       blockers: [],
       createdAt: '',
       updatedAt: '',
-    } as any);
+    } as import('../../services/api/sharedTypes').Release);
     mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce([]);
     mockedScopeService.canGenerateAllocations.mockResolvedValueOnce(false);
 
@@ -229,9 +229,9 @@ describe('AllocationDetailPage', () => {
       blockers: [],
       createdAt: '',
       updatedAt: '',
-    } as any);
+    } as import('../../services/api/sharedTypes').Release);
     // Mock the allocation service to return non-array data (simulating API error)
-    mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce(null as any);
+    mockedAllocationService.getAllocationsForRelease.mockResolvedValueOnce(null as unknown as import('../../services/api/v1/allocationService').Allocation[]);
     mockedScopeService.canGenerateAllocations.mockResolvedValueOnce(false);
 
     renderWithRouter(<AllocationDetailPage />, { initialEntries: ['/releases/10/allocations'] });

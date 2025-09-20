@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { server } from './server';
 
 // Polyfill ResizeObserver for Recharts ResponsiveContainer in JSDOM
-if (typeof (globalThis as any).ResizeObserver === 'undefined') {
+if (typeof (globalThis as unknown as { ResizeObserver?: unknown }).ResizeObserver === 'undefined') {
   class ResizeObserverMock {
     callback: ResizeObserverCallback;
     constructor(callback: ResizeObserverCallback) {
@@ -13,13 +13,13 @@ if (typeof (globalThis as any).ResizeObserver === 'undefined') {
     disconnect() {/* no-op */}
   }
   // @ts-expect-error - injecting into global for test env
-  (globalThis as any).ResizeObserver = ResizeObserverMock;
+  (globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = ResizeObserverMock;
 }
 
 // Mock navigation API to suppress JSDOM warnings
-if (typeof (globalThis as any).navigate === 'undefined') {
+if (typeof (globalThis as unknown as { navigate?: unknown }).navigate === 'undefined') {
   // @ts-expect-error - injecting into global for test env
-  (globalThis as any).navigate = () => {
+  (globalThis as unknown as { navigate: () => void }).navigate = () => {
     // Mock implementation - no-op
   };
 }

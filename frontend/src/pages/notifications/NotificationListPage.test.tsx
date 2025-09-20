@@ -36,7 +36,7 @@ describe('NotificationListPage', () => {
   });
 
   it('renders empty state when there are no notifications', async () => {
-    mockedService.getNotifications.mockResolvedValueOnce(makePage([]) as any);
+    mockedService.getNotifications.mockResolvedValueOnce(makePage([]) as import('../../services/api/sharedTypes').PaginatedResponse<import('../../types').Notification>);
 
     renderWithAuth(<NotificationListPage />);
 
@@ -45,9 +45,9 @@ describe('NotificationListPage', () => {
   });
 
   it('loads and displays notifications with actions', async () => {
-    mockedService.getNotifications.mockResolvedValueOnce(makePage([makeNotification({ id: 1 }), makeNotification({ id: 2, isRead: true, message: 'Read item' })]) as any);
-    mockedService.markAsRead.mockResolvedValue(undefined as any);
-    mockedService.deleteNotification.mockResolvedValue(undefined as any);
+    mockedService.getNotifications.mockResolvedValueOnce(makePage([makeNotification({ id: 1 }), makeNotification({ id: 2, isRead: true, message: 'Read item' })]) as import('../../services/api/sharedTypes').PaginatedResponse<import('../../types').Notification>);
+    mockedService.markAsRead.mockResolvedValue(undefined);
+    mockedService.deleteNotification.mockResolvedValue(undefined);
 
     renderWithAuth(<NotificationListPage />);
 
@@ -73,8 +73,8 @@ describe('NotificationListPage', () => {
 
   it('applies filters when clicking Apply', async () => {
     mockedService.getNotifications
-      .mockResolvedValueOnce(makePage([makeNotification()]) as any) // initial load
-      .mockResolvedValueOnce(makePage([]) as any); // after filter
+      .mockResolvedValueOnce(makePage([makeNotification()]) as import('../../services/api/sharedTypes').PaginatedResponse<import('../../types').Notification>) // initial load
+      .mockResolvedValueOnce(makePage([]) as import('../../services/api/sharedTypes').PaginatedResponse<import('../../types').Notification>); // after filter
 
     renderWithAuth(<NotificationListPage />);
 
@@ -95,8 +95,8 @@ describe('NotificationListPage', () => {
   });
 
   it('marks all as read', async () => {
-    mockedService.getNotifications.mockResolvedValueOnce(makePage([makeNotification({ id: 1 }), makeNotification({ id: 2 })]) as any);
-    mockedService.markAllAsRead.mockResolvedValue(undefined as any);
+    mockedService.getNotifications.mockResolvedValueOnce(makePage([makeNotification({ id: 1 }), makeNotification({ id: 2 })]) as import('../../services/api/sharedTypes').PaginatedResponse<import('../../types').Notification>);
+    mockedService.markAllAsRead.mockResolvedValue(undefined);
 
     renderWithAuth(<NotificationListPage />);
 

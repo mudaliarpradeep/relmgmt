@@ -7,7 +7,7 @@ const withProviders = (story: React.ReactNode) => (
   <MemoryRouter initialEntries={['/notifications']}>
     <NotificationsProvider pollMs={0}>
       <Routes>
-        <Route path="/notifications" element={story as any} />
+        <Route path="/notifications" element={story as React.ReactElement} />
       </Routes>
     </NotificationsProvider>
   </MemoryRouter>

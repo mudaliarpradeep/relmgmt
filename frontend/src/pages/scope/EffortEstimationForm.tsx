@@ -20,9 +20,9 @@ const EffortEstimationForm: React.FC = () => {
       .number({ invalid_type_error: 'Effort days must be a number' })
       .positive('Effort days must be positive'),
   }).refine((data) => {
-    const applicable = getApplicableSubFunctions(data.skillFunction as any);
+    const applicable = getApplicableSubFunctions(data.skillFunction);
     if (applicable.length === 0) return !data.skillSubFunction;
-    return !data.skillSubFunction || applicable.includes(data.skillSubFunction as any);
+    return !data.skillSubFunction || applicable.includes(data.skillSubFunction);
   }, { message: 'Invalid sub-function for selected skill function', path: ['skillSubFunction'] });
 
   type FormValues = z.infer<typeof schema>;
@@ -68,12 +68,12 @@ const EffortEstimationForm: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="skillSubFunction">Skill Sub-function</label>
                 <select id="skillSubFunction" className={`w-full border rounded px-3 py-2 ${errors.skillSubFunction ? 'border-red-300' : ''}`}
-                  disabled={getApplicableSubFunctions(selectedSkillFunction as any).length === 0}
+                  disabled={getApplicableSubFunctions(selectedSkillFunction as import('../../services/api/sharedTypes').SkillFunction).length === 0}
                   {...register('skillSubFunction')}>
-                  {getApplicableSubFunctions(selectedSkillFunction as any).length === 0 ? (
+                  {getApplicableSubFunctions(selectedSkillFunction as import('../../services/api/sharedTypes').SkillFunction).length === 0 ? (
                     <option value="">N/A</option>
                   ) : (
-                    getApplicableSubFunctions(selectedSkillFunction as any).map((s) => (
+                    getApplicableSubFunctions(selectedSkillFunction as import('../../services/api/sharedTypes').SkillFunction).map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))
                   )}

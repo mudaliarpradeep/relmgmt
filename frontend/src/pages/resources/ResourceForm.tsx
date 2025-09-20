@@ -59,9 +59,9 @@ const ResourceForm = () => {
       const resource = await ResourceService.getResource(resourceId);
       
       // Validate skill sub-function against skill function to ensure it's still applicable
-      const applicableSubFunctions = getApplicableSubFunctions(resource.skillFunction as any);
+      const applicableSubFunctions = getApplicableSubFunctions(resource.skillFunction);
       const validSkillSubFunction = resource.skillSubFunction && 
-        applicableSubFunctions.includes(resource.skillSubFunction as any) 
+        applicableSubFunctions.includes(resource.skillSubFunction) 
         ? resource.skillSubFunction 
         : '';
       
@@ -122,7 +122,7 @@ const ResourceForm = () => {
       
       // If skill function changed, reset skill sub-function to first applicable option or empty
       if (field === 'skillFunction') {
-        const applicableSubFunctions = getApplicableSubFunctions(value as any);
+        const applicableSubFunctions = getApplicableSubFunctions(value as SkillFunction);
         newData.skillSubFunction = applicableSubFunctions.length > 0 ? applicableSubFunctions[0] : '';
       }
       
@@ -150,12 +150,12 @@ const ResourceForm = () => {
         name: formData.name.trim(),
         employeeNumber: formData.employeeNumber.trim(),
         email: formData.email.trim(),
-        status: formData.status as any,
+        status: formData.status as Status,
         projectStartDate: formData.projectStartDate || undefined,
         projectEndDate: formData.projectEndDate || undefined,
-        employeeGrade: formData.employeeGrade as any,
-        skillFunction: formData.skillFunction as any,
-        skillSubFunction: formData.skillSubFunction && formData.skillSubFunction.trim() !== '' ? formData.skillSubFunction as any : undefined
+        employeeGrade: formData.employeeGrade as EmployeeGrade,
+        skillFunction: formData.skillFunction as SkillFunction,
+        skillSubFunction: formData.skillSubFunction && formData.skillSubFunction.trim() !== '' ? formData.skillSubFunction : undefined
       };
 
       if (isEditMode && id) {
@@ -392,7 +392,7 @@ const ResourceForm = () => {
               <div className="flex flex-col">
                 <label htmlFor="skillSubFunction" className="text-sm font-medium text-gray-700 mb-2">
                   Skill Sub-function
-                  {getApplicableSubFunctions(formData.skillFunction as any).length === 0 && (
+                  {getApplicableSubFunctions(formData.skillFunction as SkillFunction).length === 0 && (
                     <span className="text-gray-500 text-xs ml-1">(Not applicable)</span>
                   )}
                 </label>
@@ -400,17 +400,17 @@ const ResourceForm = () => {
                   id="skillSubFunction"
                   value={formData.skillSubFunction}
                   onChange={(e) => handleInputChange('skillSubFunction', e.target.value)}
-                  disabled={getApplicableSubFunctions(formData.skillFunction as any).length === 0}
+                  disabled={getApplicableSubFunctions(formData.skillFunction as SkillFunction).length === 0}
                   className={`px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                    getApplicableSubFunctions(formData.skillFunction as any).length === 0 
+                    getApplicableSubFunctions(formData.skillFunction as SkillFunction).length === 0 
                       ? 'bg-gray-100 cursor-not-allowed' 
                       : 'hover:border-gray-400'
                   }`}
                 >
-                  {getApplicableSubFunctions(formData.skillFunction as any).length === 0 ? (
+                  {getApplicableSubFunctions(formData.skillFunction as SkillFunction).length === 0 ? (
                     <option value="">No sub-functions available</option>
                   ) : (
-                    getApplicableSubFunctions(formData.skillFunction as any).map(subFunc => (
+                    getApplicableSubFunctions(formData.skillFunction as SkillFunction).map(subFunc => (
                       <option key={subFunc} value={subFunc}>{subFunc}</option>
                     ))
                   )}

@@ -11,7 +11,7 @@ describe('AllocationService', () => {
   });
 
   it('generateAllocation should POST to allocation endpoint', async () => {
-    mockedApiClient.post.mockResolvedValueOnce({ status: 202, data: null } as any);
+    mockedApiClient.post.mockResolvedValueOnce({ status: 202, data: null });
 
     await expect(allocationService.generateAllocation(42)).resolves.not.toThrow();
     expect(mockedApiClient.post).toHaveBeenCalledWith('/v1/releases/42/allocate');
@@ -34,7 +34,7 @@ describe('AllocationService', () => {
         updatedAt: '2025-01-01T00:00:00Z',
       },
     ];
-    mockedApiClient.get.mockResolvedValueOnce({ data: mockAllocations } as any);
+    mockedApiClient.get.mockResolvedValueOnce({ data: mockAllocations });
 
     const result = await allocationService.getAllocationsForRelease(10);
     expect(result).toHaveLength(1);
@@ -59,7 +59,7 @@ describe('AllocationService', () => {
         updatedAt: '2025-02-01T00:00:00Z',
       },
     ];
-    mockedApiClient.get.mockResolvedValueOnce({ data: mockAllocations } as any);
+    mockedApiClient.get.mockResolvedValueOnce({ data: mockAllocations });
 
     const result = await allocationService.getAllocationsForResource(8);
     expect(result).toHaveLength(1);
@@ -77,7 +77,7 @@ describe('AllocationService', () => {
         ],
       },
     ];
-    mockedApiClient.get.mockResolvedValueOnce({ data: mockConflicts } as any);
+    mockedApiClient.get.mockResolvedValueOnce({ data: mockConflicts });
 
     const result = await allocationService.getAllocationConflicts();
     expect(result).toHaveLength(1);
@@ -112,7 +112,7 @@ describe('AllocationService', () => {
         totalWeeks: 29
       }
     };
-    mockedApiClient.get.mockResolvedValueOnce({ data: mockMatrix } as any);
+    mockedApiClient.get.mockResolvedValueOnce({ data: mockMatrix });
 
     const result = await allocationService.getWeeklyAllocations('2024-09-01');
     expect(result.resources).toHaveLength(1);
@@ -124,7 +124,7 @@ describe('AllocationService', () => {
   });
 
   it('updateWeeklyAllocation should PUT to update endpoint', async () => {
-    mockedApiClient.put.mockResolvedValueOnce({ status: 200, data: null } as any);
+    mockedApiClient.put.mockResolvedValueOnce({ status: 200, data: null });
 
     await expect(allocationService.updateWeeklyAllocation('1', '2024-09-01', 4.5)).resolves.not.toThrow();
     expect(mockedApiClient.put).toHaveBeenCalledWith('/v1/allocations/weekly/1/2024-09-01', null, {
@@ -141,7 +141,7 @@ describe('AllocationService', () => {
       skillSubFunction: 'Frontend',
       profileUrl: '/resources/1'
     };
-    mockedApiClient.get.mockResolvedValueOnce({ data: mockProfile } as any);
+    mockedApiClient.get.mockResolvedValueOnce({ data: mockProfile });
 
     const result = await allocationService.getResourceProfile('1');
     expect(result.name).toBe('John Doe');

@@ -27,7 +27,7 @@ describe('ScopeItemForm', () => {
   });
 
   it('submits create form with valid values', async () => {
-    mockedService.createScopeItem.mockResolvedValueOnce({} as any);
+    mockedService.createScopeItem.mockResolvedValueOnce({} as import('../../types').ScopeItem);
 
     renderWithRouter(<ScopeItemForm />, { initialEntries: ['/releases/5/scope-items/new'] });
 

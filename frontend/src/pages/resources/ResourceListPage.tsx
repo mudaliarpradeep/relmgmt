@@ -471,7 +471,7 @@ const ResourceListPage = () => {
                     handleFilterChange('skillFunction', value);
                     // Reset skill sub-function when skill function changes
                     if (value) {
-                      const applicableSubFunctions = getApplicableSubFunctions(value as any);
+                      const applicableSubFunctions = getApplicableSubFunctions(value as import('../../services/api/sharedTypes').SkillFunction);
                       if (applicableSubFunctions.length === 0) {
                         handleFilterChange('skillSubFunction', undefined);
                       }
@@ -489,7 +489,7 @@ const ResourceListPage = () => {
               <div>
                 <label htmlFor="skill-sub-function-filter" className="block text-sm font-medium text-gray-700 mb-2">
                   Skill Sub-Function
-                  {filters.skillFunction && getApplicableSubFunctions(filters.skillFunction as any).length === 0 && (
+                  {filters.skillFunction && getApplicableSubFunctions(filters.skillFunction as import('../../services/api/sharedTypes').SkillFunction).length === 0 && (
                     <span className="text-gray-500 text-xs ml-1">(Not applicable)</span>
                   )}
                 </label>
@@ -497,15 +497,15 @@ const ResourceListPage = () => {
                   id="skill-sub-function-filter"
                   value={filters.skillSubFunction || ''}
                   onChange={(e) => handleFilterChange('skillSubFunction', e.target.value || undefined)}
-                  disabled={!filters.skillFunction || getApplicableSubFunctions(filters.skillFunction as any).length === 0}
+                  disabled={!filters.skillFunction || getApplicableSubFunctions(filters.skillFunction as import('../../services/api/sharedTypes').SkillFunction).length === 0}
                   className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                    !filters.skillFunction || getApplicableSubFunctions(filters.skillFunction as any).length === 0
+                    !filters.skillFunction || getApplicableSubFunctions(filters.skillFunction as import('../../services/api/sharedTypes').SkillFunction).length === 0
                       ? 'bg-gray-100 cursor-not-allowed' 
                       : 'hover:border-gray-400'
                   }`}
                 >
                   <option value="">All Sub-Functions</option>
-                  {filters.skillFunction && getApplicableSubFunctions(filters.skillFunction as any).map(subFunc => (
+                  {filters.skillFunction && getApplicableSubFunctions(filters.skillFunction as import('../../services/api/sharedTypes').SkillFunction).map(subFunc => (
                     <option key={subFunc} value={subFunc}>{subFunc}</option>
                   ))}
                 </select>

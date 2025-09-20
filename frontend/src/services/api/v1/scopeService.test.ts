@@ -5,7 +5,7 @@ import apiClient from '../apiClient';
 import type { ScopeItem, Component, ComponentRequest } from '../sharedTypes';
 
 vi.mock('../apiClient');
-const mockedApi = vi.mocked(apiClient) as any;
+const mockedApi = vi.mocked(apiClient);
 
 const mockScopeItem = (id = 1): ScopeItem => ({
   id,
@@ -25,7 +25,7 @@ const mockComponent = (id = 1): Component => ({
   id,
   scopeItemId: 1,
   name: 'ETL Component',
-  componentType: 'ETL' as any,
+  componentType: 'ETL' as import('../sharedTypes').ComponentTypeEnum,
   technicalDesignDays: 5,
   buildDays: 10,
   createdAt: '2025-01-10T10:00:00Z',
@@ -71,7 +71,7 @@ describe('ComponentService', () => {
   it('createComponent should POST and return component', async () => {
     const req: ComponentRequest = {
       name: 'New Component',
-      componentType: 'ETL' as any,
+      componentType: 'ETL' as import('../sharedTypes').ComponentTypeEnum,
       technicalDesignDays: 5,
       buildDays: 10
     };

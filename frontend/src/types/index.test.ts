@@ -11,7 +11,7 @@ describe('Utility Functions', () => {
     });
 
     it('should return the same value for unknown status', () => {
-      expect(getStatusEnumName('Unknown' as any)).toBe('Unknown');
+      expect(getStatusEnumName('Unknown' as unknown as import('../services/api/sharedTypes').Status)).toBe('Unknown');
     });
   });
 
@@ -41,7 +41,7 @@ describe('Utility Functions', () => {
     });
 
     it('should return the same value for unknown skill function', () => {
-      expect(getSkillFunctionEnumName('Unknown' as any)).toBe('Unknown');
+      expect(getSkillFunctionEnumName('Unknown' as unknown as import('../services/api/sharedTypes').SkillFunction)).toBe('Unknown');
     });
   });
 }); 

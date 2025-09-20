@@ -19,7 +19,7 @@ describe('ReportService', () => {
         ],
       },
     ];
-    mockedApi.get.mockResolvedValueOnce({ data } as any);
+    mockedApi.get.mockResolvedValueOnce({ data });
 
     const result = await reportService.getAllocationConflictsReport();
     expect(result).toEqual(data);
@@ -28,7 +28,7 @@ describe('ReportService', () => {
 
   it('getResourceUtilizationReport should pass params', async () => {
     const mock = [{ resourceId: 1, weeks: [] }];
-    mockedApi.get.mockResolvedValueOnce({ data: mock } as any);
+    mockedApi.get.mockResolvedValueOnce({ data: mock });
     const params = { from: '2025-01-01', to: '2025-01-31' };
     const result = await reportService.getResourceUtilizationReport(params);
     expect(result).toEqual(mock);
@@ -37,7 +37,7 @@ describe('ReportService', () => {
 
   it('exportReport should return Blob', async () => {
     const bytes = new Uint8Array([1, 2, 3]);
-    mockedApi.get.mockResolvedValueOnce({ data: bytes } as any);
+    mockedApi.get.mockResolvedValueOnce({ data: bytes });
     const blob = await reportService.exportReport(ReportType.ALLOCATION_CONFLICTS, { year: '2025' });
     expect(blob).toBeInstanceOf(Blob);
     expect(mockedApi.get).toHaveBeenCalledWith('/v1/reports/export?type=ALLOCATION_CONFLICTS&year=2025', { responseType: 'blob' });

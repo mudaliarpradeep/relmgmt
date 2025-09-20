@@ -27,7 +27,7 @@ describe('ProjectForm', () => {
   });
 
   it('submits create form with valid values', async () => {
-    mockedService.createProject.mockResolvedValueOnce({} as any);
+    mockedService.createProject.mockResolvedValueOnce({} as import('../../types').ScopeItem);
 
     renderWithRouter(<ProjectForm />, { initialEntries: ['/releases/10/projects/new'] });
 

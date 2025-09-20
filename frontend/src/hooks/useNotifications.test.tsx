@@ -36,7 +36,7 @@ describe('useNotifications', () => {
       numberOfElements: 1,
       first: true,
       empty: false,
-    } as any);
+    } as import('../services/api/sharedTypes').PaginatedResponse<import('../types').Notification>);
   });
 
   it('loads notifications on mount and computes unreadCount', async () => {

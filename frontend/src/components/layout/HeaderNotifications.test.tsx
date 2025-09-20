@@ -18,7 +18,7 @@ vi.mock('../../hooks/useAuth', () => {
 });
 
 vi.mock('../../services/api/v1/notificationService', async (importOriginal) => {
-  const actual = await importOriginal<any>();
+  const actual = await importOriginal<typeof import('../../services/api/v1/notificationService')>();
   return {
     __esModule: true,
     default: {
@@ -33,11 +33,11 @@ vi.mock('../../services/api/v1/notificationService', async (importOriginal) => {
 
 const makeNotif = (id: number, overrides?: Partial<import('../../types').Notification>): import('../../types').Notification => ({
   id,
-  eventType: 'Allocation Conflict' as any,
+  eventType: 'Allocation Conflict' as import('../../types').EventType,
   message: `n${id}`,
   isRead: false,
   createdAt: '2025-01-01T00:00:00.000Z',
-  entityType: 'resource' as any,
+  entityType: 'resource' as import('../../types').EntityType,
   entityId: id,
   ...overrides,
 });
