@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { ScopeItemWithComponents, EffortEstimate, ComponentTypeEnum } from '../../services/api/sharedTypes';
+import type { ScopeItemWithComponents, ComponentTypeEnum } from '../../services/api/sharedTypes';
 
 // Helper function to convert enum to display label
 const getComponentTypeLabel = (componentType: ComponentTypeEnum): string => {

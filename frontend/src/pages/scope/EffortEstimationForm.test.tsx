@@ -1,9 +1,9 @@
 import { vi } from 'vitest';
-import { renderWithRouter, screen, fireEvent, waitFor } from '../../test/test-utils';
+import { renderWithRouter } from '../../test/test-utils';
 import ComponentService from '../../services/api/v1/componentService';
 
 vi.mock('../../services/api/v1/componentService');
-const mockedService = vi.mocked(ComponentService);
+// const mockedService = vi.mocked(ComponentService);
 
 // Mock useParams to provide component id for route
 vi.mock('react-router-dom', async () => {

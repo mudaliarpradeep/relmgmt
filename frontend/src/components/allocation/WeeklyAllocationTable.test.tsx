@@ -22,7 +22,7 @@ vi.mock('date-fns', () => ({
     weekOffset++;
     return baseDate.toISOString().split('T')[0];
   }),
-  startOfWeek: vi.fn((date, options) => {
+  startOfWeek: vi.fn((date) => {
     const result = new Date(date);
     const day = result.getDay();
     const diff = result.getDate() - day + (day === 0 ? -6 : 1);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { Release, ReleasePhase, ReleaseBlocker, ScopeItemWithComponents, ComponentTypeEnum } from '../../services/api/sharedTypes';
+import type { Release, ScopeItemWithComponents, ComponentTypeEnum } from '../../services/api/sharedTypes';
 import { ReleaseStatus, PhaseStatus, BlockerSeverity, BlockerStatus, ComponentType } from '../../services/api/sharedTypes';
 import { EffortSummaryTable } from '../../components/scope/EffortSummaryTable';
 
@@ -123,25 +123,22 @@ const ReleaseDetailPage: React.FC = () => {
     return new Date(dateString).toLocaleString();
   };
 
-  const getPrimaryComponent = (item: ScopeItemWithComponents): string => {
-    if (item.components.length === 0) return 'No components';
-
-    const firstComponent = item.components[0];
-    if (!firstComponent || !firstComponent.componentType) {
-      return 'Unknown Type';
-    }
-
-    // Convert enum value to display name
-    const componentTypeValue = firstComponent.componentType;
-    const componentTypeKey = Object.keys(ComponentType).find(
-      key => ComponentType[key as keyof typeof ComponentType] === componentTypeValue
-    );
-    if (componentTypeKey) {
-      // Get the display name by removing underscores and capitalizing
-      return componentTypeKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    }
-    return componentTypeValue; // Fallback to the raw value
-  };
+  // Unused function - commented out to fix ESLint
+  // const getPrimaryComponent = (item: ScopeItemWithComponents): string => {
+  //   if (item.components.length === 0) return 'No components';
+  //   const firstComponent = item.components[0];
+  //   if (!firstComponent || !firstComponent.componentType) {
+  //     return 'Unknown Type';
+  //   }
+  //   const componentTypeValue = firstComponent.componentType;
+  //   const componentTypeKey = Object.keys(ComponentType).find(
+  //     key => ComponentType[key as keyof typeof ComponentType] === componentTypeValue
+  //   );
+  //   if (componentTypeKey) {
+  //     return componentTypeKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  //   }
+  //   return componentTypeValue;
+  // };
 
   const calculateTotalEffort = (item: ScopeItemWithComponents): number => {
     const scopeItemEffort = item.functionalDesignDays + item.sitDays + item.uatDays;

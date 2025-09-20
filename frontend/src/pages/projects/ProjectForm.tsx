@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ProjectService from '../../services/api/v1/projectService';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { ProjectRequest, EnhancedScopeItemRequest, ScopeItem, ScopeItemWithEffort, BuildSubSkill, EffortEstimate } from '../../types';
+import type { EnhancedScopeItemRequest, ScopeItem, ScopeItemWithEffort, BuildSubSkill } from '../../types';
 import { ProjectType, BUILD_SUB_SKILLS, SkillFunction } from '../../types';
 
 const ProjectForm: React.FC = () => {

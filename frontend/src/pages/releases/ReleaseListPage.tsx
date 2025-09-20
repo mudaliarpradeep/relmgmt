@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
 import type { Release, ReleaseStatusEnum } from '../../services/api/sharedTypes';
@@ -14,9 +14,9 @@ const ReleaseListPage: React.FC = () => {
 
   useEffect(() => {
     loadReleases();
-  }, [currentPage, statusFilter]);
+  }, [currentPage, statusFilter, loadReleases]);
 
-  const loadReleases = async () => {
+  const loadReleases = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -29,7 +29,7 @@ const ReleaseListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, statusFilter]);
 
   const handleDeleteRelease = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this release?')) {

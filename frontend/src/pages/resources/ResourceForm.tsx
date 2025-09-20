@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ResourceService from '../../services/api/v1/resourceService';
-import type { Resource, ResourceRequest } from '../../services/api/sharedTypes';
-import { Status, EmployeeGrade, SkillFunction, SkillSubFunction, getApplicableSubFunctions } from '../../services/api/sharedTypes';
+import type { ResourceRequest } from '../../services/api/sharedTypes';
+import { Status, EmployeeGrade, SkillFunction, getApplicableSubFunctions } from '../../services/api/sharedTypes';
 
 interface FormData {
   name: string;

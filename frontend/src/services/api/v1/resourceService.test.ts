@@ -6,11 +6,7 @@ import type {
   ResourceRequest, 
   ResourceFilters, 
   PaginatedResponse, 
-  ResourceImportResponse,
-  StatusEnum,
-  EmployeeGradeEnum,
-  SkillFunctionEnum,
-  SkillSubFunctionEnum
+  ResourceImportResponse
 } from '../../../types';
 import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../../../types';
 

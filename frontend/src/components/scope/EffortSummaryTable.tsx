@@ -10,13 +10,13 @@ interface ReleaseEffortSummary {
 }
 
 // Local type definitions to avoid import issues
-type ComponentTypeKey = 'ETL' | 'FORGEROCK_IGA' | 'FORGEROCK_UI' | 'FORGEROCK_IG' | 'FORGEROCK_IDM' | 'SAILPOINT' | 'FUNCTIONAL_TEST';
+// type ComponentTypeKey = 'ETL' | 'FORGEROCK_IGA' | 'FORGEROCK_UI' | 'FORGEROCK_IG' | 'FORGEROCK_IDM' | 'SAILPOINT' | 'FUNCTIONAL_TEST';
 
-interface EffortSummaryItem {
-  componentType: string;
-  phase: string;
-  totalEffort: number;
-}
+// interface EffortSummaryItem {
+//   componentType: string;
+//   phase: string;
+//   totalEffort: number;
+// }
 
 interface EffortSummaryTableProps {
   releaseId: number;

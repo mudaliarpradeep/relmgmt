@@ -264,7 +264,7 @@ const AllocationListPage: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {conflicts.map((conflict) =>
-                  conflict.weeklyConflicts.map((weeklyConflict, index) => (
+                  conflict.weeklyConflicts.map((weeklyConflict) => (
                     <tr key={`${conflict.resourceId}-${weeklyConflict.weekStarting}`}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">

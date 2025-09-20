@@ -1,8 +1,6 @@
 import { apiClient } from '../apiClient';
 import type {
   PaginatedResponse,
-  Component,
-  ComponentRequest,
   ScopeItem,
   ScopeItemRequest,
   ScopeItemWithComponents,

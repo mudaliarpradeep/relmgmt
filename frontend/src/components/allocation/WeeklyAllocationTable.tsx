@@ -14,7 +14,7 @@ const WeeklyAllocationTable: React.FC<WeeklyAllocationTableProps> = ({
   onResourceClick,
   onAllocationUpdate
 }) => {
-  const [currentWeekStart, setCurrentWeekStart] = useState<string>(matrix.currentWeekStart);
+  const [currentWeekStart] = useState<string>(matrix.currentWeekStart);
   const [visibleWeeks, setVisibleWeeks] = useState<string[]>([]);
 
 

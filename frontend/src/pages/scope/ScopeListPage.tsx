@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ScopeService from '../../services/api/v1/scopeService';
 import ReleaseService from '../../services/api/v1/releaseService';
-import type { ScopeItem, Release, ScopeItemWithComponents, ComponentTypeEnum } from '../../services/api/sharedTypes';
+import type { Release, ScopeItemWithComponents, ComponentTypeEnum } from '../../services/api/sharedTypes';
 import { ComponentType } from '../../services/api/sharedTypes';
 import { EffortSummaryTable } from '../../components/scope/EffortSummaryTable';
 
@@ -71,25 +71,22 @@ const ScopeListPage: React.FC = () => {
     return scopeItemEffort + componentEffort;
   };
 
-  const getPrimaryComponent = (item: ScopeItemWithComponents): string => {
-    if (item.components.length === 0) return 'No components';
-
-    const firstComponent = item.components[0];
-    if (!firstComponent || !firstComponent.componentType) {
-      return 'Unknown Type';
-    }
-
-    // Convert enum value to display name
-    const componentTypeValue = firstComponent.componentType;
-    const componentTypeKey = Object.keys(ComponentType).find(
-      key => ComponentType[key as keyof typeof ComponentType] === componentTypeValue
-    );
-    if (componentTypeKey) {
-      // Get the display name by removing underscores and capitalizing
-      return componentTypeKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    }
-    return componentTypeValue; // Fallback to the raw value
-  };
+  // Unused function - commented out to fix ESLint
+  // const getPrimaryComponent = (item: ScopeItemWithComponents): string => {
+  //   if (item.components.length === 0) return 'No components';
+  //   const firstComponent = item.components[0];
+  //   if (!firstComponent || !firstComponent.componentType) {
+  //     return 'Unknown Type';
+  //   }
+  //   const componentTypeValue = firstComponent.componentType;
+  //   const componentTypeKey = Object.keys(ComponentType).find(
+  //     key => ComponentType[key as keyof typeof ComponentType] === componentTypeValue
+  //   );
+  //   if (componentTypeKey) {
+  //     return componentTypeKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  //   }
+  //   return componentTypeValue;
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -208,7 +205,7 @@ const ScopeListPage: React.FC = () => {
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
                             <div className="flex items-center space-x-2">
-                              {item.components.map((component, index) => (
+                              {item.components.map((component) => (
                                 <span 
                                   key={component.id}
                                   className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"

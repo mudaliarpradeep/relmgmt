@@ -10,8 +10,7 @@ import type {
   ScopeItemRequest, 
   ScopeItem,
   Component,
-  ComponentRequest,
-  ComponentTypeEnum
+  ComponentRequest
 } from '../../types';
 
 // Form schema for scope item with components

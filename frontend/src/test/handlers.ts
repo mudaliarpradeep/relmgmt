@@ -66,7 +66,7 @@ export const handlers = [
     return HttpResponse.json({});
   }),
   // Dashboard dependent endpoints
-  http.get('http://localhost:8080/api/v1/resources', ({ request }) => {
+  http.get('http://localhost:8080/api/v1/resources', () => {
     // Return minimal pageable shape
     return HttpResponse.json({ content: [], totalElements: 2, totalPages: 2, number: 0, size: 1 })
   }),

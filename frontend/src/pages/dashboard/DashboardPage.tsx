@@ -13,10 +13,10 @@ const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [totalResources, setTotalResources] = useState<number>(0);
   const [resourcesLoading, setResourcesLoading] = useState<boolean>(true);
-  const [resourcesError, setResourcesError] = useState<string | null>(null);
+  const [, setResourcesError] = useState<string | null>(null);
   const [activeReleasesCount, setActiveReleasesCount] = useState<number>(0);
   const [activeReleasesLoading, setActiveReleasesLoading] = useState<boolean>(true);
-  const [activeReleasesError, setActiveReleasesError] = useState<string | null>(null);
+  const [, setActiveReleasesError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResourceCount = async () => {

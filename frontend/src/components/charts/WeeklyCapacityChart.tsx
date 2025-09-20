@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ReferenceLine, Cell, ComposedChart, Line } from 'recharts';
+import { ResponsiveContainer, Bar, XAxis, YAxis, Tooltip, Legend, ReferenceLine, Cell, ComposedChart, Line } from 'recharts';
 import type { Allocation } from '../../services/api/v1/allocationService';
 import { enumerateWeeks, computeWeeklyAllocationForWeek } from '../../lib/capacity';
 
@@ -21,7 +21,6 @@ interface WeeklyData {
 
 const WeeklyCapacityChart: React.FC<WeeklyCapacityChartProps> = ({ 
   allocations, 
-  selectedWeek, 
   height = 300 
 }) => {
   const safeAllocations = Array.isArray(allocations) ? allocations : [];
@@ -101,7 +100,7 @@ const WeeklyCapacityChart: React.FC<WeeklyCapacityChartProps> = ({
   };
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const phases = getPhasesForWeek(data.week);

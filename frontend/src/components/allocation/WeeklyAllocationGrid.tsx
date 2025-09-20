@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Allocation } from '../../services/api/v1/allocationService';
 import { enumerateWeeks, computeWeeklyAllocationForWeek } from '../../lib/capacity';
-import { startOfWeek, addDays, isBefore, isAfter, isEqual, formatISO } from 'date-fns';
+import { startOfWeek, isBefore, isAfter, formatISO } from 'date-fns';
 
 interface WeeklyAllocationGridProps {
   allocations: Allocation[];
