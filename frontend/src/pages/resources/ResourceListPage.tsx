@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ResourceService from '../../services/api/v1/resourceService';
 import type { Resource, ResourceFilters, PaginatedResponse } from '../../services/api/sharedTypes';
@@ -221,7 +221,7 @@ const ResourceListPage = () => {
   const [importModalOpen, setImportModalOpen] = useState(false);
 
   // Load resources
-  const loadResources = async (newFilters?: ResourceFilters, isTableUpdate: boolean = false) => {
+  const loadResources = useCallback(async (newFilters?: ResourceFilters, isTableUpdate: boolean = false) => {
     try {
       if (isTableUpdate) {
         setTableLoading(true);
@@ -247,11 +247,11 @@ const ResourceListPage = () => {
         setLoading(false);
       }
     }
-  };
+  }, [filters, sort]);
 
   useEffect(() => {
     loadResources();
-  }, []);
+  }, [loadResources]);
 
   // Handle sort changes
   const handleSort = (field: string) => {

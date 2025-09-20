@@ -48,7 +48,7 @@ export interface Component {
   technicalDesignDays: number;
   buildDays: number;
   scopeItemId: number;
-  effortEstimates?: any[];
+  effortEstimates?: unknown[];
   createdAt: string;
   updatedAt: string;
 }

@@ -5,6 +5,7 @@ import { AuthProvider } from '../hooks/useAuth';
 import { NotificationsProvider } from '../hooks/useNotifications';
 
 // Custom render function that includes Router context
+// eslint-disable-next-line react-refresh/only-export-components
 const AllTheProviders = ({ children, initialEntries = ['/'] }: { children: React.ReactNode; initialEntries?: string[] }) => {
   return (
     <MemoryRouter initialEntries={initialEntries}>
@@ -64,4 +65,5 @@ export const renderWithBrowserRouter = (
 };
 
 // Re-export everything from testing-library
+// eslint-disable-next-line react-refresh/only-export-components
 export * from '@testing-library/react';

@@ -13,18 +13,18 @@ class ReportService {
     return res.data;
   }
 
-  async getResourceUtilizationReport(params: { from?: string; to?: string }): Promise<any[]> {
+  async getResourceUtilizationReport(params: { from?: string; to?: string }): Promise<unknown[]> {
     const query = new URLSearchParams();
     if (params.from) query.append('from', params.from);
     if (params.to) query.append('to', params.to);
-    const res = await apiClient.get<any[]>(`/v1/reports/resource-utilization?${query.toString()}`);
+    const res = await apiClient.get<unknown[]>(`/v1/reports/resource-utilization?${query.toString()}`);
     return res.data;
   }
 
-  async getReleaseTimelineReport(params: { year?: string }): Promise<any[]> {
+  async getReleaseTimelineReport(params: { year?: string }): Promise<unknown[]> {
     const query = new URLSearchParams();
     if (params.year) query.append('year', params.year);
-    const res = await apiClient.get<any[]>(`/v1/reports/release-timeline?${query.toString()}`);
+    const res = await apiClient.get<unknown[]>(`/v1/reports/release-timeline?${query.toString()}`);
     return res.data;
   }
 

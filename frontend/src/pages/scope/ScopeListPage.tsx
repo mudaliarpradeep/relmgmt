@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ScopeService from '../../services/api/v1/scopeService';
 import ReleaseService from '../../services/api/v1/releaseService';
-import type { Release, ScopeItemWithComponents, ComponentTypeEnum } from '../../services/api/sharedTypes';
-import { ComponentType } from '../../services/api/sharedTypes';
+import type { Release, ScopeItemWithComponents } from '../../services/api/sharedTypes';
+// import { ComponentType } from '../../services/api/sharedTypes';
 import { EffortSummaryTable } from '../../components/scope/EffortSummaryTable';
 
 // Helper function to convert enum to display label

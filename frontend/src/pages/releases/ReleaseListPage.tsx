@@ -29,7 +29,7 @@ const ReleaseListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, statusFilter]);
+  }, [currentPage]);
 
   const handleDeleteRelease = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this release?')) {

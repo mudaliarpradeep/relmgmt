@@ -27,7 +27,7 @@ const EffortEstimationForm: React.FC = () => {
 
   type FormValues = z.infer<typeof schema>;
 
-  const { register, handleSubmit, watch, setValue, setError, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const { register, handleSubmit, watch, setError, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { skillFunction: SkillFunction.BUILD, phase: ReleasePhase.BUILD, effortDays: 1 },
   });

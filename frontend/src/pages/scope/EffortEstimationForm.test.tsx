@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
-import { renderWithRouter } from '../../test/test-utils';
-import ComponentService from '../../services/api/v1/componentService';
+// import { renderWithRouter } from '../../test/test-utils';
+// import ComponentService from '../../services/api/v1/componentService';
 
 vi.mock('../../services/api/v1/componentService');
 // const mockedService = vi.mocked(ComponentService);

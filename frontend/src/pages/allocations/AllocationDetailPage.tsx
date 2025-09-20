@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { allocationService } from '../../services/api/v1/allocationService';
 import type { Allocation } from '../../services/api/v1/allocationService';
@@ -25,9 +25,9 @@ const AllocationDetailPage: React.FC = () => {
     if (releaseId) {
       loadReleaseAndAllocations();
     }
-  }, [releaseId]);
+  }, [releaseId, loadReleaseAndAllocations]);
 
-  const loadReleaseAndAllocations = async () => {
+  const loadReleaseAndAllocations = useCallback(async () => {
     try {
       setLoading(true);
       const [releaseData, allocationsData, canGenerate] = await Promise.all([
@@ -47,7 +47,7 @@ const AllocationDetailPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [releaseId]);
 
   const handleGenerateAllocations = async () => {
     try {

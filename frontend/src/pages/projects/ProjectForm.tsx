@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ProjectService from '../../services/api/v1/projectService';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { EnhancedScopeItemRequest, ScopeItem, ScopeItemWithEffort, BuildSubSkill } from '../../types';
+import type { EnhancedScopeItemRequest, ScopeItemWithEffort, BuildSubSkill } from '../../types';
 import { ProjectType, BUILD_SUB_SKILLS, SkillFunction } from '../../types';
 
 const ProjectForm: React.FC = () => {
@@ -13,7 +13,7 @@ const ProjectForm: React.FC = () => {
   const { id, releaseId } = useParams();
   const isEdit = Boolean(id) && !releaseId; // edit uses /projects/:id/edit, create uses /releases/:releaseId/projects/new
 
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [scopeItems, setScopeItems] = useState<ScopeItemWithEffort[]>([]);
@@ -75,7 +75,7 @@ const ProjectForm: React.FC = () => {
             effortEstimates,
             component
           };
-        } catch (error) {
+        } catch {
           // If effort estimates can't be fetched, return item without them
           return {
             ...item,
@@ -110,7 +110,7 @@ const ProjectForm: React.FC = () => {
       }
     };
     load();
-  }, [isEdit, id]);
+  }, [isEdit, id, setValue]);
 
   const onSubmit = async (form: FormValues) => {
     try {
