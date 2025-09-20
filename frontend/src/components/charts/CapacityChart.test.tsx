@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import CapacityChart from './CapacityChart';
-import { CapacityDatum, getCapacityBarColor } from '../../lib/capacityUtils';
+import type { CapacityDatum } from '../../lib/capacityUtils';
+import { getCapacityBarColor } from '../../lib/capacityUtils';
 
 describe('CapacityChart', () => {
   it('renders without crashing and shows container', () => {

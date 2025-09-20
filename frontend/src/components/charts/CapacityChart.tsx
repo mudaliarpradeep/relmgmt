@@ -1,6 +1,7 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ReferenceLine, Cell } from 'recharts';
-import { CapacityDatum, getCapacityBarColor } from '../../lib/capacityUtils';
+import type { CapacityDatum } from '../../lib/capacityUtils';
+import { getCapacityBarColor } from '../../lib/capacityUtils';
 
 interface CapacityChartProps {
   data: CapacityDatum[];
