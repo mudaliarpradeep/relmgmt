@@ -8,10 +8,10 @@ FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
 
 # Copy gradle wrapper and configuration files
-COPY backend/gradlew .
-COPY backend/gradle gradle/
-COPY backend/build.gradle .
-COPY backend/settings.gradle .
+COPY gradlew .
+COPY gradle gradle/
+COPY build.gradle .
+COPY settings.gradle .
 
 # Make gradlew executable
 RUN chmod +x ./gradlew
@@ -20,7 +20,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew dependencies --no-daemon
 
 # Copy source code
-COPY backend/src src/
+COPY src src/
 
 # Build the application (skip tests for faster builds - tests run in CI)
 RUN ./gradlew build -x test --no-daemon
