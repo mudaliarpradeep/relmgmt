@@ -46,8 +46,10 @@ jobs:
     - name: Check for dependency updates
       run: |
         cd backend
-        ./gradlew dependencyUpdates > dependency-updates.txt 2>&1 || true
-        cat dependency-updates.txt
+        echo "Dependency updates check not configured - skipping"
+        echo "TODO: Add Gradle Versions plugin to build.gradle to enable dependency updates checking"
+        # ./gradlew dependencyUpdates > dependency-updates.txt 2>&1 || true
+        # cat dependency-updates.txt
 
     - name: Create dependency update branch
       run: |

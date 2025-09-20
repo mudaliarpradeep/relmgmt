@@ -75,15 +75,8 @@ jobs:
       run: |
         cd backend
         chmod +x gradlew
-        ./gradlew dependencyCheckAnalyze || true
-
-    - name: Upload Gradle dependency check results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: dependency-check-report
-        path: backend/build/reports/dependency-check-report.html
-        retention-days: 30
+        echo "Dependency check not configured - skipping"
+        # TODO: Add OWASP Dependency Check plugin to build.gradle to enable dependency scanning
 
     - name: Setup Node.js
       uses: actions/setup-node@v4

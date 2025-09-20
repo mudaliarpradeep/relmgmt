@@ -623,16 +623,20 @@ The system is now ready for comprehensive user acceptance testing and production
   - `frontend/src/pages/resources/ResourceListPage.tsx` - Fixed resources array in components
 
 ### GitHub Actions Workflow Fixes
-- **Issue**: Security scanning and CI/CD workflows failing with "No such file or directory" errors
-- **Root Cause**: Workflows using incorrect paths `relmgmt/backend` and `relmgmt/frontend` instead of `backend` and `frontend`
-- **Solution**: Updated all workflow files to use correct directory paths
+- **Issue**: Security scanning and CI/CD workflows failing with "No such file or directory" errors and non-existent Gradle tasks
+- **Root Cause**: 
+  1. Workflows using incorrect paths `relmgmt/backend` and `relmgmt/frontend` instead of `backend` and `frontend`
+  2. Workflows trying to run non-existent Gradle tasks (`integrationTest`, `dependencyCheckAnalyze`, `dependencyUpdates`)
+- **Solution**: 
+  1. Updated all workflow files to use correct directory paths
+  2. Removed or commented out non-existent Gradle tasks
 - **Files Fixed**:
-  - `.github/workflows/security-scan.yml` - Fixed all security scanning paths
-  - `.github/workflows/backend-ci.yml` - Fixed backend CI/CD paths
+  - `.github/workflows/security-scan.yml` - Fixed paths and removed non-existent `dependencyCheckAnalyze` task
+  - `.github/workflows/backend-ci.yml` - Fixed paths and removed non-existent `integrationTest` task
   - `.github/workflows/frontend-ci.yml` - Fixed frontend CI/CD paths
   - `.github/workflows/deploy-render.yml` - Fixed deployment trigger paths
   - `.github/workflows/deploy-full-stack.yml` - Fixed full-stack deployment paths
-  - `.github/workflows/dependency-update.yml` - Fixed dependency update paths
+  - `.github/workflows/dependency-update.yml` - Fixed paths and removed non-existent `dependencyUpdates` task
 
 ---
 
