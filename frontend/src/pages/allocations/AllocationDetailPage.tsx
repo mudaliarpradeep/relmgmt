@@ -21,12 +21,6 @@ const AllocationDetailPage: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState<string>('');
   const [canGenerateAllocations, setCanGenerateAllocations] = useState(false);
 
-  useEffect(() => {
-    if (releaseId) {
-      loadReleaseAndAllocations();
-    }
-  }, [releaseId, loadReleaseAndAllocations]);
-
   const loadReleaseAndAllocations = useCallback(async () => {
     try {
       setLoading(true);
@@ -48,6 +42,12 @@ const AllocationDetailPage: React.FC = () => {
       setLoading(false);
     }
   }, [releaseId]);
+
+  useEffect(() => {
+    if (releaseId) {
+      loadReleaseAndAllocations();
+    }
+  }, [releaseId, loadReleaseAndAllocations]);
 
   const handleGenerateAllocations = async () => {
     try {

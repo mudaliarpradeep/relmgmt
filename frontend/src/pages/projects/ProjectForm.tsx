@@ -13,7 +13,7 @@ const ProjectForm: React.FC = () => {
   const { id, releaseId } = useParams();
   const isEdit = Boolean(id) && !releaseId; // edit uses /projects/:id/edit, create uses /releases/:releaseId/projects/new
 
-  const [, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [scopeItems, setScopeItems] = useState<ScopeItemWithEffort[]>([]);
