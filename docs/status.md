@@ -37,7 +37,7 @@
 - ✅ **TruffleHog Error**: Implemented conditional execution to prevent "BASE and HEAD commits are the same" error
 - ✅ **SARIF Upload Permissions**: Fixed permissions for Trivy and Hadolint security scan uploads
 - ✅ **Storybook Deployment**: Re-enabled GitHub Pages deployment (Pages feature enabled)
-- ✅ **Trivy Vulnerability Scanner Error**: Fixed container image scanning by adding Docker authentication and `--skip-version-check` flag
+- ✅ **Trivy Vulnerability Scanner Error**: Fixed container image scanning by building images locally for scanning and adding `--skip-version-check` flag
 
 **Pipeline Status**:
 - ✅ **Backend CI/CD**: Docker build and push working correctly

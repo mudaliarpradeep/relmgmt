@@ -449,11 +449,10 @@
   - Added `actions: read` and `contents: read` to container scanning jobs
   - Resolved "Resource not accessible by integration" for security results
 - **Pipeline-Fix-6**: Trivy Vulnerability Scanner Error
-  - Fixed container image scanning authentication issues
-  - Added Docker registry authentication for GitHub Container Registry
+  - Fixed container image scanning by building images locally instead of scanning remote images
   - Added `--skip-version-check` flag to prevent version check failures
-  - Updated both security-scan.yml and frontend-ci.yml workflows
-  - Resolved "unable to find the specified image" and "UNAUTHORIZED" errors
+  - Updated frontend-ci.yml workflow to build image locally for scanning
+  - Resolved "unable to find the specified image" and "MANIFEST_UNKNOWN" errors
 - **Pipeline-Fix-7**: Storybook Deployment Configuration
   - Re-enabled GitHub Pages deployment (Pages feature now enabled)
   - Removed conditional execution to allow automatic deployment
