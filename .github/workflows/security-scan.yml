@@ -157,10 +157,21 @@ jobs:
       actions: read
       contents: read
       security-events: write
+      packages: read
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build backend image for scanning
       run: |
@@ -173,6 +184,7 @@ jobs:
         image-ref: 'relmgmt-backend:scan'
         format: 'sarif'
         output: 'backend-trivy-results.sarif'
+        skip-version-check: true
 
     - name: Upload backend Trivy scan results
       uses: github/codeql-action/upload-sarif@v3
@@ -191,6 +203,7 @@ jobs:
         image-ref: 'relmgmt-frontend:scan'
         format: 'sarif'
         output: 'frontend-trivy-results.sarif'
+        skip-version-check: true
 
     - name: Upload frontend Trivy scan results
       uses: github/codeql-action/upload-sarif@v3

@@ -448,7 +448,13 @@
   - Fixed permissions for Trivy and Hadolint security scan uploads
   - Added `actions: read` and `contents: read` to container scanning jobs
   - Resolved "Resource not accessible by integration" for security results
-- **Pipeline-Fix-6**: Storybook Deployment Configuration
+- **Pipeline-Fix-6**: Trivy Vulnerability Scanner Error
+  - Fixed container image scanning authentication issues
+  - Added Docker registry authentication for GitHub Container Registry
+  - Added `--skip-version-check` flag to prevent version check failures
+  - Updated both security-scan.yml and frontend-ci.yml workflows
+  - Resolved "unable to find the specified image" and "UNAUTHORIZED" errors
+- **Pipeline-Fix-7**: Storybook Deployment Configuration
   - Re-enabled GitHub Pages deployment (Pages feature now enabled)
   - Removed conditional execution to allow automatic deployment
   - Storybook automatically deploys to GitHub Pages on main branch pushes

@@ -38,6 +38,7 @@ All critical GitHub Actions pipeline issues have been resolved:
 
 ### ✅ **Security Scanning Issues Fixed**
 - **CodeQL Permissions**: Added `actions: read` permissions for telemetry
+- **Trivy Vulnerability Scanner**: Fixed container image scanning authentication and added `--skip-version-check` flag
 - **SARIF Uploads**: Fixed permissions for Trivy and Hadolint results
 - **TruffleHog**: Implemented conditional execution for different trigger types
 

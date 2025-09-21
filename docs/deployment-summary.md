@@ -29,6 +29,7 @@ This document provides complete traceability for the Release Management System's
 | **CodeQL Permissions** | ✅ Fixed | Added `actions: read` permissions for telemetry | Security scanning results upload successfully |
 | **TruffleHog Errors** | ✅ Fixed | Implemented conditional execution for different triggers | Secret scanning works for all workflow types |
 | **SARIF Uploads** | ✅ Fixed | Updated permissions for Trivy and Hadolint | Container vulnerability results appear in Security tab |
+| **Trivy Vulnerability Scanner** | ✅ Fixed | Added Docker authentication and `--skip-version-check` flag | Container image vulnerability scanning works correctly |
 | **Storybook Deployment** | ✅ Fixed | Re-enabled GitHub Pages deployment | Storybook automatically deploys to GitHub Pages |
 
 ### 🏗️ **DEPLOYMENT ARCHITECTURE**
