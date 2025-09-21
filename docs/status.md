@@ -38,6 +38,7 @@
 - ✅ **SARIF Upload Permissions**: Fixed permissions for Trivy and Hadolint security scan uploads
 - ✅ **Storybook Deployment**: Re-enabled GitHub Pages deployment (Pages feature enabled)
 - ✅ **Trivy Vulnerability Scanner Error**: Fixed container image scanning by building images locally for scanning and adding `--skip-version-check` flag
+- ✅ **Render Deployment Docker Context Error**: Fixed Docker build context for Render deployment by adding `dockerContext: ./backend`
 
 **Pipeline Status**:
 - ✅ **Backend CI/CD**: Docker build and push working correctly

@@ -457,6 +457,10 @@
   - Re-enabled GitHub Pages deployment (Pages feature now enabled)
   - Removed conditional execution to allow automatic deployment
   - Storybook automatically deploys to GitHub Pages on main branch pushes
+- **Pipeline-Fix-8**: Render Deployment Docker Context Error
+  - Fixed Docker build context for Render deployment
+  - Added `dockerContext: ./backend` to render.yaml configuration
+  - Resolved "/src: not found" error in Render Docker builds
 
 ### **🔄 Current Phase Priorities (Audit & Performance)**
 1. **Backend Audit and Transaction Logging (BE-Phase-13)**

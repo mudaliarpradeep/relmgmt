@@ -31,6 +31,7 @@ This document provides complete traceability for the Release Management System's
 | **SARIF Uploads** | ✅ Fixed | Updated permissions for Trivy and Hadolint | Container vulnerability results appear in Security tab |
 | **Trivy Vulnerability Scanner** | ✅ Fixed | Build images locally for scanning and added `--skip-version-check` flag | Container image vulnerability scanning works correctly |
 | **Storybook Deployment** | ✅ Fixed | Re-enabled GitHub Pages deployment | Storybook automatically deploys to GitHub Pages |
+| **Render Deployment Docker Context** | ✅ Fixed | Added `dockerContext: ./backend` to render.yaml | Render Docker builds work correctly with proper build context |
 
 ### 🏗️ **DEPLOYMENT ARCHITECTURE**
 

@@ -44,6 +44,7 @@ All critical GitHub Actions pipeline issues have been resolved:
 
 ### ✅ **Deployment Configuration Fixed**
 - **Storybook**: Re-enabled GitHub Pages deployment (Pages feature enabled)
+- **Render Deployment**: Fixed Docker build context by adding `dockerContext: ./backend`
 - **Error Handling**: Added `continue-on-error` for graceful failure handling
 - **Permissions**: Updated all workflow permissions for proper access
 

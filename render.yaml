@@ -11,6 +11,7 @@ services:
     region: oregon
     plan: free  # FREE TIER - 750 hours/month (sleeps after 15 min inactivity)
     dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     buildCommand: ""
     envVars:
       # Database connection components (auto-injected from linked database)
