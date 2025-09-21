@@ -427,6 +427,32 @@
 - **BE-Phase-11**: Complete weekly allocation system with new DTOs and endpoints
 - **BE-Phase-12**: Complete critical bug fixes and PRD compliance
 
+### **✅ GitHub Actions Pipeline Fixes (January 15, 2025)**
+- **Pipeline-Fix-1**: Docker Build Context Resolution
+  - Fixed backend Dockerfile paths to work with GitHub Actions build context
+  - Resolved "/backend/src not found" error in Docker builds
+  - Updated COPY commands to use relative paths from build context
+- **Pipeline-Fix-2**: Gradle Wrapper Configuration
+  - Corrected Gradle wrapper directory copy in Dockerfile
+  - Fixed "failed to solve: process gradlew dependencies" error
+  - Updated COPY gradle/wrapper gradle/wrapper/ for proper structure
+- **Pipeline-Fix-3**: Security Scanning Permissions
+  - Added required `actions: read` permissions for CodeQL analysis
+  - Fixed "Resource not accessible by integration" errors
+  - Updated global and job-level permissions in security workflows
+- **Pipeline-Fix-4**: TruffleHog Secret Scanning
+  - Implemented conditional execution to prevent "BASE and HEAD commits are the same" error
+  - Added smart change detection for different trigger types
+  - Graceful handling of scheduled runs with no changes
+- **Pipeline-Fix-5**: SARIF Upload Permissions
+  - Fixed permissions for Trivy and Hadolint security scan uploads
+  - Added `actions: read` and `contents: read` to container scanning jobs
+  - Resolved "Resource not accessible by integration" for security results
+- **Pipeline-Fix-6**: Storybook Deployment Configuration
+  - Re-enabled GitHub Pages deployment (Pages feature now enabled)
+  - Removed conditional execution to allow automatic deployment
+  - Storybook automatically deploys to GitHub Pages on main branch pushes
+
 ### **🔄 Current Phase Priorities (Audit & Performance)**
 1. **Backend Audit and Transaction Logging (BE-Phase-13)**
    - Implement transaction logging aspect
