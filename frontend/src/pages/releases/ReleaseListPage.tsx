@@ -18,10 +18,12 @@ const ReleaseListPage: React.FC = () => {
       setError(null);
       
       const response = await ReleaseService.getReleases(currentPage, 10);
-      setReleases(response.content);
-      setTotalPages(response.totalPages);
+      setReleases(response?.content || []);
+      setTotalPages(response?.totalPages || 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load releases');
+      setReleases([]);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -65,7 +67,7 @@ const ReleaseListPage: React.FC = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  if (loading && releases.length === 0) {
+  if (loading && (releases || []).length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -206,7 +208,7 @@ const ReleaseListPage: React.FC = () => {
           </div>
 
           {/* Empty State */}
-          {releases.length === 0 && !loading && (
+          {(releases || []).length === 0 && !loading && (
             <div className="text-center py-12">
               <div className="text-gray-500">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
