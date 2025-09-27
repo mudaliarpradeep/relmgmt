@@ -3,8 +3,8 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithRouter } from '../../test/test-utils';
 import ResourceListPage from './ResourceListPage';
 import ResourceService from '../../services/api/v1/resourceService';
-import type { PaginatedResponse, Resource } from '../../types';
-import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../../types';
+import type { PaginatedResponse, Resource } from '../../services/api/sharedTypes';
+import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../../services/api/sharedTypes';
 
 // Mock the ResourceService
 vi.mock('../../services/api/v1/resourceService');

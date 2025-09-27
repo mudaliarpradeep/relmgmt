@@ -9,4 +9,20 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          api: ['axios'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
+  },
 })

@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import WeeklyAllocationTable from './WeeklyAllocationTable';
-import type { WeeklyAllocationMatrix } from '../../types';
+import type { WeeklyAllocationMatrix } from '../../services/api/sharedTypes';
 
 // Mock the date-fns functions with a simpler approach
 let weekOffset = 0;

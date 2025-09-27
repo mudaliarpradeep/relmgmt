@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { format, startOfWeek, addWeeks, parseISO } from 'date-fns';
-import type { WeeklyAllocationMatrix, ResourceAllocation, WeeklyAllocation } from '../../types';
+import type { WeeklyAllocationMatrix, ResourceAllocation, WeeklyAllocation } from '../../services/api/sharedTypes';
 
 interface WeeklyAllocationTableProps {
   matrix: WeeklyAllocationMatrix;

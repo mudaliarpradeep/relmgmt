@@ -545,3 +545,56 @@ export const getApplicableSubFunctions = (skillFunction: SkillFunctionEnum): Ski
       return [];
   }
 };
+
+// Weekly Allocation Types
+export interface WeeklyAllocation {
+  weekStart: string; // YYYY-MM-DD (Monday)
+  personDays: number;
+  projectName?: string;
+  projectId?: string;
+}
+
+export interface ResourceAllocation {
+  id: string;
+  name: string;
+  grade: string;
+  skillFunction: string;
+  skillSubFunction?: string;
+  profileUrl: string;
+  weeklyAllocations: WeeklyAllocation[];
+}
+
+export interface WeeklyAllocationMatrix {
+  resources: ResourceAllocation[];
+  currentWeekStart: string;
+  timeWindow: {
+    startWeek: string;
+    endWeek: string;
+    totalWeeks: number;
+  };
+}
+
+export interface ResourceProfile {
+  id: string;
+  name: string;
+  grade: string;
+  skillFunction: string;
+  skillSubFunction?: string;
+  profileUrl: string;
+}
+
+// Utility functions for component badge colors
+export const getComponentBadgeColor = (component?: string): string => {
+  if (!component) return 'bg-gray-100 text-gray-800';
+  
+  const colorMap: Record<string, string> = {
+    'ETL': 'bg-blue-100 text-blue-800',
+    'ForgeRock IGA': 'bg-purple-100 text-purple-800',
+    'ForgeRock IG': 'bg-indigo-100 text-indigo-800',
+    'ForgeRock UI': 'bg-cyan-100 text-cyan-800',
+    'SailPoint': 'bg-green-100 text-green-800',
+    'Functional Test': 'bg-orange-100 text-orange-800'
+  };
+  
+  return colorMap[component] || 'bg-gray-100 text-gray-800';
+};

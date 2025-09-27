@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { authService } from './authService';
 import apiClient from '../apiClient';
-import type { LoginRequest, LoginResponse, AuthUser } from '../../../types';
+import type { LoginRequest, LoginResponse, AuthUser } from '../sharedTypes';
 
 // Mock the API client
 vi.mock('../apiClient');

@@ -3,7 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { NotificationsProvider, useNotifications } from './useNotifications';
 import NotificationService from '../services/api/v1/notificationService';
-import { EventType } from '../types';
+import { EventType } from '../services/api/sharedTypes';
 
 vi.mock('../services/api/v1/notificationService');
 const mockedService = vi.mocked(NotificationService);

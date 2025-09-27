@@ -3,7 +3,7 @@ import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { renderWithRouter } from '../../test/test-utils';
 import ResourceForm from './ResourceForm';
 import ResourceService from '../../services/api/v1/resourceService';
-import type { Resource } from '../../types';
+import type { Resource } from '../../services/api/sharedTypes';
 
 // Mock the ResourceService
 vi.mock('../../services/api/v1/resourceService');

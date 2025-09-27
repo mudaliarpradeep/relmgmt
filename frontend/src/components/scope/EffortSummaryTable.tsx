@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ScopeService } from '../../services/api/v1/scopeService';
-import { getComponentBadgeColor } from '../../types';
+import { getComponentBadgeColor } from '../../services/api/sharedTypes';
 
 // Define the type locally to avoid import issues
 interface ReleaseEffortSummary {

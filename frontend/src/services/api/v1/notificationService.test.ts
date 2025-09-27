@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import NotificationService from './notificationService';
 import apiClient from '../apiClient';
-import type { Notification, PaginatedResponse, NotificationFilters } from '../../../types';
-import { EventType } from '../../../types';
+import type { Notification, PaginatedResponse, NotificationFilters } from '../sharedTypes';
+import { EventType } from '../sharedTypes';
 
 vi.mock('../apiClient');
 const mockedApiClient = vi.mocked(apiClient);

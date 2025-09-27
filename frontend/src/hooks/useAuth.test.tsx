@@ -3,7 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { AuthProvider, useAuth } from './useAuth';
 import { authService } from '../services/api/v1/authService';
-import type { LoginRequest, LoginResponse, AuthUser } from '../types';
+import type { LoginRequest, LoginResponse, AuthUser } from '../services/api/sharedTypes';
 
 // Mock the auth service
 vi.mock('../services/api/v1/authService');

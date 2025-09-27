@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProjectService from './projectService';
 import apiClient from '../apiClient';
-import type { Project, ProjectRequest } from '../../../types';
+import type { Project, ProjectRequest } from '../sharedTypes';
 
 vi.mock('../apiClient');
 const mockedApi = vi.mocked(apiClient);

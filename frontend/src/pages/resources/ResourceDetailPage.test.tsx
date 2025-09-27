@@ -3,8 +3,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import ResourceDetailPage from './ResourceDetailPage';
 import ResourceService from '../../services/api/v1/resourceService';
-import type { Resource } from '../../types';
-import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../../types';
+import type { Resource } from '../../services/api/sharedTypes';
+import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../../services/api/sharedTypes';
 
 // Mock the resource service
 vi.mock('../../services/api/v1/resourceService');

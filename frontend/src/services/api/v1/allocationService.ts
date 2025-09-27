@@ -1,5 +1,5 @@
 import { apiClient } from '../apiClient';
-import type { WeeklyAllocationMatrix, ResourceProfile } from '../../../types';
+import type { WeeklyAllocationMatrix, ResourceProfile } from '../sharedTypes';
 
 export interface Allocation {
   id: number;

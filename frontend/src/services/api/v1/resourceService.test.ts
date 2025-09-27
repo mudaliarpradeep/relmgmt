@@ -8,7 +8,7 @@ import type {
   PaginatedResponse, 
   ResourceImportResponse
 } from '../../../types';
-import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../../../types';
+import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../sharedTypes';
 
 // Mock the API client
 vi.mock('../apiClient');
