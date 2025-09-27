@@ -12,10 +12,6 @@ const ReleaseListPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [statusFilter, setStatusFilter] = useState<ReleaseStatusEnum | ''>('');
 
-  useEffect(() => {
-    loadReleases();
-  }, [currentPage, statusFilter, loadReleases]);
-
   const loadReleases = useCallback(async () => {
     try {
       setLoading(true);
@@ -30,6 +26,10 @@ const ReleaseListPage: React.FC = () => {
       setLoading(false);
     }
   }, [currentPage]);
+
+  useEffect(() => {
+    loadReleases();
+  }, [currentPage, statusFilter, loadReleases]);
 
   const handleDeleteRelease = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this release?')) {
