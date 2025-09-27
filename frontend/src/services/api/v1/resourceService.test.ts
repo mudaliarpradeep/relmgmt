@@ -7,7 +7,7 @@ import type {
   ResourceFilters, 
   PaginatedResponse, 
   ResourceImportResponse
-} from '../../../types';
+} from '../sharedTypes';
 import { Status, EmployeeGrade, SkillFunction, SkillSubFunction } from '../sharedTypes';
 
 // Mock the API client

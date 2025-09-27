@@ -5,8 +5,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ProjectService from '../../services/api/v1/projectService';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { EnhancedScopeItemRequest, ScopeItemWithEffort, BuildSubSkill } from '../../types';
-import { ProjectType, BUILD_SUB_SKILLS, SkillFunction } from '../../types';
+import type { EnhancedScopeItemRequest, ScopeItemWithEffort, BuildSubSkill } from '../../services/api/sharedTypes';
+import { ProjectType, BUILD_SUB_SKILLS, SkillFunction } from '../../services/api/sharedTypes';
 
 const ProjectForm: React.FC = () => {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { screen, waitFor, fireEvent, act } from '../../test/test-utils';
 import NotificationListPage from './NotificationListPage';
 import { renderWithAuth } from '../../test/test-utils';
 import NotificationService from '../../services/api/v1/notificationService';
-import { EventType, type Notification } from '../../types';
+import { EventType, type Notification } from '../../services/api/sharedTypes';
 
 vi.mock('../../services/api/v1/notificationService');
 const mockedService = vi.mocked(NotificationService);

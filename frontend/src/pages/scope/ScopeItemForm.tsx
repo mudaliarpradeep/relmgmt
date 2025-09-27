@@ -11,7 +11,7 @@ import type {
   ScopeItem,
   Component,
   ComponentRequest
-} from '../../types';
+} from '../../services/api/sharedTypes';
 
 // Form schema for scope item with components
 const scopeItemSchema = z.object({

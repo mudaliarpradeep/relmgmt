@@ -5,8 +5,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ScopeService from '../../services/api/v1/scopeService';
 import ProjectService from '../../services/api/v1/projectService';
-import type { EnhancedScopeItemRequest, BuildSubSkill, Project } from '../../types';
-import { BUILD_SUB_SKILLS } from '../../types';
+import type { EnhancedScopeItemRequest, BuildSubSkill, Project } from '../../services/api/sharedTypes';
+import { BUILD_SUB_SKILLS } from '../../services/api/sharedTypes';
 
 const EnhancedScopeItemForm: React.FC = () => {
   const navigate = useNavigate();

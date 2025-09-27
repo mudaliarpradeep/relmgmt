@@ -598,3 +598,61 @@ export const getComponentBadgeColor = (component?: string): string => {
   
   return colorMap[component] || 'bg-gray-100 text-gray-800';
 };
+
+// Effort Estimate types
+export interface EffortEstimate {
+  id: number;
+  componentId: number;
+  skillFunction: SkillFunctionEnum;
+  skillSubFunction?: SkillSubFunctionEnum;
+  phase: ReleasePhaseEnum;
+  effortDays: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EffortEstimateRequest {
+  skillFunction: SkillFunctionEnum;
+  skillSubFunction?: SkillSubFunctionEnum;
+  phase: ReleasePhaseEnum;
+  effortDays: number;
+}
+
+export interface EffortEstimateResponse {
+  id: number;
+  skillFunction: SkillFunctionEnum;
+  skillSubFunction?: SkillSubFunctionEnum;
+  phase: ReleasePhaseEnum;
+  effortDays: number;
+  componentId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Build sub-skills for scope items (subset of SkillSubFunction)
+export const BUILD_SUB_SKILLS = [
+  SkillSubFunction.ETL,
+  SkillSubFunction.FORGEROCK_IGA,
+  SkillSubFunction.FORGEROCK_IG,
+  SkillSubFunction.FORGEROCK_UI,
+  SkillSubFunction.SAILPOINT,
+  SkillSubFunction.FUNCTIONAL_TEST
+] as const;
+
+export type BuildSubSkill = typeof BUILD_SUB_SKILLS[number];
+
+// Enhanced scope item types for legacy project system
+export interface EnhancedScopeItemRequest {
+  name: string;
+  description?: string;
+  functionalDesignDays: number;
+  sitDays: number;
+  uatDays: number;
+  components: ComponentRequest[];
+  buildSubSkills?: BuildSubSkill[];
+}
+
+export interface ScopeItemWithEffort extends ScopeItem {
+  totalEffortDays: number;
+  effortByPhase: Record<string, number>;
+}

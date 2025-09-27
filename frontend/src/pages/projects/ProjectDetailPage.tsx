@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import ProjectService from '../../services/api/v1/projectService';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { Project, ScopeItem, EnhancedScopeItemRequest, BuildSubSkill } from '../../types';
-import { BUILD_SUB_SKILLS } from '../../types';
+import type { Project, ScopeItem, EnhancedScopeItemRequest, BuildSubSkill } from '../../services/api/sharedTypes';
+import { BUILD_SUB_SKILLS } from '../../services/api/sharedTypes';
 
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams();

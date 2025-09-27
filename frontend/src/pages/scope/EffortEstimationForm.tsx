@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { EffortEstimateRequest } from '../../types';
-import { SkillFunction, ReleasePhase, getApplicableSubFunctions } from '../../types';
+import type { EffortEstimateRequest } from '../../services/api/sharedTypes';
+import { SkillFunction, ReleasePhase, getApplicableSubFunctions } from '../../services/api/sharedTypes';
 
 const EffortEstimationForm: React.FC = () => {
   const navigate = useNavigate();

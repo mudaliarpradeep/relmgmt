@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
 import ProjectService from '../../services/api/v1/projectService';
 import ScopeService from '../../services/api/v1/scopeService';
-import type { Release, Project, ScopeItem } from '../../types';
+import type { Release, Project, ScopeItem } from '../../services/api/sharedTypes';
 
 const ScopeOverviewPage: React.FC = () => {
   const [releases, setReleases] = useState<Release[]>([]);
