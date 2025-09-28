@@ -540,7 +540,7 @@ const ResourceListPage = () => {
       )}
 
       {/* Resources Table */}
-      {resources && resources.content.length > 0 ? (
+      {resources && resources.content && resources.content.length > 0 ? (
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Table Loading Overlay */}
           {tableLoading && (
@@ -585,7 +585,7 @@ const ResourceListPage = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               <TableContent
-                resources={resources.content}
+                resources={resources.content || []}
                 onRowClick={handleRowClick}
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
@@ -607,7 +607,7 @@ const ResourceListPage = () => {
             )}
             <div className="divide-y divide-gray-200">
               <MobileCardContent
-                resources={resources.content}
+                resources={resources.content || []}
                 onRowClick={handleRowClick}
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
@@ -616,7 +616,7 @@ const ResourceListPage = () => {
           </div>
 
           {/* Pagination */}
-          {resources.totalPages > 1 && (
+          {resources && resources.totalPages && resources.totalPages > 1 && (
             <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
@@ -629,7 +629,7 @@ const ResourceListPage = () => {
                 </button>
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage >= resources.totalPages - 1}
+                  disabled={currentPage >= (resources.totalPages || 1) - 1}
                   className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   data-testid="mobile-next-button"
                 >
@@ -640,11 +640,11 @@ const ResourceListPage = () => {
                 <div>
                   <p className="text-sm text-gray-700">
                     Showing{' '}
-                    <span className="font-medium">{currentPage * resources.size + 1}</span> to{' '}
+                    <span className="font-medium">{currentPage * (resources.size || 0) + 1}</span> to{' '}
                     <span className="font-medium">
-                      {Math.min((currentPage + 1) * resources.size, resources.totalElements)}
+                      {Math.min((currentPage + 1) * (resources.size || 0), resources.totalElements || 0)}
                     </span>{' '}
-                    of <span className="font-medium">{resources.totalElements}</span> results
+                    of <span className="font-medium">{resources.totalElements || 0}</span> results
                   </p>
                 </div>
                 <div>
@@ -659,7 +659,7 @@ const ResourceListPage = () => {
                     </button>
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage >= resources.totalPages - 1}
+                      disabled={currentPage >= (resources.totalPages || 1) - 1}
                       className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       data-testid="desktop-next-button"
                     >
