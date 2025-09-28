@@ -94,7 +94,7 @@ services:
           name: relmgmt-backend
           property: host
           prefix: https://
-          suffix: /api/v1
+          suffix: /api
       - key: VITE_APP_TITLE
         value: "Release Management System"
       - key: VITE_LOG_LEVEL
