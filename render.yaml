@@ -6,7 +6,7 @@ services:
         
   # Backend API Service - FREE TIER
   - type: web
-    name: relmgmt-backend
+    name: relmgmt-backend-pr2z
     env: docker
     region: oregon
     plan: free  # FREE TIER - 750 hours/month (sleeps after 15 min inactivity)
@@ -78,7 +78,7 @@ services:
 
   # Frontend Static Site - FREE TIER
   - type: web
-    name: relmgmt-frontend
+    name: relmgmt-frontend-pr2z
     env: static
     # Static sites are free by default - no plan needed
     buildCommand: |
@@ -91,7 +91,7 @@ services:
       - key: VITE_API_URL
         fromService:
           type: web
-          name: relmgmt-backend
+          name: relmgmt-backend-pr2z
           property: host
           prefix: https://
           suffix: /api/v1
