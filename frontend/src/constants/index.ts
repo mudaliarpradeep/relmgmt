@@ -2,7 +2,7 @@
 export const API_CONFIG = {
   BASE_URL: import.meta.env.VITE_API_URL || 
             import.meta.env.VITE_API_URL_FALLBACK || 
-            'http://localhost:8080/api/v1',
+            'http://localhost:8080/api',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 } as const;

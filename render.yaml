@@ -87,12 +87,12 @@ services:
       npm run build
     staticPublishPath: ./frontend/dist
     envVars:
-      # API URL - using explicit backend URL for reliability
+      # API URL - using explicit backend URL for reliability (without /v1 suffix as services add it)
       - key: VITE_API_URL
-        value: "https://relmgmt-backend-pr2z.onrender.com/api/v1"
+        value: "https://relmgmt-backend-pr2z.onrender.com/api"
       # Fallback API URL (same as primary for consistency)
       - key: VITE_API_URL_FALLBACK
-        value: "https://relmgmt-backend-pr2z.onrender.com/api/v1"
+        value: "https://relmgmt-backend-pr2z.onrender.com/api"
       - key: VITE_APP_TITLE
         value: "Release Management System"
       - key: VITE_LOG_LEVEL
