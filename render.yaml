@@ -6,7 +6,7 @@ services:
         
   # Backend API Service - FREE TIER
   - type: web
-    name: relmgmt-backend-pr2z
+    name: relmgmt-backend
     env: docker
     region: oregon
     plan: free  # FREE TIER - 750 hours/month (sleeps after 15 min inactivity)
@@ -78,7 +78,7 @@ services:
 
   # Frontend Static Site - FREE TIER
   - type: web
-    name: relmgmt-frontend-pr2z
+    name: relmgmt-frontend
     env: static
     # Static sites are free by default - no plan needed
     buildCommand: |
@@ -91,10 +91,13 @@ services:
       - key: VITE_API_URL
         fromService:
           type: web
-          name: relmgmt-backend-pr2z
+          name: relmgmt-backend
           property: host
           prefix: https://
           suffix: /api/v1
+      # Fallback API URL (update with your actual backend URL if fromService fails)
+      - key: VITE_API_URL_FALLBACK
+        value: "https://relmgmt-backend-pr2z.onrender.com/api/v1"
       - key: VITE_APP_TITLE
         value: "Release Management System"
       - key: VITE_LOG_LEVEL
