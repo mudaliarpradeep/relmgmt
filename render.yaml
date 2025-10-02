@@ -87,15 +87,10 @@ services:
       npm run build
     staticPublishPath: ./frontend/dist
     envVars:
-      # API URL auto-wired from backend service
+      # API URL - using explicit backend URL for reliability
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: relmgmt-backend
-          property: host
-          prefix: https://
-          suffix: /api/v1
-      # Fallback API URL (update with your actual backend URL if fromService fails)
+        value: "https://relmgmt-backend-pr2z.onrender.com/api/v1"
+      # Fallback API URL (same as primary for consistency)
       - key: VITE_API_URL_FALLBACK
         value: "https://relmgmt-backend-pr2z.onrender.com/api/v1"
       - key: VITE_APP_TITLE
