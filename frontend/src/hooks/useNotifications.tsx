@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import NotificationService from '../services/api/v1/notificationService';
+import { useAuth } from './useAuth';
 import type { Notification, NotificationFilters, PaginatedResponse } from '../services/api/sharedTypes';
 
 interface NotificationsContextValue {
@@ -25,6 +26,7 @@ interface NotificationsProviderProps {
 }
 
 export function NotificationsProvider({ children, pollMs, initialNotifications, initialLoading, initialError, disableInitialFetch }: NotificationsProviderProps) {
+  const { isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications ?? []);
   const [loading, setLoading] = useState<boolean>(initialLoading ?? false);
   const [error, setError] = useState<string | null>(initialError ?? null);
@@ -63,17 +65,17 @@ export function NotificationsProvider({ children, pollMs, initialNotifications, 
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 
-  // Initial load
+  // Initial load - only fetch when authenticated
   useEffect(() => {
-    if (!disableInitialFetch) {
+    if (!disableInitialFetch && isAuthenticated) {
       fetchNotifications();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [disableInitialFetch]);
+  }, [disableInitialFetch, isAuthenticated]);
 
-  // Polling (optional)
+  // Polling (optional) - only when authenticated
   useEffect(() => {
-    if (!pollMs || pollMs <= 0) return;
+    if (!pollMs || pollMs <= 0 || !isAuthenticated) return;
     const start = () => {
       if (pollRef.current) return;
       pollRef.current = window.setInterval(() => {
@@ -98,7 +100,7 @@ export function NotificationsProvider({ children, pollMs, initialNotifications, 
       stop();
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [fetchNotifications, pollMs]);
+  }, [fetchNotifications, pollMs, isAuthenticated]);
 
   const value: NotificationsContextValue = {
     notifications,

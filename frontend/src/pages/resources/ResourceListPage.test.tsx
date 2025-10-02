@@ -381,5 +381,49 @@ describe('ResourceListPage', () => {
       expect(screen.getByText(/import resources from excel/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/choose file/i)).toBeInTheDocument();
     });
+
+    it('should refresh resources after successful import', async () => {
+      const mockImportResponse = {
+        totalProcessed: 10,
+        successful: 10,
+        failed: 0,
+        errors: [],
+      };
+
+      mockedResourceService.importResources.mockResolvedValue(mockImportResponse);
+
+      renderWithRouter(<ResourceListPage />);
+      
+      await waitFor(() => {
+        expect(screen.getAllByText('John Doe')).toHaveLength(2);
+      });
+
+      // Open import modal
+      const importButton = screen.getByText('Import from Excel');
+      fireEvent.click(importButton);
+
+      // Select file
+      const file = new File(['test'], 'resources.xlsx', {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const input = screen.getByLabelText(/choose file/i) as HTMLInputElement;
+      fireEvent.change(input, { target: { files: [file] } });
+
+      // Click import button
+      const submitButton = screen.getByText('Import');
+      fireEvent.click(submitButton);
+
+      // Wait for import to complete and success message
+      await waitFor(() => {
+        expect(mockedResourceService.importResources).toHaveBeenCalledWith(file);
+        expect(screen.getByText(/All resources imported successfully/)).toBeInTheDocument();
+      });
+
+      // Wait for the setTimeout (2000ms) and auto-close to trigger refresh
+      await waitFor(() => {
+        // getResources should be called again to refresh the list (initial load + refresh after import)
+        expect(mockedResourceService.getResources).toHaveBeenCalledTimes(2);
+      }, { timeout: 3000 });
+    });
   });
 });
