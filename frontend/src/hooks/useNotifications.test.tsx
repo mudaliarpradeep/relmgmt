@@ -8,6 +8,21 @@ import { EventType } from '../services/api/sharedTypes';
 vi.mock('../services/api/v1/notificationService');
 const mockedService = vi.mocked(NotificationService);
 
+// Mock useAuth to return authenticated state
+vi.mock('./useAuth', async () => {
+  const actual = await vi.importActual('./useAuth');
+  return {
+    ...actual,
+    useAuth: () => ({
+      user: { id: 1, username: 'testuser', email: 'test@example.com' },
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
+      isLoading: false,
+    }),
+  };
+});
+
 const createWrapper = (pollMs?: number) =>
   ({ children }: { children: ReactNode }) => (
     <NotificationsProvider pollMs={pollMs}>{children}</NotificationsProvider>
