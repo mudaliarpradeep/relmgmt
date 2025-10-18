@@ -514,3 +514,537 @@
 - Comprehensive documentation updated and synchronized
 - Critical bugs resolved and PRD compliance achieved
 - New data model fully documented in PRD and technical specifications
+
+---
+
+## 📋 PENDING REQUIREMENTS (70% Complete - 15 Tasks Remaining)
+
+### **Phase 1: Critical Requirements (IMMEDIATE - Next 3-5 Days)**
+
+#### **CRIT-1: Data Model Migration Cleanup** 🔴 **CRITICAL**
+**PRD Reference**: Release → Scope Items → Components model  
+**Status**: Partial - Backend complete, Frontend has legacy code  
+**Estimated Effort**: 2-3 hours
+
+**Tasks**:
+- [ ] **CRIT-1.1**: Audit and remove legacy Project entity references from frontend
+  - Remove `/frontend/src/pages/projects/` folder (ProjectForm, ProjectDetailPage, ProjectListPage)
+  - Remove `projectService.ts` from services
+  - Search and remove all imports of Project types
+  - Update any hardcoded routes in components
+- [ ] **CRIT-1.2**: Update navigation and routing
+  - Verify no sidebar links to project pages
+  - Ensure all scope item navigation flows through releases
+  - Update breadcrumbs to reflect correct hierarchy
+- [ ] **CRIT-1.3**: Database verification
+  - Verify no orphaned project data in database
+  - Confirm all scope items properly linked to releases
+  - Run data integrity checks
+- [ ] **CRIT-1.4**: Test and validate
+  - Run full test suite (expect some test updates)
+  - Update any integration tests referencing projects
+  - Document migration completion
+
+**Dependencies**: None  
+**Blockers**: None  
+**Testing**: Integration tests, data integrity checks
+
+---
+
+#### **CRIT-2: Production Security - Password Encryption** 🔴 **CRITICAL**
+**PRD Reference**: Section 5.2 - Security  
+**Status**: Disabled for testing (temporary workaround)  
+**Estimated Effort**: 1-2 hours
+
+**Tasks**:
+- [ ] **CRIT-2.1**: Enable BCrypt password encoding
+  - Update `SecurityConfig.java` to enable password encoder bean
+  - Remove any test-only password handling code
+  - Update user creation to hash passwords
+- [ ] **CRIT-2.2**: Update existing test users
+  - Hash all existing user passwords in database
+  - Create migration script for password hashing
+  - Update seed data scripts
+- [ ] **CRIT-2.3**: Update authentication tests
+  - Ensure tests use proper password hashing
+  - Update test fixtures with hashed passwords
+  - Verify login flow with real encryption
+- [ ] **CRIT-2.4**: Security audit
+  - Verify no plaintext passwords in logs
+  - Confirm secure password storage
+  - Document security implementation
+
+**Dependencies**: None  
+**Blockers**: None  
+**Testing**: Authentication tests, security audit
+
+---
+
+#### **CRIT-3: Audit and Transaction Logging System** 🔴 **CRITICAL**
+**PRD Reference**: Section 4.7 - Audit and Transaction Logging  
+**Status**: Not implemented  
+**Estimated Effort**: 8-12 hours
+
+**Backend Tasks**:
+- [ ] **CRIT-3.1**: Create transaction logs database table
+  - Migration script: `V16__create_transaction_logs_table.sql`
+  - Fields: id, user_id, action_type, entity_type, entity_id, timestamp, ip_address, old_values (JSONB), new_values (JSONB), additional_info (JSONB)
+  - Indexes: entity_type+entity_id, user_id, timestamp
+  - Partitioning strategy for performance
+- [ ] **CRIT-3.2**: Create TransactionLog entity and repository
+  - `TransactionLog.java` entity with proper mappings
+  - `TransactionLogRepository.java` with custom queries
+  - Support for JSONB columns
+  - Date range query methods
+- [ ] **CRIT-3.3**: Implement AuditAspect for automatic logging
+  - AOP aspect to intercept service method calls
+  - Capture before/after state for updates
+  - Extract IP address from request
+  - Handle async logging for performance
+- [ ] **CRIT-3.4**: Create AuditService
+  - Methods: logCreate, logUpdate, logDelete
+  - JSON serialization of entity state
+  - Filtering and search capabilities
+  - Export to CSV/Excel
+- [ ] **CRIT-3.5**: Create AuditController
+  - `GET /api/v1/audit/logs` - List with filters
+  - `GET /api/v1/audit/logs/{id}` - Get specific log
+  - `GET /api/v1/audit/export` - Export to CSV/Excel
+  - Query parameters: from, to, userId, actionType, entityType
+- [ ] **CRIT-3.6**: Write comprehensive tests
+  - Repository tests for JSONB queries
+  - Service tests for logging logic
+  - Aspect tests for interception
+  - Controller tests for API endpoints
+
+**Frontend Tasks**:
+- [ ] **CRIT-3.7**: Create AuditLog types and service
+  - TypeScript interfaces for TransactionLog
+  - `auditService.ts` with API methods
+  - Filtering and pagination support
+- [ ] **CRIT-3.8**: Create AuditLogPage component
+  - `/frontend/src/pages/audit/AuditLogPage.tsx`
+  - List view with filters (date range, user, action, entity)
+  - Pagination and sorting
+  - Export button
+- [ ] **CRIT-3.9**: Create AuditLogDetailModal
+  - Show full transaction details
+  - Display old vs new values (diff view)
+  - Entity navigation links
+  - Copy to clipboard functionality
+- [ ] **CRIT-3.10**: Update routing and navigation
+  - Add route to AppRouter: `/audit`
+  - Add to Sidebar: "Audit Logs" menu item
+  - Admin-only access (future RBAC)
+- [ ] **CRIT-3.11**: Write frontend tests
+  - Component tests for AuditLogPage
+  - Service tests for audit API calls
+  - Integration tests for filtering
+  - Export functionality tests
+
+**Dependencies**: BE-Phase-13 foundation  
+**Blockers**: None  
+**Testing**: 100% test coverage required for audit functionality
+
+---
+
+### **Phase 2: High-Priority Features (Next 5-7 Days)**
+
+#### **HIGH-1: Re-enable and Complete Report Pages** 🟡 **HIGH**
+**PRD Reference**: Section 4.5 - Reporting and Export  
+**Status**: Pages exist but routes commented out, missing forecast pages  
+**Estimated Effort**: 4-6 hours
+
+**Tasks**:
+- [ ] **HIGH-1.1**: Re-enable existing report routes
+  - Uncomment report routes in `AppRouter.tsx`
+  - Verify AllocationConflictsReportPage works
+  - Verify ResourceUtilizationReportPage works
+  - Verify ReleaseTimelineReportPage works
+  - Test all export functionality
+- [ ] **HIGH-1.2**: Create ResourceCapacityForecastPage
+  - New component: `/frontend/src/pages/reports/ResourceCapacityForecastPage.tsx`
+  - API integration with `/api/v1/reports/capacity-forecast`
+  - Date range filters (from, to)
+  - Skill function/sub-function filters
+  - Chart visualization of capacity over time
+  - Export to Excel functionality
+- [ ] **HIGH-1.3**: Create SkillCapacityForecastPage
+  - New component: `/frontend/src/pages/reports/SkillCapacityForecastPage.tsx`
+  - API integration with `/api/v1/reports/skill-capacity-forecast`
+  - Show allocated vs available capacity
+  - Group by skill function and sub-function
+  - Visual capacity charts
+  - Export to Excel functionality
+- [ ] **HIGH-1.4**: Update Sidebar navigation
+  - Add "Resource Capacity Forecast" to Reports submenu
+  - Add "Skill Capacity Forecast" to Reports submenu
+  - Update icons and labels
+- [ ] **HIGH-1.5**: Create tests for new pages
+  - Unit tests for forecast pages
+  - Integration tests for API calls
+  - Export functionality tests
+  - Filter interaction tests
+
+**Dependencies**: Backend API (already complete)  
+**Blockers**: None  
+**Testing**: Component tests, integration tests
+
+---
+
+#### **HIGH-2: Gantt Chart Visualization** 🟡 **HIGH**
+**PRD Reference**: Section 4.4.1 - Gantt View  
+**Status**: Basic timeline component exists, needs Gantt implementation  
+**Estimated Effort**: 8-10 hours
+
+**Tasks**:
+- [ ] **HIGH-2.1**: Evaluate Gantt chart libraries
+  - Research: react-gantt-chart, dhtmlx-gantt, frappe-gantt
+  - License compatibility check
+  - Performance evaluation
+  - Select best fit for requirements
+- [ ] **HIGH-2.2**: Create GanttChart component
+  - New component: `/frontend/src/components/charts/GanttChart.tsx`
+  - Props: releases, phases, date range
+  - Interactive timeline with zoom/pan
+  - Phase bars with color coding
+  - Hover tooltips with phase details
+  - Responsive design
+- [ ] **HIGH-2.3**: Create SingleReleaseGanttPage
+  - New page: `/frontend/src/pages/releases/ReleaseGanttPage.tsx`
+  - Show all phases for selected release
+  - Timeline navigation
+  - Export to image/PDF
+  - Print-friendly view
+- [ ] **HIGH-2.4**: Create AnnualGanttPage
+  - New page: `/frontend/src/pages/releases/AnnualGanttPage.tsx`
+  - Show all releases in selected year
+  - Year selector dropdown
+  - Multi-release timeline view
+  - Filter by release status
+  - Export functionality
+- [ ] **HIGH-2.5**: Update routing
+  - Add route: `/releases/:id/gantt`
+  - Add route: `/releases/gantt/annual/:year`
+  - Add navigation links in release detail pages
+  - Add to main navigation menu
+- [ ] **HIGH-2.6**: Create tests
+  - Component tests for GanttChart
+  - Page tests for both Gantt views
+  - Interaction tests (zoom, pan, hover)
+  - Export tests
+
+**Dependencies**: Third-party library selection  
+**Blockers**: None  
+**Testing**: Visual tests, interaction tests, export tests
+
+---
+
+#### **HIGH-3: Release Blocker Management UI** 🟡 **HIGH**
+**PRD Reference**: Section 4.2.1 - Release Creation  
+**Status**: Backend exists, UI missing  
+**Estimated Effort**: 3-4 hours
+
+**Tasks**:
+- [ ] **HIGH-3.1**: Add blockers section to ReleaseForm
+  - Add "Blockers" section in form
+  - List current blockers with status
+  - Add blocker button with description input
+  - Delete blocker functionality
+  - Resolve/reopen blocker actions
+- [ ] **HIGH-3.2**: Add blockers display to ReleaseDetailPage
+  - Show list of active blockers
+  - Color-coded by status (OPEN, RESOLVED, CLOSED)
+  - Add/edit/delete actions
+  - Status change actions
+- [ ] **HIGH-3.3**: Integrate with notification system
+  - Generate notification when blocker added
+  - Generate notification when blocker resolved
+  - Link notifications to release page
+- [ ] **HIGH-3.4**: Create tests
+  - Form tests for blocker management
+  - Detail page tests
+  - Notification integration tests
+  - API call tests
+
+**Dependencies**: Backend API (already complete)  
+**Blockers**: None  
+**Testing**: Component tests, integration tests
+
+---
+
+#### **HIGH-4: Re-enable Notification Pages** 🟡 **HIGH**
+**PRD Reference**: Section 4.6 - Notification System  
+**Status**: Page exists but route commented out  
+**Estimated Effort**: 1-2 hours
+
+**Tasks**:
+- [ ] **HIGH-4.1**: Re-enable notification route
+  - Uncomment route in `AppRouter.tsx`: `/notifications`
+  - Test NotificationListPage functionality
+  - Verify pagination and filtering
+  - Test mark as read functionality
+- [ ] **HIGH-4.2**: Update navigation
+  - Ensure Sidebar link is active
+  - Add notification badge to menu item
+  - Test navigation flow
+- [ ] **HIGH-4.3**: Integration testing
+  - Test header bell → notifications page flow
+  - Verify notification detail modal
+  - Test filter interactions
+  - Export functionality (if exists)
+
+**Dependencies**: None (already implemented)  
+**Blockers**: None  
+**Testing**: Integration tests
+
+---
+
+### **Phase 3: Medium-Priority Enhancements (Next 7-10 Days)**
+
+#### **MED-1: Manual Effort Fields for Special Phases** 🟢 **MEDIUM**
+**PRD Reference**: Section 4.2.4 - Effort Estimation  
+**Status**: Database fields exist, UI inputs missing  
+**Estimated Effort**: 2-3 hours
+
+**Tasks**:
+- [ ] **MED-1.1**: Update ReleaseForm
+  - Add "Manual Effort Estimates" section
+  - Input field: Regression Testing Days (0-1000 PD)
+  - Input field: Smoke Testing Days (0-1000 PD)
+  - Input field: Go-Live Days (0-1000 PD)
+  - Validation and error messages
+- [ ] **MED-1.2**: Update ReleaseDetailPage
+  - Display manual effort estimates
+  - Show in effort summary section
+  - Include in total effort calculations
+- [ ] **MED-1.3**: Update effort summary calculations
+  - Include manual efforts in release totals
+  - Show breakdown by phase type
+  - Update export to include manual efforts
+- [ ] **MED-1.4**: Update tests
+  - Form validation tests
+  - Calculation tests
+  - Display tests
+
+**Dependencies**: None  
+**Blockers**: None  
+**Testing**: Form tests, calculation tests
+
+---
+
+### **Phase 4: Non-Functional Requirements (Ongoing)**
+
+#### **NFR-1: Performance Optimization and Testing** 🟢 **MEDIUM**
+**PRD Reference**: Section 5.1 - Performance  
+**Status**: Not verified  
+**Estimated Effort**: 8-12 hours
+
+**Tasks**:
+- [ ] **NFR-1.1**: Setup performance testing framework
+  - Install and configure JMeter or Gatling
+  - Create test scenarios for key workflows
+  - Setup performance monitoring
+- [ ] **NFR-1.2**: Conduct load testing
+  - Test with 50 concurrent users
+  - Measure page load times (target: < 3 seconds)
+  - Test allocation calculation speed (target: < 5 seconds)
+  - Identify bottlenecks
+- [ ] **NFR-1.3**: Database optimization
+  - Analyze slow queries with EXPLAIN
+  - Add missing indexes
+  - Optimize N+1 query issues
+  - Implement connection pooling tuning
+- [ ] **NFR-1.4**: Frontend optimization
+  - Bundle size analysis and reduction
+  - Code splitting optimization
+  - Lazy loading implementation
+  - Image optimization
+- [ ] **NFR-1.5**: Backend optimization
+  - Add caching for frequently accessed data
+  - Implement Redis for session management
+  - Optimize allocation algorithm
+  - Profile and fix memory leaks
+- [ ] **NFR-1.6**: Document performance results
+  - Create performance benchmarks document
+  - Record baseline metrics
+  - Track improvements over time
+
+**Dependencies**: None  
+**Blockers**: None  
+**Testing**: Performance tests, load tests
+
+---
+
+#### **NFR-2: API Documentation Publication** 🟢 **MEDIUM**
+**PRD Reference**: Section 5.6 - API Management  
+**Status**: Swagger configured but not published  
+**Estimated Effort**: 2-3 hours
+
+**Tasks**:
+- [ ] **NFR-2.1**: Configure Swagger UI endpoint
+  - Verify SpringDoc OpenAPI configuration
+  - Enable Swagger UI at `/swagger-ui.html`
+  - Configure API documentation metadata
+- [ ] **NFR-2.2**: Enhance API documentation
+  - Add comprehensive operation descriptions
+  - Add request/response examples
+  - Document authentication flow
+  - Add error code documentation
+- [ ] **NFR-2.3**: Create API usage guide
+  - Document authentication setup
+  - Provide example API calls (cURL, JavaScript)
+  - Document pagination and filtering
+  - Add troubleshooting section
+- [ ] **NFR-2.4**: Publish and test
+  - Test Swagger UI accessibility
+  - Verify all endpoints documented
+  - Test "Try it out" functionality
+  - Update README with API docs link
+
+**Dependencies**: None  
+**Blockers**: None  
+**Testing**: Documentation review, API testing
+
+---
+
+#### **NFR-3: Accessibility Compliance** 🟢 **MEDIUM**
+**PRD Reference**: Section 5.3 & 7.1 - Usability  
+**Status**: Not verified  
+**Estimated Effort**: 6-8 hours
+
+**Tasks**:
+- [ ] **NFR-3.1**: Setup accessibility testing tools
+  - Install axe-core for automated testing
+  - Setup WAVE browser extension
+  - Install screen reader (NVDA/JAWS)
+- [ ] **NFR-3.2**: Conduct accessibility audit
+  - Test with automated tools
+  - Manual keyboard navigation testing
+  - Screen reader compatibility testing
+  - Color contrast verification
+- [ ] **NFR-3.3**: Fix accessibility issues
+  - Add missing ARIA labels
+  - Fix heading hierarchy
+  - Improve focus indicators
+  - Ensure keyboard navigation
+  - Add skip links
+- [ ] **NFR-3.4**: Document accessibility compliance
+  - Create WCAG 2.1 AA compliance report
+  - Document keyboard shortcuts
+  - Add accessibility statement
+  - Update user documentation
+
+**Dependencies**: None  
+**Blockers**: None  
+**Testing**: Accessibility audit, screen reader testing
+
+---
+
+#### **NFR-4: Help Documentation System** 🟢 **LOW**
+**PRD Reference**: Section 5.3 - Usability  
+**Status**: Not implemented  
+**Estimated Effort**: 8-12 hours
+
+**Tasks**:
+- [ ] **NFR-4.1**: Create user documentation structure
+  - Setup documentation framework (MkDocs/Docusaurus)
+  - Create documentation outline
+  - Define documentation sections
+- [ ] **NFR-4.2**: Write user guides
+  - Getting Started guide
+  - Resource Management guide
+  - Release Planning guide
+  - Allocation Management guide
+  - Reports and Analytics guide
+- [ ] **NFR-4.3**: Add in-app help system
+  - Create HelpIcon component
+  - Add contextual help tooltips
+  - Create help panel/drawer
+  - Link to detailed documentation
+- [ ] **NFR-4.4**: Create video tutorials (optional)
+  - Screen recordings of key workflows
+  - Voiceover narration
+  - Host on YouTube/internal platform
+- [ ] **NFR-4.5**: Deploy and integrate
+  - Deploy documentation site
+  - Add help links in application
+  - Create help menu in header
+  - Test all help links
+
+**Dependencies**: None  
+**Blockers**: None  
+**Testing**: Documentation review, usability testing
+
+---
+
+#### **NFR-5: Data Retention and Archival** 🟢 **LOW**
+**PRD Reference**: Section 6.3 - Data Retention  
+**Status**: Not implemented  
+**Estimated Effort**: 4-6 hours
+
+**Tasks**:
+- [ ] **NFR-5.1**: Create data archival strategy
+  - Define archival rules (3-year retention)
+  - Design archival database schema
+  - Plan archival process
+- [ ] **NFR-5.2**: Implement scheduled archival jobs
+  - Create Spring @Scheduled jobs
+  - Archive old transaction logs
+  - Archive completed releases (3+ years old)
+  - Archive inactive resources (1+ year after end date)
+- [ ] **NFR-5.3**: Implement backup verification
+  - Automated backup testing
+  - Restore verification procedures
+  - Document recovery procedures
+- [ ] **NFR-5.4**: Create monitoring and alerts
+  - Alert for archival job failures
+  - Monitor storage usage
+  - Track archival metrics
+- [ ] **NFR-5.5**: Document procedures
+  - Data retention policy document
+  - Archival procedures
+  - Recovery procedures
+  - Compliance verification
+
+**Dependencies**: Audit logging system (CRIT-3)  
+**Blockers**: None  
+**Testing**: Archival tests, recovery tests
+
+---
+
+## 📊 Implementation Tracking
+
+### **Overall Progress Summary**
+| Phase | Total Tasks | Completed | Pending | % Complete |
+|-------|-------------|-----------|---------|------------|
+| **Critical** | 3 phases | 0 | 3 | 0% |
+| **High Priority** | 4 phases | 0 | 4 | 0% |
+| **Medium Priority** | 1 phase | 0 | 1 | 0% |
+| **Non-Functional** | 5 phases | 0 | 5 | 0% |
+| **TOTAL PENDING** | **13 phases** | **0** | **13** | **0%** |
+
+### **Estimated Timeline**
+- **Critical Phase (3-5 days)**: CRIT-1, CRIT-2, CRIT-3
+- **High Priority (5-7 days)**: HIGH-1, HIGH-2, HIGH-3, HIGH-4
+- **Medium Priority (2-3 days)**: MED-1
+- **Non-Functional (Ongoing)**: NFR-1 to NFR-5
+
+**Total Estimated Effort**: 50-70 hours (2-3 weeks full-time)
+
+### **Priority Execution Order**
+1. **Day 1-2**: CRIT-1 (Data Model Cleanup) + CRIT-2 (Password Encryption)
+2. **Day 3-5**: CRIT-3 (Audit Logging System)
+3. **Day 6-7**: HIGH-1 (Report Pages) + HIGH-4 (Notifications)
+4. **Day 8-10**: HIGH-2 (Gantt Charts)
+5. **Day 11-12**: HIGH-3 (Blocker UI) + MED-1 (Manual Effort)
+6. **Day 13+**: NFR items (ongoing optimization and documentation)
+
+---
+
+### **🎯 Updated Quality Standards**
+- Maintain 100% test pass rate for all new features
+- Zero linting errors for all code changes
+- Full documentation updates for each completed phase
+- Performance benchmarks must meet PRD requirements
+- Accessibility compliance verification for all UI changes
