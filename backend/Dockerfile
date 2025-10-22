@@ -40,12 +40,45 @@ WORKDIR /app
 # Copy built jar from builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Create startup script to handle database URL construction
+# Create startup script to handle database URL construction with DNS wait
 RUN echo '#!/bin/sh' > /app/start.sh && \
     echo 'export SPRING_PROFILES_ACTIVE=prod' >> /app/start.sh && \
-    echo 'if [ -n "$RENDER_DB_HOST" ] && [ -n "$RENDER_DB_PORT" ] && [ -n "$RENDER_DB_NAME" ]; then' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# Handle database URL configuration' >> /app/start.sh && \
+    echo 'if [ -n "$SPRING_DATASOURCE_URL" ]; then' >> /app/start.sh && \
+    echo '  # Convert postgres:// to jdbc:postgresql:// if needed' >> /app/start.sh && \
+    echo '  if echo "$SPRING_DATASOURCE_URL" | grep -q "^postgres://"; then' >> /app/start.sh && \
+    echo '    export SPRING_DATASOURCE_URL=$(echo "$SPRING_DATASOURCE_URL" | sed "s|^postgres://|jdbc:postgresql://|")' >> /app/start.sh && \
+    echo '    echo "Converted Render database URL to JDBC format"' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '  # Ensure sslmode is set for Render databases' >> /app/start.sh && \
+    echo '  if ! echo "$SPRING_DATASOURCE_URL" | grep -q "sslmode="; then' >> /app/start.sh && \
+    echo '    if echo "$SPRING_DATASOURCE_URL" | grep -q "?"; then' >> /app/start.sh && \
+    echo '      export SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}&sslmode=require"' >> /app/start.sh && \
+    echo '    else' >> /app/start.sh && \
+    echo '      export SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}?sslmode=require"' >> /app/start.sh && \
+    echo '    fi' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '  echo "Using database URL: ${SPRING_DATASOURCE_URL%%\?*}?..."' >> /app/start.sh && \
+    echo 'elif [ -n "$RENDER_DB_HOST" ] && [ -n "$RENDER_DB_PORT" ] && [ -n "$RENDER_DB_NAME" ]; then' >> /app/start.sh && \
+    echo '  # Construct from individual components as fallback' >> /app/start.sh && \
     echo '  export SPRING_DATASOURCE_URL="jdbc:postgresql://${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}?sslmode=require"' >> /app/start.sh && \
+    echo '  echo "Constructed database URL from components: ${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}"' >> /app/start.sh && \
+    echo '  # Wait for DNS resolution of database host' >> /app/start.sh && \
+    echo '  echo "Waiting for database DNS resolution..."' >> /app/start.sh && \
+    echo '  for i in 1 2 3 4 5 6 7 8 9 10; do' >> /app/start.sh && \
+    echo '    if getent hosts ${RENDER_DB_HOST} > /dev/null 2>&1; then' >> /app/start.sh && \
+    echo '      echo "Database host ${RENDER_DB_HOST} resolved successfully"' >> /app/start.sh && \
+    echo '      break' >> /app/start.sh && \
+    echo '    fi' >> /app/start.sh && \
+    echo '    echo "Attempt $i: Waiting for DNS resolution of ${RENDER_DB_HOST}..."' >> /app/start.sh && \
+    echo '    sleep 2' >> /app/start.sh && \
+    echo '  done' >> /app/start.sh && \
+    echo 'else' >> /app/start.sh && \
+    echo '  echo "Warning: No database configuration found"' >> /app/start.sh && \
     echo 'fi' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo 'echo "Starting application..."' >> /app/start.sh && \
     echo 'exec java $JAVA_OPTS -jar app.jar' >> /app/start.sh && \
     chmod +x /app/start.sh
 

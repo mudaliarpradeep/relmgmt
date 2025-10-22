@@ -152,7 +152,8 @@ jobs:
   container-scanning:
     name: Container Security Scanning
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    # Only run on schedule or manual trigger to avoid duplication with CI workflows
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:
       actions: read
       contents: read
@@ -173,15 +174,15 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build backend image for scanning
+    - name: Pull latest backend image from registry
       run: |
-        cd backend
-        docker build -t relmgmt-backend:scan .
+        docker pull ghcr.io/${{ github.repository }}/relmgmt-backend:latest || \
+        (echo "Latest image not found in registry, building locally..." && cd backend && docker build -t ghcr.io/${{ github.repository }}/relmgmt-backend:latest .)
 
     - name: Run Trivy vulnerability scanner on backend
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: 'relmgmt-backend:scan'
+        image-ref: 'ghcr.io/${{ github.repository }}/relmgmt-backend:latest'
         format: 'sarif'
         output: 'backend-trivy-results.sarif'
         skip-version-check: true
@@ -192,15 +193,15 @@ jobs:
         sarif_file: 'backend-trivy-results.sarif'
         category: 'backend-container'
 
-    - name: Build frontend image for scanning
+    - name: Pull latest frontend image from registry
       run: |
-        cd frontend
-        docker build -t relmgmt-frontend:scan .
+        docker pull ghcr.io/${{ github.repository }}/relmgmt-frontend:latest || \
+        (echo "Latest image not found in registry, building locally..." && cd frontend && docker build -t ghcr.io/${{ github.repository }}/relmgmt-frontend:latest .)
 
     - name: Run Trivy vulnerability scanner on frontend
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: 'relmgmt-frontend:scan'
+        image-ref: 'ghcr.io/${{ github.repository }}/relmgmt-frontend:latest'
         format: 'sarif'
         output: 'frontend-trivy-results.sarif'
         skip-version-check: true
@@ -211,7 +212,7 @@ jobs:
         sarif_file: 'frontend-trivy-results.sarif'
         category: 'frontend-container'
 
-    - name: Run Hadolint on Dockerfiles
+    - name: Run Hadolint on backend Dockerfile
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: backend/Dockerfile
@@ -219,11 +220,25 @@ jobs:
         output-file: backend-hadolint-results.sarif
         no-fail: true
 
-    - name: Upload Hadolint results
+    - name: Upload backend Hadolint results
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: backend-hadolint-results.sarif
-        category: 'dockerfile-lint'
+        category: 'dockerfile-lint-backend'
+
+    - name: Run Hadolint on frontend Dockerfile
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: frontend/Dockerfile
+        format: sarif
+        output-file: frontend-hadolint-results.sarif
+        no-fail: true
+
+    - name: Upload frontend Hadolint results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: frontend-hadolint-results.sarif
+        category: 'dockerfile-lint-frontend'
 
   compliance-check:
     name: Compliance Checking
