@@ -46,9 +46,21 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
     echo 'export SPRING_PROFILES_ACTIVE=prod' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
     echo 'echo "=== Database Configuration Debug ==="' >> /app/start.sh && \
-    echo 'echo "SPRING_DATASOURCE_URL is set: $([ -n \"$SPRING_DATASOURCE_URL\" ] && echo \"YES\" || echo \"NO\")"' >> /app/start.sh && \
-    echo 'echo "RENDER_DB_HOST is set: $([ -n \"$RENDER_DB_HOST\" ] && echo \"YES ($RENDER_DB_HOST)\" || echo \"NO\")"' >> /app/start.sh && \
-    echo 'echo "DATABASE_URL is set: $([ -n \"$DATABASE_URL\" ] && echo \"YES\" || echo \"NO\")"' >> /app/start.sh && \
+    echo 'if [ -n "$SPRING_DATASOURCE_URL" ]; then' >> /app/start.sh && \
+    echo '  echo "SPRING_DATASOURCE_URL is set: YES"' >> /app/start.sh && \
+    echo 'else' >> /app/start.sh && \
+    echo '  echo "SPRING_DATASOURCE_URL is set: NO"' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
+    echo 'if [ -n "$RENDER_DB_HOST" ]; then' >> /app/start.sh && \
+    echo '  echo "RENDER_DB_HOST is set: YES ($RENDER_DB_HOST)"' >> /app/start.sh && \
+    echo 'else' >> /app/start.sh && \
+    echo '  echo "RENDER_DB_HOST is set: NO"' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
+    echo 'if [ -n "$DATABASE_URL" ]; then' >> /app/start.sh && \
+    echo '  echo "DATABASE_URL is set: YES"' >> /app/start.sh && \
+    echo 'else' >> /app/start.sh && \
+    echo '  echo "DATABASE_URL is set: NO"' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
     echo '# Try DATABASE_URL (Renders default env var for linked databases)' >> /app/start.sh && \
     echo 'if [ -z "$SPRING_DATASOURCE_URL" ] && [ -n "$DATABASE_URL" ]; then' >> /app/start.sh && \
