@@ -42,14 +42,26 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Create startup script to handle database URL construction with DNS wait
 RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'set -e' >> /app/start.sh && \
     echo 'export SPRING_PROFILES_ACTIVE=prod' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo 'echo "=== Database Configuration Debug ==="' >> /app/start.sh && \
+    echo 'echo "SPRING_DATASOURCE_URL is set: $([ -n \"$SPRING_DATASOURCE_URL\" ] && echo \"YES\" || echo \"NO\")"' >> /app/start.sh && \
+    echo 'echo "RENDER_DB_HOST is set: $([ -n \"$RENDER_DB_HOST\" ] && echo \"YES ($RENDER_DB_HOST)\" || echo \"NO\")"' >> /app/start.sh && \
+    echo 'echo "DATABASE_URL is set: $([ -n \"$DATABASE_URL\" ] && echo \"YES\" || echo \"NO\")"' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# Try DATABASE_URL (Renders default env var for linked databases)' >> /app/start.sh && \
+    echo 'if [ -z "$SPRING_DATASOURCE_URL" ] && [ -n "$DATABASE_URL" ]; then' >> /app/start.sh && \
+    echo '  echo "Using DATABASE_URL from Render"' >> /app/start.sh && \
+    echo '  export SPRING_DATASOURCE_URL="$DATABASE_URL"' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
     echo '# Handle database URL configuration' >> /app/start.sh && \
     echo 'if [ -n "$SPRING_DATASOURCE_URL" ]; then' >> /app/start.sh && \
     echo '  # Convert postgres:// to jdbc:postgresql:// if needed' >> /app/start.sh && \
     echo '  if echo "$SPRING_DATASOURCE_URL" | grep -q "^postgres://"; then' >> /app/start.sh && \
     echo '    export SPRING_DATASOURCE_URL=$(echo "$SPRING_DATASOURCE_URL" | sed "s|^postgres://|jdbc:postgresql://|")' >> /app/start.sh && \
-    echo '    echo "Converted Render database URL to JDBC format"' >> /app/start.sh && \
+    echo '    echo "✓ Converted postgres:// to jdbc:postgresql://"' >> /app/start.sh && \
     echo '  fi' >> /app/start.sh && \
     echo '  # Ensure sslmode is set for Render databases' >> /app/start.sh && \
     echo '  if ! echo "$SPRING_DATASOURCE_URL" | grep -q "sslmode="; then' >> /app/start.sh && \
@@ -58,27 +70,50 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
     echo '    else' >> /app/start.sh && \
     echo '      export SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL}?sslmode=require"' >> /app/start.sh && \
     echo '    fi' >> /app/start.sh && \
+    echo '    echo "✓ Added sslmode=require"' >> /app/start.sh && \
     echo '  fi' >> /app/start.sh && \
-    echo '  echo "Using database URL: ${SPRING_DATASOURCE_URL%%\?*}?..."' >> /app/start.sh && \
+    echo '  # Extract hostname for DNS check' >> /app/start.sh && \
+    echo '  DB_HOST=$(echo "$SPRING_DATASOURCE_URL" | sed -n "s|.*://[^@]*@\\([^:/]*\\).*|\\1|p")' >> /app/start.sh && \
+    echo '  if [ -n "$DB_HOST" ]; then' >> /app/start.sh && \
+    echo '    echo "Database host: $DB_HOST"' >> /app/start.sh && \
+    echo '    echo "Waiting for DNS resolution..."' >> /app/start.sh && \
+    echo '    for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do' >> /app/start.sh && \
+    echo '      if getent hosts "$DB_HOST" > /dev/null 2>&1; then' >> /app/start.sh && \
+    echo '        echo "✓ DNS resolution successful"' >> /app/start.sh && \
+    echo '        break' >> /app/start.sh && \
+    echo '      fi' >> /app/start.sh && \
+    echo '      echo "Attempt $i/15: DNS not ready, waiting 2 seconds..."' >> /app/start.sh && \
+    echo '      sleep 2' >> /app/start.sh && \
+    echo '    done' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '  echo "✓ Database URL configured successfully"' >> /app/start.sh && \
     echo 'elif [ -n "$RENDER_DB_HOST" ] && [ -n "$RENDER_DB_PORT" ] && [ -n "$RENDER_DB_NAME" ]; then' >> /app/start.sh && \
     echo '  # Construct from individual components as fallback' >> /app/start.sh && \
-    echo '  export SPRING_DATASOURCE_URL="jdbc:postgresql://${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}?sslmode=require"' >> /app/start.sh && \
-    echo '  echo "Constructed database URL from components: ${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}"' >> /app/start.sh && \
-    echo '  # Wait for DNS resolution of database host' >> /app/start.sh && \
-    echo '  echo "Waiting for database DNS resolution..."' >> /app/start.sh && \
-    echo '  for i in 1 2 3 4 5 6 7 8 9 10; do' >> /app/start.sh && \
-    echo '    if getent hosts ${RENDER_DB_HOST} > /dev/null 2>&1; then' >> /app/start.sh && \
-    echo '      echo "Database host ${RENDER_DB_HOST} resolved successfully"' >> /app/start.sh && \
+    echo '  echo "Constructing URL from components..."' >> /app/start.sh && \
+    echo '  if [ -n "$SPRING_DATASOURCE_USERNAME" ] && [ -n "$SPRING_DATASOURCE_PASSWORD" ]; then' >> /app/start.sh && \
+    echo '    export SPRING_DATASOURCE_URL="jdbc:postgresql://${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}?sslmode=require"' >> /app/start.sh && \
+    echo '  else' >> /app/start.sh && \
+    echo '    echo "ERROR: Username or password not provided"' >> /app/start.sh && \
+    echo '    exit 1' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '  echo "Database: ${RENDER_DB_HOST}:${RENDER_DB_PORT}/${RENDER_DB_NAME}"' >> /app/start.sh && \
+    echo '  # Wait for DNS resolution' >> /app/start.sh && \
+    echo '  echo "Waiting for DNS resolution..."' >> /app/start.sh && \
+    echo '  for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do' >> /app/start.sh && \
+    echo '    if getent hosts "${RENDER_DB_HOST}" > /dev/null 2>&1; then' >> /app/start.sh && \
+    echo '      echo "✓ DNS resolution successful"' >> /app/start.sh && \
     echo '      break' >> /app/start.sh && \
     echo '    fi' >> /app/start.sh && \
-    echo '    echo "Attempt $i: Waiting for DNS resolution of ${RENDER_DB_HOST}..."' >> /app/start.sh && \
+    echo '    echo "Attempt $i/15: DNS not ready, waiting 2 seconds..."' >> /app/start.sh && \
     echo '    sleep 2' >> /app/start.sh && \
     echo '  done' >> /app/start.sh && \
     echo 'else' >> /app/start.sh && \
-    echo '  echo "Warning: No database configuration found"' >> /app/start.sh && \
+    echo '  echo "ERROR: No database configuration found!"' >> /app/start.sh && \
+    echo '  echo "Please check Render environment variables"' >> /app/start.sh && \
+    echo '  exit 1' >> /app/start.sh && \
     echo 'fi' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
-    echo 'echo "Starting application..."' >> /app/start.sh && \
+    echo 'echo "=== Starting Application ==="' >> /app/start.sh && \
     echo 'exec java $JAVA_OPTS -jar app.jar' >> /app/start.sh && \
     chmod +x /app/start.sh
 

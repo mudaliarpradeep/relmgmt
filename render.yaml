@@ -14,21 +14,7 @@ services:
     dockerContext: ./backend
     buildCommand: ""
     envVars:
-      # Database connection - Use Render's internal connection URL for better reliability
-      - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: relmgmt-database
-          property: connectionString
-      - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: relmgmt-database
-          property: user
-      - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: relmgmt-database
-          property: password
-      
-      # Keep these for fallback/debugging
+      # Database connection components (Render will auto-populate these)
       - key: RENDER_DB_HOST
         fromDatabase:
           name: relmgmt-database
@@ -41,6 +27,17 @@ services:
         fromDatabase:
           name: relmgmt-database
           property: database
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: relmgmt-database
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: relmgmt-database
+          property: password
+      
+      # Note: SPRING_DATASOURCE_URL will be constructed by startup script
+      # from RENDER_DB_* components above, or from DATABASE_URL if Render provides it
       
       # Application configuration
       - key: APP_JWT_SECRET
