@@ -16,6 +16,11 @@ spring:
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:bBzp16eHfA29wZUvr}
     driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    out-of-order: true
+    validate-on-migrate: true
   security:
     user:
       name: ${ADMIN_USERNAME:admin}

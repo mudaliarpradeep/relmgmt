@@ -100,41 +100,6 @@ export interface ReleaseEffortSummary {
   totalEffort: number;
 }
 
-// Project types
-export interface Project {
-  id: number;
-  releaseId: number;
-  name: string;
-  description: string;
-  type: 'Day 1' | 'Day 2';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ProjectRequest {
-  name: string;
-  description?: string;
-  type: 'Day 1' | 'Day 2';
-}
-
-export const ProjectType = {
-  DAY_1: 'Day 1',
-  DAY_2: 'Day 2',
-} as const;
-
-export type ProjectTypeEnum = typeof ProjectType[keyof typeof ProjectType];
-
-export const getProjectTypeEnumName = (displayName: string): string => {
-  switch (displayName) {
-    case ProjectType.DAY_1:
-      return 'DAY_1';
-    case ProjectType.DAY_2:
-      return 'DAY_2';
-    default:
-      return displayName;
-  }
-};
-
 // Release types
 export interface Release {
   id: number;

@@ -82,18 +82,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Temporarily using plain text for testing - NEVER USE IN PRODUCTION!
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence rawPassword) {
-                return rawPassword.toString();
-            }
-
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                return rawPassword.toString().equals(encodedPassword);
-            }
-        };
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

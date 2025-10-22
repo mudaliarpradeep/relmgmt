@@ -165,8 +165,7 @@ class UserServiceTest {
 
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-        // TEMPORARY: Skip password encoder mocking while encryption is disabled
-        // when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(newUser);
 
         // Act
@@ -174,8 +173,7 @@ class UserServiceTest {
 
         // Assert
         assertNotNull(createdUser);
-        // TEMPORARY: Skip password encoder verification while encryption is disabled
-        // verify(passwordEncoder).encode("password123");
+        verify(passwordEncoder).encode("password123");
         verify(userRepository).save(newUser);
     }
 

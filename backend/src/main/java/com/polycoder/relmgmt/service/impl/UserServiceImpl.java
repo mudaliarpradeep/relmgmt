@@ -93,8 +93,8 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Email already exists");
         }
 
-        // TEMPORARY: Skip password encoding for testing - NEVER USE IN PRODUCTION!
-        // user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Encode password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
@@ -122,9 +122,8 @@ public class UserServiceImpl implements UserService {
 
         // Only update password if provided
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            // TEMPORARY: Skip password encoding for testing - NEVER USE IN PRODUCTION!
-            existingUser.setPassword(user.getPassword());
-            // existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            // Encode password before updating
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
         return userRepository.save(existingUser);
