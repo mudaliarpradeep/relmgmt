@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Database Backup Script for Release Management System
-# Supports backing up from Render or Neon databases
-# Usage: ./backup-database.sh [render|neon]
+# Database Backup Script for Release Management System (Neon)
+# Creates comprehensive backups of the Neon PostgreSQL database
+# Usage: ./backup-database.sh
 
 set -e  # Exit on error
 
@@ -19,26 +19,13 @@ TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 # Create backup directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
 
-echo -e "${GREEN}=== Release Management System Database Backup ===${NC}"
+echo -e "${GREEN}=== Release Management System Database Backup (Neon) ===${NC}"
 echo ""
 
-# Determine source database
-SOURCE="${1:-render}"
-
-if [ "$SOURCE" = "render" ]; then
-    echo -e "${YELLOW}Backing up from Render database...${NC}"
-    echo "Please enter your Render database connection string:"
-    echo "Format: postgresql://user:password@host/database?sslmode=require"
-    read -r DB_URL
-elif [ "$SOURCE" = "neon" ]; then
-    echo -e "${YELLOW}Backing up from Neon database...${NC}"
-    echo "Please enter your Neon database connection string:"
-    echo "Format: postgresql://user:password@ep-xxx.region.aws.neon.tech/database?sslmode=require"
-    read -r DB_URL
-else
-    echo -e "${RED}Error: Invalid source. Use 'render' or 'neon'${NC}"
-    exit 1
-fi
+echo -e "${YELLOW}Backing up from Neon database...${NC}"
+echo "Please enter your Neon database connection string:"
+echo "Format: postgresql://user:password@ep-xxx.region.aws.neon.tech/database?sslmode=require"
+read -r DB_URL
 
 # Validate connection string
 if [[ ! "$DB_URL" =~ ^postgresql:// ]]; then
@@ -50,7 +37,7 @@ echo ""
 echo -e "${GREEN}Starting backup...${NC}"
 
 # Backup in custom format (binary, compressed)
-CUSTOM_BACKUP="${BACKUP_DIR}/relmgmt-${SOURCE}-backup-${TIMESTAMP}.dump"
+CUSTOM_BACKUP="${BACKUP_DIR}/relmgmt-neon-backup-${TIMESTAMP}.dump"
 echo "Creating custom format backup: $CUSTOM_BACKUP"
 pg_dump "$DB_URL" \
     --no-owner \
@@ -67,7 +54,7 @@ else
 fi
 
 # Backup in SQL format (plain text, easy to inspect)
-SQL_BACKUP="${BACKUP_DIR}/relmgmt-${SOURCE}-backup-${TIMESTAMP}.sql"
+SQL_BACKUP="${BACKUP_DIR}/relmgmt-neon-backup-${TIMESTAMP}.sql"
 echo ""
 echo "Creating SQL format backup: $SQL_BACKUP"
 pg_dump "$DB_URL" \
@@ -85,7 +72,7 @@ else
 fi
 
 # Backup schema only (useful for reference)
-SCHEMA_BACKUP="${BACKUP_DIR}/relmgmt-${SOURCE}-schema-${TIMESTAMP}.sql"
+SCHEMA_BACKUP="${BACKUP_DIR}/relmgmt-neon-schema-${TIMESTAMP}.sql"
 echo ""
 echo "Creating schema-only backup: $SCHEMA_BACKUP"
 pg_dump "$DB_URL" \
