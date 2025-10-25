@@ -1,0 +1,48 @@
+# Neon PostgreSQL Database Configuration
+# Copy these values to your Render Dashboard → Environment Variables
+
+# ==============================================================================
+# NEON DATABASE CONNECTION
+# ==============================================================================
+# Get these values from your Neon dashboard: https://console.neon.tech
+
+# JDBC connection string (Spring Boot format)
+# Note: Add jdbc: prefix and :5432 port to Neon's connection string
+SPRING_DATASOURCE_URL=jdbc:postgresql://ep-xxxxx.region.aws.neon.tech:5432/neondb?sslmode=require
+SPRING_DATASOURCE_USERNAME=your_neon_user
+SPRING_DATASOURCE_PASSWORD=your_neon_password
+
+# Connection pool settings (optimized for Neon free tier)
+SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5
+SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=1
+SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=30000
+SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT=300000
+SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=600000
+
+# Database migration settings
+SPRING_FLYWAY_ENABLED=true
+SPRING_FLYWAY_CLEAN_DISABLED=true
+SPRING_JPA_HIBERNATE_DDL_AUTO=none
+
+# ==============================================================================
+# OTHER REQUIRED VARIABLES (keep existing values)
+# ==============================================================================
+SPRING_PROFILES_ACTIVE=prod
+APP_JWT_SECRET=[your existing JWT secret - do not change]
+APP_JWT_EXPIRATION=86400000
+LOGGING_LEVEL_ROOT=WARN
+LOGGING_LEVEL_COM_POLYCODER_RELMGMT=INFO
+
+# ==============================================================================
+# VERCEL FRONTEND CONFIGURATION
+# ==============================================================================
+# Use these in Vercel dashboard Environment Variables
+
+# Backend API URL (your Render backend URL)
+VITE_API_URL=https://your-backend.onrender.com/api
+
+# Application settings
+VITE_APP_TITLE=Release Management System
+VITE_LOG_LEVEL=error
+VITE_NOTIF_POLL_MS=120000
+
