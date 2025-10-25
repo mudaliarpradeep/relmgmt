@@ -19,13 +19,6 @@ spring:
       connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
       idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:300000}
       max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:600000}
-      initialization-fail-timeout: 60000
-      # Additional settings for Render database connectivity
-      data-source-properties:
-        socketTimeout: 30
-        loginTimeout: 30
-        connectTimeout: 30
-        tcpKeepAlive: true
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:true}
     clean-disabled: ${SPRING_FLYWAY_CLEAN_DISABLED:true}
