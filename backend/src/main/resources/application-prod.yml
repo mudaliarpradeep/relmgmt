@@ -20,7 +20,6 @@ spring:
       idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:300000}
       max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:600000}
       initialization-fail-timeout: 60000
-      connection-test-query: SELECT 1
       # Additional settings for Render database connectivity
       data-source-properties:
         socketTimeout: 30
