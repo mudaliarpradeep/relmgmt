@@ -57,10 +57,13 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
     echo '' >> /app/start.sh && \
     echo 'echo "✓ SPRING_DATASOURCE_URL is configured"' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
-    echo '# Convert postgres:// to jdbc:postgresql:// if needed' >> /app/start.sh && \
+    echo '# Convert postgres:// or postgresql:// to jdbc:postgresql:// if needed' >> /app/start.sh && \
     echo 'if echo "$SPRING_DATASOURCE_URL" | grep -q "^postgres://"; then' >> /app/start.sh && \
     echo '  export SPRING_DATASOURCE_URL=$(echo "$SPRING_DATASOURCE_URL" | sed "s|^postgres://|jdbc:postgresql://|")' >> /app/start.sh && \
     echo '  echo "✓ Converted postgres:// to jdbc:postgresql://"' >> /app/start.sh && \
+    echo 'elif echo "$SPRING_DATASOURCE_URL" | grep -q "^postgresql://"; then' >> /app/start.sh && \
+    echo '  export SPRING_DATASOURCE_URL=$(echo "$SPRING_DATASOURCE_URL" | sed "s|^postgresql://|jdbc:postgresql://|")' >> /app/start.sh && \
+    echo '  echo "✓ Converted postgresql:// to jdbc:postgresql://"' >> /app/start.sh && \
     echo 'fi' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
     echo '# Ensure sslmode is set' >> /app/start.sh && \
