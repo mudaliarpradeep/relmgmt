@@ -52,16 +52,7 @@ services:
         value: "true"
       - key: SPRING_FLYWAY_CLEAN_DISABLED
         value: "true"
-      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
-        value: "3"  # Reduced for free tier
-      - key: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
-        value: "1"  # Reduced for free tier
-      - key: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
-        value: "30000"
-      - key: SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT
-        value: "300000"
-      - key: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
-        value: "600000"
+      # HikariCP settings removed - using defaults from application-prod.yml
       
       # Logging (reduced for free tier)
       - key: LOGGING_LEVEL_ROOT
