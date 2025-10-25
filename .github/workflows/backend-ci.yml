@@ -48,44 +48,21 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x backend/gradlew
 
-    - name: Run tests
+    - name: Run tests and build
       run: |
         cd backend
-        ./gradlew test
-
-    - name: Build application
-      run: |
-        cd backend
-        ./gradlew build -x test
-
+        ./gradlew build --parallel
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
-      if: always()
+      if: failure()
       with:
         name: test-results
         path: backend/build/reports/tests/
-        retention-days: 30
+        retention-days: 7
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts
-        path: backend/build/libs/
-        retention-days: 30
-
-    - name: Generate JaCoCo test coverage report
-      run: |
-        cd backend
-        ./gradlew jacocoTestReport
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: backend/build/reports/jacoco/test/jacocoTestReport.xml
-        flags: backend
-        name: backend-coverage
-        fail_ci_if_error: false
+    # Coverage reporting disabled for faster builds
+    # Re-enable if needed for code quality tracking
 
   build-and-push:
     needs: test
@@ -129,27 +106,12 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        platforms: linux/amd64,linux/arm64
+        platforms: linux/amd64
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
 
-    - name: Wait for image to be available
-      run: |
-        echo "Waiting for Docker image to be fully available..."
-        sleep 10
-
-    - name: Generate SBOM
-      uses: anchore/sbom-action@v0
-      with:
-        image: ${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-        format: spdx-json
-        output-file: backend-sbom.spdx.json
-      continue-on-error: true
-
-    - name: Upload SBOM
-      uses: actions/upload-artifact@v4
-      with:
-        name: backend-sbom
-        path: backend-sbom.spdx.json
-        retention-days: 30
+    # SBOM generation removed for faster builds
+    # Re-enable if needed for compliance requirements
 
   deploy-staging:
     needs: build-and-push
