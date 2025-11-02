@@ -383,7 +383,9 @@ public class AllocationServiceImpl implements AllocationService {
     private AllocationDto convertToDto(Allocation allocation) {
         return new AllocationDto(
                 allocation.getId(),
-                allocation.getResource(),
+                allocation.getRelease().getId(),
+                allocation.getResource().getId(),
+                allocation.getResource().getName(),
                 allocation.getPhase(),
                 allocation.getStartDate(),
                 allocation.getEndDate(),

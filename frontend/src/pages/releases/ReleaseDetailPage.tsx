@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
 import ScopeService from '../../services/api/v1/scopeService';
 import type { Release, ScopeItemWithComponents } from '../../services/api/sharedTypes';
@@ -22,10 +22,22 @@ const getComponentTypeLabel = (componentType: ComponentTypeEnum): string => {
 
 const ReleaseDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const [release, setRelease] = useState<Release | null>(null);
   const [scopeItems, setScopeItems] = useState<ScopeItemWithComponents[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showScopePrompt, setShowScopePrompt] = useState(false);
+
+  useEffect(() => {
+    // Check if we're coming from a newly created release
+    const state = location.state as { showScopePrompt?: boolean } | null;
+    if (state?.showScopePrompt) {
+      setShowScopePrompt(true);
+      // Clear the state to prevent showing prompt on refresh
+      window.history.replaceState({}, '');
+    }
+  }, [location]);
 
   useEffect(() => {
     if (id) {
@@ -174,6 +186,42 @@ const ReleaseDetailPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Success Prompt Banner */}
+        {showScopePrompt && (
+          <div className="mb-6 bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-green-800">Release Created Successfully!</h3>
+                <div className="mt-2 text-sm text-green-700">
+                  <p className="mb-2">
+                    Your release has been created. Next, add scope items to define what will be delivered in this release.
+                  </p>
+                  <Link
+                    to={`/releases/${release?.id}/scope-items/new`}
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add First Scope Item
+                  </Link>
+                  <button
+                    onClick={() => setShowScopePrompt(false)}
+                    className="ml-3 text-green-800 hover:text-green-900 text-sm font-medium underline"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-start">
@@ -197,10 +245,10 @@ const ReleaseDetailPage: React.FC = () => {
             </div>
             <div className="flex space-x-3">
               <Link
-                to={`/releases/${release.id}/projects`}
+                to={`/releases/${release.id}/scope-items`}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
-                View Projects
+                Manage Scope Items
               </Link>
               <Link
                 to={`/releases/${release.id}/allocations`}
@@ -430,20 +478,27 @@ const ReleaseDetailPage: React.FC = () => {
                   to={`/releases/${release.id}/edit`}
                   className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-center block"
                 >
-                  Edit Release
+                  Edit Release & Phases
                 </Link>
                 <Link
-                  to={`/releases/${release.id}/phases`}
+                  to={`/releases/${release.id}/scope-items`}
                   className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors text-center block"
                 >
-                  Manage Phases
+                  Manage Scope Items
                 </Link>
                 <Link
-                  to={`/releases/${release.id}/blockers`}
-                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors text-center block"
+                  to={`/releases/${release.id}/allocations`}
+                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors text-center block"
                 >
-                  Manage Blockers
+                  View Allocations
                 </Link>
+              </div>
+              
+              {/* Coming Soon Note */}
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-xs text-amber-800">
+                  <strong>Note:</strong> Blocker management UI coming soon. Currently, blockers are displayed in the section above.
+                </p>
               </div>
             </div>
 

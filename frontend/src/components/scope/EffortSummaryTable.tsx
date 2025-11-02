@@ -28,12 +28,6 @@ export const EffortSummaryTable: React.FC<EffortSummaryTableProps> = ({ releaseI
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isExpanded && effortSummaries.length === 0) {
-      loadEffortSummary();
-    }
-  }, [isExpanded, effortSummaries.length, loadEffortSummary]);
-
   const loadEffortSummary = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -47,6 +41,12 @@ export const EffortSummaryTable: React.FC<EffortSummaryTableProps> = ({ releaseI
       setLoading(false);
     }
   }, [releaseId]);
+
+  useEffect(() => {
+    if (isExpanded && effortSummaries.length === 0) {
+      loadEffortSummary();
+    }
+  }, [isExpanded, effortSummaries.length, loadEffortSummary]);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);

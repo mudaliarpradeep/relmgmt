@@ -1,7 +1,6 @@
 package com.polycoder.relmgmt.dto;
 
 import com.polycoder.relmgmt.entity.PhaseTypeEnum;
-import com.polycoder.relmgmt.entity.Resource;
 
 import java.time.LocalDate;
 
@@ -10,7 +9,9 @@ import java.time.LocalDate;
  */
 public class AllocationDto {
     private Long id;
-    private Resource resource;
+    private Long releaseId;
+    private Long resourceId;
+    private String resourceName;
     private PhaseTypeEnum phase;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -20,10 +21,13 @@ public class AllocationDto {
     // Constructors
     public AllocationDto() {}
 
-    public AllocationDto(Long id, Resource resource, PhaseTypeEnum phase, LocalDate startDate, 
+    public AllocationDto(Long id, Long releaseId, Long resourceId, String resourceName, 
+                        PhaseTypeEnum phase, LocalDate startDate, 
                         LocalDate endDate, Double allocationDays, Double allocationFactor) {
         this.id = id;
-        this.resource = resource;
+        this.releaseId = releaseId;
+        this.resourceId = resourceId;
+        this.resourceName = resourceName;
         this.phase = phase;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -40,12 +44,28 @@ public class AllocationDto {
         this.id = id;
     }
 
-    public Resource getResource() {
-        return resource;
+    public Long getReleaseId() {
+        return releaseId;
     }
 
-    public void setResource(Resource resource) {
-        this.resource = resource;
+    public void setReleaseId(Long releaseId) {
+        this.releaseId = releaseId;
+    }
+
+    public Long getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
     }
 
     public PhaseTypeEnum getPhase() {

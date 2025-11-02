@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import ReleaseService from '../../services/api/v1/releaseService';
 import type { ReleaseRequest, ReleasePhaseRequest, ReleaseStatusEnum, ReleasePhaseEnum } from '../../services/api/sharedTypes';
 import { ReleaseStatus, ReleasePhase, getPhaseDisplayName, getStatusDisplayName } from '../../services/api/sharedTypes';
@@ -205,13 +205,24 @@ const ReleaseForm: React.FC = () => {
         phases: formData.phases
       };
 
+      let releaseId: number;
       if (isEditMode && id) {
         await ReleaseService.updateRelease(parseInt(id), releaseRequest);
+        releaseId = parseInt(id);
       } else {
-        await ReleaseService.createRelease(releaseRequest);
+        const createdRelease = await ReleaseService.createRelease(releaseRequest);
+        releaseId = createdRelease.id;
       }
 
-      navigate('/releases');
+      // Redirect to release detail page after creation to show scope items section
+      // For edit, redirect to list page
+      if (isEditMode) {
+        navigate('/releases');
+      } else {
+        navigate(`/releases/${releaseId}`, { 
+          state: { showScopePrompt: true } 
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save release');
     } finally {
@@ -405,6 +416,65 @@ const ReleaseForm: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Scope Items Information Section */}
+            {isEditMode && (
+              <div className="border-b border-gray-200 pb-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <h3 className="text-sm font-medium text-blue-800">Manage Scope Items</h3>
+                      <div className="mt-2 text-sm text-blue-700">
+                        <p>
+                          To add or manage scope items for this release, save your changes and navigate to the{' '}
+                          <Link
+                            to={`/releases/${id}/scope-items`}
+                            className="font-semibold underline hover:text-blue-900"
+                          >
+                            Scope Items page
+                          </Link>
+                          . You can also access this from the release detail page after saving.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Next Steps Information for New Releases */}
+            {!isEditMode && (
+              <div className="border-b border-gray-200 pb-6">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <h3 className="text-sm font-medium text-green-800">Next Steps</h3>
+                      <div className="mt-2 text-sm text-green-700">
+                        <p className="mb-2">
+                          After creating this release, you'll be able to:
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 ml-2">
+                          <li>Add scope items with components and effort estimates</li>
+                          <li>Generate resource allocations based on phase timelines</li>
+                          <li>Track progress and manage blockers</li>
+                          <li>View detailed reports and analytics</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200">

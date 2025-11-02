@@ -65,7 +65,7 @@ const ScopeItemDetailPage: React.FC = () => {
               <h1 className="text-2xl font-bold">{item.name}</h1>
             </div>
             <div className="flex gap-2">
-              <Link to={`/scope/${item.id}/edit`} className="px-3 py-2 bg-indigo-600 text-white rounded">Edit</Link>
+              <Link to={`/scope-items/${item.id}/edit`} className="px-3 py-2 bg-indigo-600 text-white rounded">Edit</Link>
               <button onClick={onDelete} className="px-3 py-2 bg-red-600 text-white rounded">Delete</button>
             </div>
           </div>

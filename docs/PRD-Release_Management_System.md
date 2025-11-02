@@ -111,6 +111,15 @@ Each resource in the roster shall have the following attributes:
 - Users shall be able to set start and end dates for each phase.
 - Users shall be able to add blockers to releases.
 
+**Release and Scope Item Workflow**:
+- The release creation form focuses on basic information and phase definition
+- After creating a release, users are automatically redirected to the release detail page
+- A success banner shall be displayed with a prominent "Add First Scope Item" call-to-action
+- The release detail page shall provide a "Manage Scope Items" button in the header for easy access
+- In edit mode, the release form shall display an informational section with a direct link to the scope items management page
+- For new releases, the form shall display a "Next Steps" section explaining that scope items can be added after creation
+- The empty scope items section shall display clear guidance and a call-to-action button to add the first scope item
+
 #### 4.2.2 Scope Item Management
 - Users shall be able to add scope items directly to a release (eliminating the Project entity).
 - Each scope item shall have:
@@ -397,14 +406,31 @@ The system shall allocate resources to releases based on the following rules:
    - Status filtering (Active/Inactive)
 
 3. **Release Management**
-   - List of releases
-   - Release creation/editing form with name field
-   - Phase timeline definition
+   - List of releases with status filtering
+   - Release creation/editing form with name field and auto-generated identifier
+   - Phase timeline definition with start/end dates
+   - **Workflow**: 
+     - Step 1: Create release with basic information (name, description, phases)
+     - Step 2: After creation, user is redirected to release detail page with prominent call-to-action to add scope items
+     - Step 3: Release detail page provides direct navigation to scope item management
+   - **Navigation**: 
+     - "Manage Scope Items" button in release detail header
+     - Quick action links in sidebar for phase and blocker management
+     - Clear information messages guiding users to next steps
 
 4. **Scope Item Management**
+   - **Access**: Via release detail page or direct URL (`/releases/{releaseId}/scope-items`)
    - Scope item list per release (replacing Project Management)
    - Scope item creation/editing form with inline component management
    - Effort estimation forms for scope item-level phases
+   - **Workflow**:
+     - Accessed after release creation via prominent call-to-action banner
+     - Can be accessed anytime from release detail page "Manage Scope Items" button
+     - Navigation breadcrumb shows: Releases → Release Detail → Scope Items
+   - **User Guidance**:
+     - New releases show success banner with "Add First Scope Item" action
+     - Empty scope items section displays clear call-to-action
+     - Edit mode release form includes informational section about managing scope items
 
 5. **Component Management (Inline)**
    - Components displayed as rows in a table within the scope item form

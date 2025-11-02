@@ -37,7 +37,7 @@ const EffortEstimationForm: React.FC = () => {
   const onSubmit = async (form: FormValues) => {
     try {
       await ScopeService.addEffortEstimates(scopeItemId, [form as EffortEstimateRequest]);
-      navigate(`/scope/${scopeItemId}`);
+      navigate(`/scope-items/${scopeItemId}`);
     } catch (e) {
       if (e instanceof Error) {
         setError('effortDays', { type: 'manual', message: e.message });
@@ -45,7 +45,7 @@ const EffortEstimationForm: React.FC = () => {
     }
   };
 
-  const onCancel = () => navigate(`/scope/${scopeItemId}`);
+  const onCancel = () => navigate(`/scope-items/${scopeItemId}`);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

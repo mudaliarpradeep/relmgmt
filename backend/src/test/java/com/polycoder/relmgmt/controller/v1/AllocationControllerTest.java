@@ -74,7 +74,8 @@ class AllocationControllerTest {
         a.setEndDate(LocalDate.of(2025, 1, 10));
         a.setAllocationFactor(0.9);
         a.setAllocationDays(4.5);
-        a.setResource(r);
+        a.setResourceId(r.getId());
+        a.setResourceName(r.getName());
         when(allocationService.getAllocationDtosForRelease(1L)).thenReturn(List.of(a));
 
         mockMvc.perform(get("/api/v1/releases/1/allocations").contentType(MediaType.APPLICATION_JSON))
