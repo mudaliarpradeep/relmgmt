@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ReleaseDetailPage from './ReleaseDetailPage';
 import ReleaseService from '../../services/api/v1/releaseService';
@@ -180,9 +179,6 @@ describe('ReleaseDetailPage', () => {
       });
 
       // Find phase status badges specifically within phase cards (not release status)
-      // Look for badges within phase sections
-      const phaseCards = document.querySelectorAll('[class*="border"][class*="rounded-lg"]');
-      
       // Find IN_PROGRESS badge within a phase card
       // Status is displayed as "In Progress" (display name)
       const inProgressBadges = screen.getAllByText('In Progress');
@@ -476,8 +472,6 @@ describe('ReleaseDetailPage', () => {
 
   describe('Success Prompt', () => {
     it('should show success prompt when navigated from create form', async () => {
-      const mockLocationState = { showScopePrompt: true };
-      
       render(
         <MemoryRouter initialEntries={['/releases/1']}>
           <Routes>
@@ -521,7 +515,7 @@ describe('ReleaseDetailPage', () => {
     });
 
     it('should display error when release is not found', async () => {
-      vi.mocked(ReleaseService.getRelease).mockResolvedValue(null as any);
+      vi.mocked(ReleaseService.getRelease).mockResolvedValue(null);
 
       renderWithRouter();
 
@@ -614,8 +608,8 @@ describe('ReleaseDetailPage', () => {
     it('should handle null or undefined phase and blocker arrays', async () => {
       vi.mocked(ReleaseService.getRelease).mockResolvedValue({
         ...mockRelease,
-        phases: undefined as any,
-        blockers: undefined as any
+        phases: undefined,
+        blockers: undefined
       });
 
       renderWithRouter();

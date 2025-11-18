@@ -771,7 +771,6 @@ describe('ReleaseListPage', () => {
     });
 
     it('should change page when previous is clicked', async () => {
-      const user = userEvent.setup();
       vi.mocked(ReleaseService.getReleases)
         .mockResolvedValueOnce({
           content: mockReleases,

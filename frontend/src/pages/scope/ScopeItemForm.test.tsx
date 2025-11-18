@@ -5,12 +5,17 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ScopeItemForm from './ScopeItemForm';
 import ScopeService from '../../services/api/v1/scopeService';
 import ComponentService from '../../services/api/v1/componentService';
-import type { ScopeItem, Component } from '../../services/api/sharedTypes';
+import type { ScopeItem, ComponentResponse } from '../../services/api/sharedTypes';
 
 vi.mock('../../services/api/v1/scopeService');
 vi.mock('../../services/api/v1/componentService');
 vi.mock('../../components/scope/ComponentTable', () => ({
-  default: ({ components, onAddComponent, onUpdateComponent, onDeleteComponent }: any) => (
+  default: ({ components, onAddComponent, onUpdateComponent, onDeleteComponent }: {
+    components: Array<{ id: number; name: string; [key: string]: unknown }>;
+    onAddComponent: (component: { name: string; componentType: string; technicalDesignDays: number; buildDays: number }) => void;
+    onUpdateComponent: (id: number, component: { name: string; [key: string]: unknown }) => void;
+    onDeleteComponent: (id: number) => void;
+  }) => (
     <div data-testid="component-table">
       <h3>Components</h3>
       <button onClick={async () => {
@@ -20,7 +25,7 @@ vi.mock('../../components/scope/ComponentTable', () => ({
       }}>
         Add Component
       </button>
-      {components.map((comp: Component) => (
+      {components.map((comp: { id: number; name: string; [key: string]: unknown }) => (
         <div key={comp.id} data-testid={`component-${comp.id}`}>
           <span>{comp.name}</span>
           <button onClick={() => onUpdateComponent(comp.id, { ...comp, name: 'Updated' })}>Update</button>
@@ -48,11 +53,13 @@ const mockScopeItem: ScopeItem = {
   sitDays: 3,
   uatDays: 2,
   releaseId: 1,
+  components: [],
+  componentsCount: 0,
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z'
 };
 
-const mockComponents: Component[] = [
+const mockComponents: ComponentResponse[] = [
   {
     id: 1,
     name: 'Component 1',
@@ -60,6 +67,7 @@ const mockComponents: Component[] = [
     technicalDesignDays: 2,
     buildDays: 5,
     scopeItemId: 1,
+    totalEffortDays: 7, // technicalDesignDays + buildDays = 2 + 5
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z'
   }
@@ -415,7 +423,8 @@ describe('ScopeItemForm', () => {
       vi.mocked(ComponentService.createComponent).mockResolvedValue({
         ...mockComponents[0],
         id: 2,
-        name: 'Test Component'
+        name: 'Test Component',
+        totalEffortDays: 3 // technicalDesignDays + buildDays = 1 + 2
       });
 
       renderForm('/scope-items/1/edit');
@@ -438,7 +447,8 @@ describe('ScopeItemForm', () => {
       vi.mocked(ComponentService.getComponentsByScopeItemId).mockResolvedValue(mockComponents);
       vi.mocked(ComponentService.updateComponent).mockResolvedValue({
         ...mockComponents[0],
-        name: 'Updated'
+        name: 'Updated',
+        totalEffortDays: 7 // technicalDesignDays + buildDays = 2 + 5
       });
 
       renderForm('/scope-items/1/edit');
