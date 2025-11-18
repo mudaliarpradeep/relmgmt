@@ -1,0 +1,36 @@
+title = "Gitleaks Configuration for Release Management System"
+
+# Allowlist for documentation and example files
+[allowlist]
+description = "Allowlist for documentation files with example credentials"
+paths = [
+    '''docs/.*\.md$''',
+    '''scripts/seed-.*\.sh$''',
+    '''scripts/backup-.*\.sh$''',
+    '''.*SEEDING.*\.md$''',
+    '''.*MIGRATION.*\.md$''',
+    '''.*\.example$''',
+]
+
+# Allowlist specific patterns that are safe
+regexes = [
+    '''your_password''',
+    '''YOUR_PASSWORD''',
+    '''secure_password''',
+    '''your_neon_password''',
+    '''your_render_api_key''',
+    '''64_character_secure_string''',
+    '''devpgadmin''',  # Development-only password
+]
+
+# Allowlist specific commits if needed (add commit SHAs here)
+commits = []
+
+# Allowlist specific stopwords (words that indicate it's an example)
+stopwords = [
+    '''example''',
+    '''sample''',
+    '''placeholder''',
+    '''your_''',
+    '''YOUR_''',
+]

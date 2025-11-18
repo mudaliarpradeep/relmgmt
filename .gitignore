@@ -16,6 +16,9 @@ target/
 .idea/
 .gradle/
 build/
+*.class
+out/
+bin/
 
 # === Python (if any tooling/scripts) ===
 __pycache__/

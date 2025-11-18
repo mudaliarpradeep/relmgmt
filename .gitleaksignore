@@ -1,0 +1,17 @@
+# Documentation files with example credentials
+docs/local-development-setup.md
+docs/environment-configuration.md
+docs/NEON-DATABASE-SETUP.md
+docs/MIGRATION-GUIDE-VERCEL-NEON.md
+docs/DEPLOYMENT-ARCHITECTURE.md
+docs/deployment-summary.md
+docs/SECURITY_AUDIT_REPORT.md
+docs/neon-env-variables.example
+
+# Seeding scripts with example passwords
+scripts/seed-neon-database.sh
+scripts/seed-resources.sh
+scripts/backup-database.sh
+SEEDING.md
+SEEDING-GUIDE.md
+MIGRATION-QUICKSTART.md
