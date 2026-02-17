@@ -15,10 +15,10 @@ import ScopeItemForm from '../../pages/scope/ScopeItemForm';
 import ScopeItemDetailPage from '../../pages/scope/ScopeItemDetailPage';
 import AllocationListPage from '../../pages/allocations/AllocationListPage';
 import AllocationDetailPage from '../../pages/allocations/AllocationDetailPage';
-// import AllocationConflictsReportPage from '../../pages/reports/AllocationConflictsReportPage';
-// import ResourceUtilizationReportPage from '../../pages/reports/ResourceUtilizationReportPage';
-// import ReleaseTimelineReportPage from '../../pages/reports/ReleaseTimelineReportPage';
-// import NotificationListPage from '../../pages/notifications/NotificationListPage';
+import AllocationConflictsReportPage from '../../pages/reports/AllocationConflictsReportPage';
+import ResourceUtilizationReportPage from '../../pages/reports/ResourceUtilizationReportPage';
+import ReleaseTimelineReportPage from '../../pages/reports/ReleaseTimelineReportPage';
+import NotificationListPage from '../../pages/notifications/NotificationListPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -54,12 +54,12 @@ const AppRouter: React.FC = () => {
         <Route path="releases/:releaseId/allocations" element={<AllocationDetailPage />} />
         
         {/* Reports */}
-        {/* <Route path="reports/allocation-conflicts" element={<AllocationConflictsReportPage />} /> */}
-        {/* <Route path="reports/resource-utilization" element={<ResourceUtilizationReportPage />} /> */}
-        {/* <Route path="reports/release-timeline" element={<ReleaseTimelineReportPage />} /> */}
+        <Route path="reports/allocation-conflicts" element={<AllocationConflictsReportPage />} />
+        <Route path="reports/resource-utilization" element={<ResourceUtilizationReportPage />} />
+        <Route path="reports/release-timeline" element={<ReleaseTimelineReportPage />} />
 
         {/* Notifications */}
-        {/* <Route path="notifications" element={<NotificationListPage />} /> */}
+        <Route path="notifications" element={<NotificationListPage />} />
         
         {/* Placeholder routes for future features */}
       </Route>

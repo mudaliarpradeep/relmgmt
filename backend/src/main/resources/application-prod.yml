@@ -38,10 +38,14 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
 
 # JWT Configuration for production
+# REQUIRED: Set APP_JWT_SECRET environment variable with a strong, random secret
 app:
   jwt:
-    secret: ${APP_JWT_SECRET:your-secret-key-here-make-it-long-and-secure-in-production}
+    secret: ${APP_JWT_SECRET}
     expiration: ${APP_JWT_EXPIRATION:86400000}
+  cors:
+    # REQUIRED: Set APP_CORS_ALLOWED_ORIGINS to your frontend URL(s)
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
 
 # Server Configuration
 server:

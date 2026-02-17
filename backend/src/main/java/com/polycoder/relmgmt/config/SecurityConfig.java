@@ -22,6 +22,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,53 +32,65 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
+    @Value("${app.cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}")
+    private String allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // CSRF is disabled because we use stateless JWT authentication.
+            // JWT tokens are sent via Authorization header, not cookies, so CSRF attacks are not applicable.
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-                .anyRequest().permitAll() // Temporarily disable all security for testing
+                // Public endpoints - no authentication required
+                .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                // All other endpoints require authentication
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
-            // Temporarily removed JWT filter for testing
-        
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Allow frontend origin
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:3000", 
-            "http://127.0.0.1:3000",
-            "https://*.onrender.com"
-        ));
-        
-        // Allow all HTTP methods
+
+        // Allow configured frontend origins (from environment or defaults)
+        // In production, set APP_CORS_ALLOWED_ORIGINS to your specific frontend URL
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
+
+        // Allow standard HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        
-        // Allow all headers
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        
-        // Allow credentials (cookies, authorization headers)
+
+        // Allow specific headers needed for JWT authentication
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Authorization",
+            "Content-Type",
+            "Accept",
+            "Origin",
+            "X-Requested-With"
+        ));
+
+        // Allow credentials (for authorization headers)
         configuration.setAllowCredentials(true);
-        
-        // Expose headers
+
+        // Expose headers that the client may need
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        
-        // Max age for preflight requests
+
+        // Max age for preflight requests (1 hour)
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        
+
         return source;
     }
 

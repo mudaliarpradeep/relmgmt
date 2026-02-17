@@ -77,17 +77,50 @@ public class WeeklyAllocationServiceImpl implements WeeklyAllocationService {
 
     @Override
     public void updateWeeklyAllocation(String resourceId, String weekStart, Double personDays) {
-        log.info("Updating weekly allocation for resource {} on week {} to {} person days", 
+        log.info("Updating weekly allocation for resource {} on week {} to {} person days",
                 resourceId, weekStart, personDays);
-        
-        // This is a placeholder implementation
-        // In a real implementation, you would:
-        // 1. Find or create allocation records for the specific week
-        // 2. Update the allocation factor based on person days
-        // 3. Save the changes
-        
-        // For now, we'll just log the update
-        log.info("Weekly allocation update requested - implementation pending");
+
+        Long id = Long.parseLong(resourceId);
+        LocalDate weekStartDate = LocalDate.parse(weekStart, DATE_FORMATTER);
+        LocalDate weekEndDate = weekStartDate.plusDays(6);
+
+        // Find allocations that overlap with this week for this resource
+        List<Allocation> allocations = allocationRepository.findByResourceIdAndDateRange(id, weekStartDate, weekEndDate);
+
+        if (allocations.isEmpty()) {
+            log.warn("No allocations found for resource {} in week {}", resourceId, weekStart);
+            throw new RuntimeException("No allocations found for resource " + resourceId + " in week " + weekStart);
+        }
+
+        // Calculate the number of working days in this week
+        int workingDays = countWorkingDays(weekStartDate, weekEndDate);
+        if (workingDays == 0) {
+            log.warn("No working days in week {}", weekStart);
+            throw new RuntimeException("No working days in the specified week");
+        }
+
+        // Calculate the new allocation factor based on requested person days
+        // personDays / workingDays = new factor
+        double newFactor = personDays / workingDays;
+
+        // Clamp the factor to valid range (0.0 to 1.0)
+        newFactor = Math.max(0.0, Math.min(1.0, newFactor));
+
+        // Update all overlapping allocations with the new factor
+        for (Allocation allocation : allocations) {
+            double oldFactor = allocation.getAllocationFactor();
+            allocation.setAllocationFactor(newFactor);
+
+            // Recalculate total allocation days for the entire allocation period
+            int totalWorkingDays = countWorkingDays(allocation.getStartDate(), allocation.getEndDate());
+            allocation.setAllocationDays(totalWorkingDays * newFactor);
+
+            allocationRepository.save(allocation);
+            log.info("Updated allocation {} factor from {} to {}", allocation.getId(), oldFactor, newFactor);
+        }
+
+        log.info("Successfully updated {} allocation(s) for resource {} in week {}",
+                allocations.size(), resourceId, weekStart);
     }
 
     @Override

@@ -1,3 +1,7 @@
+# Development profile configuration
+# WARNING: These credentials are for LOCAL DEVELOPMENT ONLY
+# Production MUST use environment variables
+
 spring:
   jpa:
     show-sql: true
@@ -6,12 +10,22 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/relmgmt
     username: postgres
-    password: bBzp16eHfA29wZUvr
+    # Local dev database password - create your local DB with this password
+    # or set SPRING_DATASOURCE_PASSWORD environment variable
+    password: ${SPRING_DATASOURCE_PASSWORD:devpassword123}
   flyway:
     enabled: true
     baseline-on-migrate: true
     out-of-order: true
     validate-on-migrate: true
+
+# JWT Configuration for development
+# WARNING: Use a strong secret in production via JWT_SECRET env var
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-key-replace-in-production-with-strong-key}
+  cors:
+    allowed-origins: http://localhost:3000,http://127.0.0.1:3000
 
 # Development-specific logging
 logging:
@@ -20,11 +34,4 @@ logging:
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-
-# Enable H2 console for development (if needed)
-# spring:
-#   h2:
-#     console:
-#       enabled: true
-#       path: /h2-console 
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE 
